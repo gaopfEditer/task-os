@@ -1,0 +1,5 @@
+time,task_id,action,from_status,to_status,summary,file
+2026-09-29 13:53,T-20260928-01,create,,inbox,创建任务：建立任务系统,tasks/T-20260928-01-建立任务系统/task.md
+2026-09-29 13:53,T-20260928-01,plan,inbox,planned,写好计划,tasks/T-20260928-01-建立任务系统/plan.md
+2026-09-29 13:53,T-20260928-01,status,planned,in_progress,开始执行系统初始化,tasks/T-20260928-01-建立任务系统/task.md
+2026-09-29 13:53,T-20260928-01,execute,,,系统初始化：创建目录、模板、索引和日志,tasks/T-20260928-01-建立任务系统/execution.md
