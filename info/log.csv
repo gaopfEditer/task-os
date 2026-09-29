@@ -1,0 +1,15 @@
+time,content_id,action,from_status,to_status,summary,file
+2026-09-29T14:56:00+08:00,SYSTEM,init,,,系统初始化：创建目录、模板、索引、日志、来源清单和内容日历,README.md
+2026-09-29T14:56:30+08:00,C-20260929-01,create,,inbox,创建选题：过年把三代人串起来,topics/C-20260929-01-过年把三代人串起来/brief.md
+2026-09-29T14:56:30+08:00,C-20260929-01,status,inbox,researching,填写 brief 并开始研究；只读检查 task-os 未找到相关内容,topics/C-20260929-01-过年把三代人串起来/research.md
+2026-09-29T14:56:48+08:00,C-20260929-01,status,researching,drafting,写入约 800 字大纲；未发布，未核实内容标【待核】,topics/C-20260929-01-过年把三代人串起来/draft.md
+2026-09-29T15:19:29+08:00,SYSTEM,edit,,,README.md 开头写入定位，新增「待用户提供」两节（资讯平台名单、写作模板名单）,README.md
+2026-09-29T15:19:29+08:00,C-20260929-01,status,drafting,archived,初始化示例，非业务选题（按用户要求直接归档，跳过中间状态）,index.md
+2026-09-29T15:22:51+08:00,SYSTEM,edit,,,"重写 sources.md：删去 8 个泛来源位，改为 4 类币圈来源（市场价格与结构、监管与传统金融、安全与风险事件、一手项目/研究）各 3 个待确认占位，写明收/不收规则",sources.md
+2026-09-29T15:23:12+08:00,SYSTEM,create,,,"新建 filter.md：三层漏斗（排除/四件事/五维打分满分 8）、维度对照表、每日 25 分钟流程；watchlist.md、thesis.md 待用户提供",filter.md
+2026-09-29T15:23:24+08:00,SYSTEM,edit,,,"README.md 小改：sources.md 描述改为四类币圈来源，目录结构加入 filter.md，操作规则第 10 条加入按 filter.md 筛选",README.md
+2026-09-29T15:23:37+08:00,C-20260929-01,edit,archived,archived,"状态标注补充为「archived（初始化示例，非业务选题，非币圈方向）」，index.md 与 brief.md 状态行同步",topics/C-20260929-01-过年把三代人串起来/brief.md
+2026-09-29T15:23:57+08:00,C-20260929-02,create,,inbox,"创建选题：币圈日报（当天序号 01 已被 C-20260929-01 占用，故用 02）",topics/C-20260929-02-币圈日报/brief.md
+2026-09-29T15:23:57+08:00,C-20260929-02,status,inbox,researching,"填写 brief（读者/渠道/关联任务待定，禁止买卖建议），开始 24 小时试跑研究",topics/C-20260929-02-币圈日报/research.md
+2026-09-29T15:32:41+08:00,C-20260929-02,research,researching,researching,"24 小时试跑（约 2026-09-28 15:00 至 09-29 15:00 HKT）：29 条候选，≥7 分 5 条，写入 research.md；来源仅试跑，未确认",topics/C-20260929-02-币圈日报/research.md
+2026-09-29T15:32:55+08:00,SYSTEM,edit,,,"index.md 增加「系统文件」小节，记录 sources.md、filter.md、README.md 最后更新时间；watchlist.md、thesis.md 待用户提供",index.md
