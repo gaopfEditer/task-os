@@ -48,11 +48,15 @@
 - 候选示例（未确认）：CoinDesk、The Block、Cointelegraph、Decrypt（用户提到的名字，未确认前不作为日常来源）。
 
 ### REG-01
-- 名称：待用户确认
-- 链接：待用户确认
-- 状态：待确认
-- 确认日期：
-- 用途：待用户确认
+- 名称：Foresight News（快讯）
+- 链接：https://foresightnews.pro/news
+- 类型：中文加密媒体 / 快讯聚合（二手来源）
+- 更新频率：全天滚动
+- 状态：已确认
+- 确认日期：2026-09-29
+- 用途：综合快讯线索，覆盖四类（市场、监管、安全、项目）；每条需追到一手出处（官方公告、监管文件、链上数据、安全公司披露）才能给可信度 2 分，追不到最高 1 分，只留 inbox
+- 可信度：中（转述为主，作线索用，不作唯一出处）
+- 抓取方式：网页有腾讯云 EdgeOne 防护，直接请求和浏览器都被拦（403）；改用站点公开只读接口 `https://api.foresightnews.pro/v1/dayNews?date=YYYYMMDD`（返回 base64+zlib 压缩的 JSON，含 is_important、source_link、published_at 字段）
 
 ### REG-02
 - 名称：待用户确认

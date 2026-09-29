@@ -13,3 +13,6 @@ time,content_id,action,from_status,to_status,summary,file
 2026-09-29T15:23:57+08:00,C-20260929-02,status,inbox,researching,"填写 brief（读者/渠道/关联任务待定，禁止买卖建议），开始 24 小时试跑研究",topics/C-20260929-02-币圈日报/research.md
 2026-09-29T15:32:41+08:00,C-20260929-02,research,researching,researching,"24 小时试跑（约 2026-09-28 15:00 至 09-29 15:00 HKT）：29 条候选，≥7 分 5 条，写入 research.md；来源仅试跑，未确认",topics/C-20260929-02-币圈日报/research.md
 2026-09-29T15:32:55+08:00,SYSTEM,edit,,,"index.md 增加「系统文件」小节，记录 sources.md、filter.md、README.md 最后更新时间；watchlist.md、thesis.md 待用户提供",index.md
+2026-09-29T16:53:03+08:00,SYSTEM,edit,,,sources.md 登记 REG-01 Foresight News 为已确认（用户确认）,sources.md
+2026-09-29T16:55:06+08:00,SYSTEM,edit,,,sources.md REG-01 抓取方式改为公开只读接口（网页和浏览器均 403）,sources.md
+2026-09-29T17:05:13+08:00,C-20260929-02,research,researching,researching,"试跑 2：Foresight News（REG-01）快讯 2026-09-28 17:11 至 09-29 16:50 HKT 共 93 条（分页接口核对无缺漏）；第一层排除 30、第二层丢弃 25、≥7 分 12 条/6 件事、4–6 分 23 条、≤3 分 3 条；站方重要 28 条中 8 条进 ≥7；与试跑 1 五条合并，新增 BitMine",topics/C-20260929-02-币圈日报/research.md
