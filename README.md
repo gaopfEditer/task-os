@@ -83,3 +83,11 @@ inbox → planned → in_progress → blocked → done → reviewed
 | to_status | 变更后状态（无则留空） |
 | summary | 一句话摘要（含逗号时用双引号包裹） |
 | file | 相对 task-os 根目录的文件路径 |
+
+## 看板
+
+网页看板：<https://gaopfediter.github.io/task-os/>（GitHub Pages，发布自 `main` 分支根目录的 `index.html`）。
+
+- 看板在浏览器里实时读取仓库根目录的 `index.md` 和 `log.csv`，按状态分列显示任务卡片、汇总数量、截止提醒和执行时间线，不存任何副本数据。
+- 只要按上面的规则保持 `index.md` 和 `log.csv` 更新，看板就会自动反映最新状态（推送后 Pages 通常 1–2 分钟生效，点「刷新」重新加载）。
+- 根目录的 `.nojekyll` 让 Pages 原样提供 `.md` / `.csv` 文件，请勿删除。

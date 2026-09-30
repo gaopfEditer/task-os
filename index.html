@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Task OS 看板</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #fff; --text: #1f2328; --muted: #656d76; --border: #d0d7de;
+    --accent: #0969da; --red: #cf222e; --orange: #bc4c00; --green: #1a7f37;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+  header { background: #24292f; color: #fff; padding: 12px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+  header h1 { font-size: 18px; margin: 0; flex: 1 1 auto; }
+  header .meta { font-size: 12px; color: #c9d1d9; }
+  button { font: inherit; cursor: pointer; border: 1px solid var(--border); background: #f6f8fa; color: var(--text); border-radius: 6px; padding: 5px 12px; }
+  button:hover { background: #eaeef2; }
+  main { padding: 12px 16px 32px; max-width: 1600px; margin: 0 auto; }
+  .msg { padding: 10px 12px; border-radius: 6px; margin-bottom: 12px; }
+  .msg.error { background: #ffebe9; color: var(--red); border: 1px solid #ffcecb; }
+  .msg.info { background: #ddf4ff; color: #0550ae; border: 1px solid #b6e3ff; }
+  .summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-bottom: 12px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+  .stat .n { font-size: 22px; font-weight: 600; }
+  .stat .l { font-size: 12px; color: var(--muted); }
+  .stat.warn .n { color: var(--red); }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .filters input, .filters select { font: inherit; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; background: #fff; min-width: 0; }
+  .filters input { flex: 1 1 200px; }
+  .board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 1fr); gap: 10px; overflow-x: auto; padding-bottom: 8px; }
+  .col { background: #eaeef2; border-radius: 8px; padding: 8px; min-height: 80px; }
+  .col h2 { font-size: 14px; margin: 0 0 8px; display: flex; justify-content: space-between; align-items: center; }
+  .col h2 code { font-size: 11px; color: var(--muted); font-weight: normal; }
+  .col h2 .cnt { background: #fff; border-radius: 10px; padding: 0 8px; font-size: 12px; }
+  .card { display: block; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; color: inherit; text-decoration: none; }
+  .card:hover { border-color: var(--accent); }
+  .card .top { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; color: var(--muted); }
+  .card .title { font-weight: 600; margin: 2px 0 4px; word-break: break-word; }
+  .badge { display: inline-block; font-size: 11px; padding: 0 6px; border-radius: 10px; border: 1px solid var(--border); white-space: nowrap; }
+  .p-P0 { background: #ffebe9; color: var(--red); border-color: #ffcecb; }
+  .p-P1 { background: #fff1e5; color: var(--orange); border-color: #ffd8b5; }
+  .p-P2 { background: #ddf4ff; color: #0550ae; border-color: #b6e3ff; }
+  .p-P3 { background: #f6f8fa; color: var(--muted); }
+  .due { font-size: 12px; }
+  .due.overdue { color: var(--red); font-weight: 600; }
+  .due.today { color: var(--orange); font-weight: 600; }
+  .tags { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag { font-size: 11px; background: #eef1f4; border-radius: 4px; padding: 0 5px; color: #57606a; }
+  .last { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); font-size: 12px; color: var(--muted); }
+  .empty { color: var(--muted); font-size: 12px; text-align: center; padding: 8px 0; }
+  section.timeline { margin-top: 20px; }
+  section.timeline h2 { font-size: 16px; }
+  .tl { list-style: none; padding: 0; margin: 0; background: var(--card); border: 1px solid var(--border); border-radius: 8px; }
+  .tl li { padding: 8px 12px; border-bottom: 1px solid #eaeef2; display: grid; grid-template-columns: 130px 1fr; gap: 4px 12px; }
+  .tl li:last-child { border-bottom: none; }
+  .tl .t { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .tl .act { font-size: 11px; background: #eef1f4; border-radius: 4px; padding: 0 5px; margin-right: 4px; }
+  .tl .trans { font-size: 12px; color: var(--muted); }
+  .tl a { color: var(--accent); text-decoration: none; }
+  footer { color: var(--muted); font-size: 12px; margin-top: 20px; }
+  footer a { color: var(--accent); }
+  @media (max-width: 700px) {
+    .board { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: 1fr; overflow-x: visible; }
+    .tl li { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Task OS 看板</h1>
+  <span class="meta" id="updated">加载中…</span>
+  <button id="refresh" type="button">刷新</button>
+</header>
+<main>
+  <div id="msg"></div>
+  <div class="summary" id="summary"></div>
+  <div class="filters">
+    <input id="q" type="search" placeholder="搜索 ID / 标题 / 标签 / 日志…">
+    <select id="fTag"><option value="">全部标签</option></select>
+    <select id="fPri"><option value="">全部优先级</option></select>
+  </div>
+  <div class="board" id="board"></div>
+  <section class="timeline">
+    <h2>时间线（log.csv，最新在前）</h2>
+    <ul class="tl" id="timeline"></ul>
+  </section>
+  <footer>
+    数据来源：仓库根目录的 <code>index.md</code> 与 <code>log.csv</code>（<a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a>）。日志时间按 log.csv 原样显示（UTC+8）。
+  </footer>
+</main>
+<script>
+(function () {
+  'use strict';
+  var REPO = 'https://github.com/gaopfEditer/task-os';
+  var RAW = 'https://raw.githubusercontent.com/gaopfEditer/task-os/main/';
+  var STATUSES = [
+    ['inbox', '收件箱'], ['planned', '已计划'], ['in_progress', '进行中'],
+    ['blocked', '阻塞'], ['done', '已完成'], ['reviewed', '已复盘']
+  ];
+  var LABEL = {}; STATUSES.forEach(function (s) { LABEL[s[0]] = s[1]; });
+  var ACTION_LABEL = { create: '创建', plan: '计划', execute: '执行', status: '状态', review: '复盘', edit: '编辑' };
+
+  var state = { tasks: [], logs: [], source: '' };
+  var $ = function (id) { return document.getElementById(id); };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // ---------- fetching ----------
+  function fetchText(url) {
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    return fetch(url + sep + '_=' + Date.now(), { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw new Error(url + ' → HTTP ' + r.status);
+      return r.text();
+    });
+  }
+  function loadFile(name) {
+    return fetchText(name).then(function (t) { return { text: t, src: 'local' }; }, function (e1) {
+      return fetchText(RAW + name).then(function (t) { return { text: t, src: 'raw' }; }, function (e2) {
+        throw new Error('无法读取 ' + name + '：' + e1.message + '；' + e2.message);
+      });
+    });
+  }
+
+  // ---------- parsing ----------
+  function stripMd(s) {
+    s = String(s || '').trim();
+    s = s.replace(/\[([^\]]*)\]\(([^)]*)\)/g, '$1');     // [text](url) → text
+    s = s.replace(/^`+|`+$/g, '').replace(/\*\*|__/g, '');
+    return s.trim();
+  }
+  function mdLink(s) {
+    var m = /\[[^\]]*\]\(([^)]*)\)/.exec(String(s || ''));
+    return m ? m[1].trim() : stripMd(s);
+  }
+  function splitRow(line) {
+    line = line.trim();
+    if (line.charAt(0) === '|') line = line.slice(1);
+    if (line.slice(-1) === '|' && line.slice(-2) !== '\\|') line = line.slice(0, -1);
+    var cells = [], cur = '';
+    for (var i = 0; i < line.length; i++) {
+      var c = line.charAt(i);
+      if (c === '\\' && line.charAt(i + 1) === '|') { cur += '|'; i++; }
+      else if (c === '|') { cells.push(cur.trim()); cur = ''; }
+      else cur += c;
+    }
+    cells.push(cur.trim());
+    return cells;
+  }
+  function parseIndex(md) {
+    var lines = md.replace(/^\uFEFF/, '').split(/\r?\n/);
+    var header = null, tasks = [];
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (line.charAt(0) !== '|') continue;
+      var cells = splitRow(line);
+      if (!header) {
+        if (cells.indexOf('ID') >= 0) header = cells;
+        continue;
+      }
+      if (cells.every(function (c) { return /^:?-{2,}:?$/.test(c) || c === ''; })) continue;
+      if (cells.indexOf('ID') >= 0 && cells.indexOf('状态') >= 0) continue; // repeated header
+      var row = {};
+      header.forEach(function (h, k) { row[h] = cells[k] == null ? '' : cells[k]; });
+      var id = stripMd(row['ID']);
+      if (!id) continue;
+      var tagsRaw = stripMd(row['标签']);
+      tasks.push({
+        id: id,
+        title: stripMd(row['标题']),
+        status: stripMd(row['状态']).toLowerCase(),
+        priority: stripMd(row['优先级']).toUpperCase(),
+        due: stripMd(row['截止']),
+        tags: tagsRaw ? tagsRaw.split(/[\s,，、]+/).filter(Boolean).map(function (t) { return t.charAt(0) === '#' ? t : '#' + t; }) : [],
+        path: mdLink(row['路径']).replace(/^\.?\//, '')
+      });
+    }
+    return tasks;
+  }
+  function parseCSV(text) {
+    text = text.replace(/^\uFEFF/, '');
+    var rows = [], row = [], field = '', q = false;
+    for (var i = 0; i < text.length; i++) {
+      var c = text.charAt(i);
+      if (q) {
+        if (c === '"') {
+          if (text.charAt(i + 1) === '"') { field += '"'; i++; } else q = false;
+        } else field += c;
+      } else if (c === '"') q = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text.charAt(i + 1) === '\n') i++;
+        row.push(field); rows.push(row); row = []; field = '';
+      } else field += c;
+    }
+    if (field !== '' || row.length) { row.push(field); rows.push(row); }
+    rows = rows.filter(function (r) { return !(r.length === 1 && r[0].trim() === ''); });
+    if (!rows.length) return [];
+    var head = rows[0].map(function (h) { return h.trim(); });
+    return rows.slice(1).map(function (r, idx) {
+      var o = { _i: idx };
+      head.forEach(function (h, k) { o[h] = (r[k] || '').trim(); });
+      return o;
+    });
+  }
+
+  // ---------- helpers ----------
+  function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function normDate(s) {
+    var m = /^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/.exec(s || '');
+    return m ? m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0') : '';
+  }
+  function dueClass(t) {
+    var d = normDate(t.due);
+    if (!d || t.status === 'done' || t.status === 'reviewed') return '';
+    var today = todayStr();
+    return d < today ? 'overdue' : d === today ? 'today' : '';
+  }
+  function cmpLogDesc(a, b) {
+    if (a.time !== b.time) return a.time < b.time ? 1 : -1;
+    return b._i - a._i;  // same minute: later line in file is newer
+  }
+  function taskUrl(p) { return REPO + '/tree/main/' + encodeURI(p.replace(/\/+$/, '')); }
+  function fileUrl(p) { return REPO + '/blob/main/' + encodeURI(p); }
+  function fmtNow(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') +
+      ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
+  }
+
+  // ---------- rendering ----------
+  function latestByTask() {
+    var m = {};
+    state.logs.slice().sort(cmpLogDesc).forEach(function (l) { if (!m[l.task_id]) m[l.task_id] = l; });
+    return m;
+  }
+  function matches(t, last) {
+    var tag = $('fTag').value, pri = $('fPri').value, q = $('q').value.trim().toLowerCase();
+    if (tag && t.tags.indexOf(tag) < 0) return false;
+    if (pri && t.priority !== pri) return false;
+    if (q) {
+      var hay = [t.id, t.title, t.status, LABEL[t.status] || '', t.priority, t.due, t.tags.join(' '), t.path, last ? last.summary : ''].join(' ').toLowerCase();
+      if (hay.indexOf(q) < 0) return false;
+    }
+    return true;
+  }
+  function renderFilters() {
+    var tags = {}, pris = {};
+    state.tasks.forEach(function (t) { t.tags.forEach(function (g) { tags[g] = 1; }); if (t.priority) pris[t.priority] = 1; });
+    function fill(sel, first, values) {
+      var cur = sel.value;
+      sel.innerHTML = '<option value="">' + first + '</option>' + values.map(function (v) {
+        return '<option value="' + esc(v) + '">' + esc(v) + '</option>';
+      }).join('');
+      if (values.indexOf(cur) >= 0) sel.value = cur;
+    }
+    fill($('fTag'), '全部标签', Object.keys(tags).sort());
+    fill($('fPri'), '全部优先级', Object.keys(pris).sort());
+  }
+  function renderSummary() {
+    var counts = {}, overdue = 0, dueToday = 0;
+    state.tasks.forEach(function (t) {
+      counts[t.status] = (counts[t.status] || 0) + 1;
+      var c = dueClass(t); if (c === 'overdue') overdue++; if (c === 'today') dueToday++;
+    });
+    var html = '<div class="stat"><div class="n">' + state.tasks.length + '</div><div class="l">全部任务</div></div>';
+    STATUSES.forEach(function (s) {
+      html += '<div class="stat"><div class="n">' + (counts[s[0]] || 0) + '</div><div class="l">' + s[1] + ' · ' + s[0] + '</div></div>';
+    });
+    html += '<div class="stat' + (overdue ? ' warn' : '') + '"><div class="n">' + overdue + '</div><div class="l">已逾期</div></div>';
+    html += '<div class="stat' + (dueToday ? ' warn' : '') + '"><div class="n">' + dueToday + '</div><div class="l">今天到期</div></div>';
+    $('summary').innerHTML = html;
+  }
+  function renderCard(t, last) {
+    var dc = dueClass(t);
+    var dueText = t.due ? (dc === 'overdue' ? '已逾期 ' : dc === 'today' ? '今天到期 ' : '截止 ') + esc(t.due) : '无截止';
+    var h = '<a class="card" target="_blank" rel="noopener" href="' + esc(t.path ? taskUrl(t.path) : REPO) + '">';
+    h += '<div class="top"><span>' + esc(t.id) + '</span>' + (t.priority ? '<span class="badge p-' + esc(t.priority) + '">' + esc(t.priority) + '</span>' : '') + '</div>';
+    h += '<div class="title">' + esc(t.title || '(无标题)') + '</div>';
+    h += '<div class="due ' + dc + '">' + dueText + '</div>';
+    if (t.tags.length) h += '<div class="tags">' + t.tags.map(function (g) { return '<span class="tag">' + esc(g) + '</span>'; }).join('') + '</div>';
+    if (last) h += '<div class="last">' + esc(last.time) + ' · ' + esc(last.summary) + '</div>';
+    return h + '</a>';
+  }
+  function renderBoard() {
+    var last = latestByTask();
+    var cols = STATUSES.slice();
+    var known = {}; cols.forEach(function (s) { known[s[0]] = 1; });
+    state.tasks.forEach(function (t) { if (!known[t.status]) { known[t.status] = 1; cols.push([t.status, '其他']); } });
+    var html = '';
+    cols.forEach(function (s) {
+      var list = state.tasks.filter(function (t) { return t.status === s[0] && matches(t, last[t.id]); });
+      list.sort(function (a, b) {
+        var da = normDate(a.due) || '9999', db = normDate(b.due) || '9999';
+        return da < db ? -1 : da > db ? 1 : (a.priority < b.priority ? -1 : a.priority > b.priority ? 1 : 0);
+      });
+      html += '<div class="col"><h2><span>' + esc(s[1]) + ' <code>' + esc(s[0] || '(空)') + '</code></span><span class="cnt">' + list.length + '</span></h2>';
+      html += list.length ? list.map(function (t) { return renderCard(t, last[t.id]); }).join('') : '<div class="empty">暂无</div>';
+      html += '</div>';
+    });
+    $('board').innerHTML = html;
+  }
+  function renderTimeline() {
+    var titles = {}; state.tasks.forEach(function (t) { titles[t.id] = t.title; });
+    var q = $('q').value.trim().toLowerCase();
+    var rows = state.logs.slice().sort(cmpLogDesc).filter(function (l) {
+      return !q || [l.time, l.task_id, titles[l.task_id] || '', l.action, l.from_status, l.to_status, l.summary, l.file].join(' ').toLowerCase().indexOf(q) >= 0;
+    });
+    if (!rows.length) { $('timeline').innerHTML = '<li><span class="empty">暂无记录</span></li>'; return; }
+    $('timeline').innerHTML = rows.map(function (l) {
+      var trans = (l.from_status || l.to_status) ?
+        ' <span class="trans">' + esc(LABEL[l.from_status] || l.from_status || '—') + ' → ' + esc(LABEL[l.to_status] || l.to_status || '—') + '</span>' : '';
+      var file = l.file ? ' · <a target="_blank" rel="noopener" href="' + esc(fileUrl(l.file)) + '">' + esc(l.file.split('/').pop()) + '</a>' : '';
+      return '<li><span class="t">' + esc(l.time) + '</span><span>' +
+        '<span class="act">' + esc(ACTION_LABEL[l.action] || l.action) + '</span>' +
+        '<b>' + esc(l.task_id) + '</b> ' + esc(l.summary) + trans + file + '</span></li>';
+    }).join('');
+  }
+  function renderAll() { renderSummary(); renderBoard(); renderTimeline(); }
+
+  function load() {
+    $('refresh').disabled = true;
+    $('updated').textContent = '加载中…';
+    Promise.all([loadFile('index.md'), loadFile('log.csv')]).then(function (res) {
+      state.tasks = parseIndex(res[0].text);
+      state.logs = parseCSV(res[1].text);
+      var src = (res[0].src === 'raw' || res[1].src === 'raw') ? '（来自 raw.githubusercontent.com）' : '';
+      var newest = state.logs.slice().sort(cmpLogDesc)[0];
+      $('updated').textContent = '数据更新于 ' + fmtNow(new Date()) + src + (newest ? ' · 最新日志 ' + newest.time : '');
+      $('msg').innerHTML = state.tasks.length ? '' : '<div class="msg info">index.md 中没有解析到任务。</div>';
+      renderFilters(); renderAll();
+    }).catch(function (e) {
+      $('updated').textContent = '加载失败';
+      $('msg').innerHTML = '<div class="msg error">' + esc(e.message) + '</div>';
+    }).then(function () { $('refresh').disabled = false; });
+  }
+
+  ['q', 'fTag', 'fPri'].forEach(function (id) { $(id).addEventListener('input', renderAll); $(id).addEventListener('change', renderAll); });
+  $('refresh').addEventListener('click', load);
+  window.__taskos = { parseIndex: parseIndex, parseCSV: parseCSV };
+  load();
+})();
+</script>
+</body>
+</html>
