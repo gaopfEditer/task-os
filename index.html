@@ -7,26 +7,37 @@
 <style>
   :root {
     --bg: #f5f6f8; --card: #fff; --text: #1f2328; --muted: #656d76; --border: #d0d7de;
-    --accent: #0969da; --red: #cf222e; --orange: #bc4c00; --green: #1a7f37;
+    --accent: #0969da; --red: #cf222e; --orange: #bc4c00; --green: #1a7f37; --purple: #8250df;
+    --plan: #0969da; --prac: #1a7f37; --rev: #8250df;
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
-  header { background: #24292f; color: #fff; padding: 12px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+  header { background: #24292f; color: #fff; padding: 10px 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
   header h1 { font-size: 18px; margin: 0; flex: 1 1 auto; }
   header .meta { font-size: 12px; color: #c9d1d9; }
   button { font: inherit; cursor: pointer; border: 1px solid var(--border); background: #f6f8fa; color: var(--text); border-radius: 6px; padding: 5px 12px; }
   button:hover { background: #eaeef2; }
+  button:disabled { opacity: .6; cursor: default; }
+  button.primary { background: #1f883d; border-color: #1a7f37; color: #fff; }
+  button.primary:hover { background: #1a7f37; }
+  button.small { padding: 2px 8px; font-size: 12px; }
+  nav.tabs { display: flex; gap: 4px; padding: 0 16px; background: #fff; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 5; }
+  nav.tabs a { padding: 10px 14px; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; font-weight: 600; }
+  nav.tabs a.active { color: var(--text); border-bottom-color: #fd8c73; }
   main { padding: 12px 16px 32px; max-width: 1600px; margin: 0 auto; }
+  .tab { display: none; }
+  .tab.active { display: block; }
   .msg { padding: 10px 12px; border-radius: 6px; margin-bottom: 12px; }
   .msg.error { background: #ffebe9; color: var(--red); border: 1px solid #ffcecb; }
   .msg.info { background: #ddf4ff; color: #0550ae; border: 1px solid #b6e3ff; }
+  .msg.ok { background: #dafbe1; color: var(--green); border: 1px solid #aceebb; }
   .summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-bottom: 12px; }
   .stat { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
   .stat .n { font-size: 22px; font-weight: 600; }
   .stat .l { font-size: 12px; color: var(--muted); }
   .stat.warn .n { color: var(--red); }
   .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-  .filters input, .filters select { font: inherit; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; background: #fff; min-width: 0; }
+  input[type=search], input[type=text], input[type=password], input[type=date], select, textarea { font: inherit; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; background: #fff; min-width: 0; color: var(--text); }
   .filters input { flex: 1 1 200px; }
   .board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 1fr); gap: 10px; overflow-x: auto; padding-bottom: 8px; }
   .col { background: #eaeef2; border-radius: 8px; padding: 8px; min-height: 80px; }
@@ -50,19 +61,106 @@
   .last { margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); font-size: 12px; color: var(--muted); }
   .empty { color: var(--muted); font-size: 12px; text-align: center; padding: 8px 0; }
   section.timeline { margin-top: 20px; }
-  section.timeline h2 { font-size: 16px; }
+  h2.sec { font-size: 16px; margin: 16px 0 8px; }
   .tl { list-style: none; padding: 0; margin: 0; background: var(--card); border: 1px solid var(--border); border-radius: 8px; }
   .tl li { padding: 8px 12px; border-bottom: 1px solid #eaeef2; display: grid; grid-template-columns: 130px 1fr; gap: 4px 12px; }
   .tl li:last-child { border-bottom: none; }
   .tl .t { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
-  .tl .act { font-size: 11px; background: #eef1f4; border-radius: 4px; padding: 0 5px; margin-right: 4px; }
-  .tl .trans { font-size: 12px; color: var(--muted); }
-  .tl a { color: var(--accent); text-decoration: none; }
+  .act { font-size: 11px; background: #eef1f4; border-radius: 4px; padding: 0 5px; margin-right: 4px; }
+  .trans { font-size: 12px; color: var(--muted); }
+  a { color: var(--accent); }
+  .tl a { text-decoration: none; }
   footer { color: var(--muted); font-size: 12px; margin-top: 20px; }
-  footer a { color: var(--accent); }
+
+  /* calendar */
+  .cal-wrap { display: grid; grid-template-columns: minmax(0, 3fr) minmax(300px, 2fr); gap: 14px; align-items: start; }
+  .cal-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .cal-bar .month { font-size: 18px; font-weight: 600; min-width: 110px; text-align: center; }
+  .cal-bar .spacer { flex: 1; }
+  .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+  .cal .wd { text-align: center; font-size: 12px; color: var(--muted); padding: 2px 0; }
+  .day { background: var(--card); border: 1px solid var(--border); border-radius: 6px; min-height: 86px; padding: 4px 5px; cursor: pointer; display: flex; flex-direction: column; gap: 3px; text-align: left; font: inherit; color: inherit; }
+  .day:hover { border-color: var(--accent); }
+  .day.other { background: #f6f8fa; color: #8c959f; }
+  .day.weekend .num { color: #cf222e99; }
+  .day.today { border: 2px solid #fd8c73; background: #fff8f5; }
+  .day.today .num { background: #fd8c73; color: #fff; border-radius: 10px; padding: 0 6px; }
+  .day.sel { box-shadow: 0 0 0 2px var(--accent); }
+  .day .num { font-weight: 600; font-size: 13px; align-self: flex-start; }
+  .marks { display: flex; flex-wrap: wrap; gap: 2px; }
+  .mk { font-size: 11px; line-height: 16px; min-width: 16px; text-align: center; border-radius: 4px; color: #fff; padding: 0 3px; }
+  .mk.plan { background: var(--plan); } .mk.prac { background: var(--prac); } .mk.rev { background: var(--rev); }
+  .mk.pending { background: #afb8c1; }
+  .chip { font-size: 11px; border-radius: 4px; padding: 0 4px; white-space: nowrap; }
+  .chip.log { background: #eef1f4; color: #57606a; }
+  .chip.due { background: #fff1e5; color: var(--orange); }
+  .chip.due.overdue { background: #ffebe9; color: var(--red); }
+  .legend { font-size: 12px; color: var(--muted); margin-top: 8px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .panel { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+  .panel h3 { margin: 0 0 4px; font-size: 16px; }
+  .panel .sub { color: var(--muted); font-size: 12px; margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .panel .actions { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+  .dsec { border-left: 3px solid var(--border); padding: 2px 0 2px 10px; margin: 10px 0; }
+  .dsec.plan { border-color: var(--plan); } .dsec.prac { border-color: var(--prac); } .dsec.rev { border-color: var(--rev); }
+  .dsec h4 { margin: 0 0 4px; font-size: 14px; }
+  .dsec .none { color: var(--muted); font-size: 12px; }
+  .md { word-break: break-word; }
+  .md h1, .md h2, .md h3, .md h4, .md h5, .md h6 { font-size: 14px; margin: 8px 0 4px; }
+  .md h3 { font-size: 15px; }
+  .md p { margin: 4px 0; }
+  .md ul, .md ol { margin: 4px 0; padding-left: 20px; }
+  .md code { background: #eff1f3; border-radius: 4px; padding: 0 4px; font-size: 12px; }
+  .md pre { background: #f6f8fa; border: 1px solid #eaeef2; border-radius: 6px; padding: 8px; overflow-x: auto; }
+  .md pre code { background: none; padding: 0; }
+  .md blockquote { margin: 4px 0; padding-left: 10px; border-left: 3px solid #d0d7de; color: var(--muted); }
+  .md .task-li { list-style: none; margin-left: -18px; }
+  .nodata { text-align: center; color: var(--muted); padding: 18px 0; }
+  .mini { list-style: none; padding: 0; margin: 4px 0; }
+  .mini li { padding: 4px 0; border-bottom: 1px solid #eaeef2; font-size: 13px; }
+  .mini li:last-child { border-bottom: none; }
+  .mini .t { color: var(--muted); font-size: 12px; margin-right: 6px; font-variant-numeric: tabular-nums; }
+  .editor label { display: block; font-weight: 600; margin: 10px 0 4px; }
+  .editor textarea { width: 100%; min-height: 110px; resize: vertical; line-height: 1.5; }
+  .editor .hint { font-size: 12px; color: var(--muted); }
+  details.remote { margin-top: 8px; font-size: 13px; }
+  details.remote pre { white-space: pre-wrap; background: #f6f8fa; padding: 8px; border-radius: 6px; max-height: 240px; overflow: auto; }
+
+  /* history */
+  .hist-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .hist-bar input { flex: 1 1 220px; }
+  .hday { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; }
+  .hday .hd { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; margin-bottom: 4px; }
+  .hday .hd a { font-weight: 600; font-size: 15px; text-decoration: none; }
+  .hday .snip { font-size: 13px; margin: 3px 0; }
+  .hday .snip .k { font-size: 11px; color: #fff; border-radius: 4px; padding: 0 5px; margin-right: 6px; }
+  .k.plan { background: var(--plan); } .k.prac { background: var(--prac); } .k.rev { background: var(--rev); }
+  .future { font-size: 11px; background: #ddf4ff; color: #0550ae; border-radius: 10px; padding: 0 6px; }
+  .todaytag { font-size: 11px; background: #fd8c73; color: #fff; border-radius: 10px; padding: 0 6px; }
+
+  /* dialog */
+  dialog { border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; max-width: 560px; width: calc(100% - 24px); }
+  dialog::backdrop { background: rgba(0,0,0,.35); }
+  dialog h3 { margin: 0 0 8px; }
+  dialog ol { padding-left: 20px; margin: 6px 0; font-size: 13px; }
+  dialog .row { display: flex; gap: 6px; margin: 10px 0; }
+  dialog .row input { flex: 1; }
+  dialog .btns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  dialog .note { font-size: 12px; color: var(--muted); }
+
+  @media (max-width: 900px) {
+    .cal-wrap { grid-template-columns: 1fr; }
+  }
   @media (max-width: 700px) {
+    main { padding: 10px 8px 28px; }
     .board { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: 1fr; overflow-x: visible; }
     .tl li { grid-template-columns: 1fr; }
+    .cal { gap: 2px; }
+    .day { min-height: 58px; padding: 2px 3px; }
+    .mk { font-size: 10px; min-width: 13px; line-height: 14px; padding: 0 1px; }
+    .chip .w { display: none; }
+    .chip { font-size: 10px; padding: 0 3px; }
+    nav.tabs { padding: 0 8px; }
+    nav.tabs a { padding: 9px 10px; }
   }
 </style>
 </head>
@@ -71,37 +169,123 @@
   <h1>Task OS 看板</h1>
   <span class="meta" id="updated">加载中…</span>
   <button id="refresh" type="button">刷新</button>
+  <button id="openSettings" type="button">设置</button>
 </header>
+<nav class="tabs">
+  <a href="#board" data-tab="board">看板</a>
+  <a href="#calendar" data-tab="calendar">日历</a>
+  <a href="#history" data-tab="history">历史</a>
+</nav>
 <main>
   <div id="msg"></div>
-  <div class="summary" id="summary"></div>
-  <div class="filters">
-    <input id="q" type="search" placeholder="搜索 ID / 标题 / 标签 / 日志…">
-    <select id="fTag"><option value="">全部标签</option></select>
-    <select id="fPri"><option value="">全部优先级</option></select>
-  </div>
-  <div class="board" id="board"></div>
-  <section class="timeline">
-    <h2>时间线（log.csv，最新在前）</h2>
-    <ul class="tl" id="timeline"></ul>
+
+  <section class="tab" id="tab-board">
+    <div class="summary" id="summary"></div>
+    <div class="filters">
+      <input id="q" type="search" placeholder="搜索 ID / 标题 / 标签 / 日志…">
+      <select id="fTag"><option value="">全部标签</option></select>
+      <select id="fPri"><option value="">全部优先级</option></select>
+    </div>
+    <div class="board" id="board"></div>
+    <section class="timeline">
+      <h2 class="sec">时间线（log.csv，最新在前）</h2>
+      <ul class="tl" id="timeline"></ul>
+    </section>
   </section>
+
+  <section class="tab" id="tab-calendar">
+    <div class="cal-wrap">
+      <div>
+        <div class="cal-bar">
+          <button type="button" id="calPrev" aria-label="上个月">‹ 上月</button>
+          <span class="month" id="calTitle"></span>
+          <button type="button" id="calNext" aria-label="下个月">下月 ›</button>
+          <button type="button" id="calToday">今天</button>
+          <span class="spacer"></span>
+          <input type="date" id="quickDate" aria-label="选择日期">
+          <button type="button" id="quickPlan">写计划</button>
+        </div>
+        <div class="cal" id="cal"></div>
+        <div class="legend">
+          <span><span class="mk plan">计</span> 计划</span>
+          <span><span class="mk prac">实</span> 实践</span>
+          <span><span class="mk rev">复</span> 复盘</span>
+          <span><span class="chip log">日志 n</span> log.csv 条数</span>
+          <span><span class="chip due">到期 n</span> 当天截止的任务</span>
+        </div>
+        <div id="dailyNote"></div>
+      </div>
+      <div class="panel" id="detail"><div class="nodata">点击日历中的某一天查看详情</div></div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-history">
+    <div class="hist-bar">
+      <input id="hq" type="search" placeholder="搜索日记和日志…">
+    </div>
+    <div id="history"></div>
+  </section>
+
   <footer>
-    数据来源：仓库根目录的 <code>index.md</code> 与 <code>log.csv</code>（<a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a>）。日志时间按 log.csv 原样显示（UTC+8）。
+    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/YYYY-MM-DD.md</code>。日志时间按 log.csv 原样显示（UTC+8）。
   </footer>
 </main>
+
+<dialog id="settings">
+  <h3>设置：GitHub 令牌</h3>
+  <p class="note" style="font-size:13px;color:inherit">在网页上编辑并保存 <code>daily/</code> 日记需要一个 GitHub <b>细粒度个人访问令牌</b>（fine-grained personal access token）。只看不改不需要令牌。</p>
+  <ol>
+    <li>打开 <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">https://github.com/settings/personal-access-tokens/new</a></li>
+    <li>Resource owner 选 <b>gaopfEditer</b>；Repository access 选 <b>Only select repositories</b> → <b>task-os</b></li>
+    <li>Permissions → Repository permissions → <b>Contents</b> 设为 <b>Read and write</b>（其他保持默认）</li>
+    <li>生成后复制以 <code>github_pat_</code> 开头的令牌，粘贴到下面并保存</li>
+  </ol>
+  <div class="row">
+    <input type="password" id="tokenInput" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
+    <button type="button" id="tokenShow">显示</button>
+  </div>
+  <p class="note">令牌只保存在当前浏览器的 localStorage 中，只会发送给 GitHub API（api.github.com），不会写进仓库。在公用设备上用完请点「清除」。</p>
+  <div id="tokenStatus" class="note"></div>
+  <div class="btns">
+    <button type="button" id="tokenClear">清除</button>
+    <button type="button" id="tokenTest">验证</button>
+    <button type="button" id="tokenSave" class="primary">保存</button>
+    <button type="button" id="settingsClose">关闭</button>
+  </div>
+</dialog>
+
 <script>
 (function () {
   'use strict';
-  var REPO = 'https://github.com/gaopfEditer/task-os';
-  var RAW = 'https://raw.githubusercontent.com/gaopfEditer/task-os/main/';
+  var OWNER = 'gaopfEditer', REPONAME = 'task-os', BRANCH = 'main';
+  var REPO = 'https://github.com/' + OWNER + '/' + REPONAME;
+  var RAW = 'https://raw.githubusercontent.com/' + OWNER + '/' + REPONAME + '/' + BRANCH + '/';
+  var TOKEN_KEY = 'taskos.github_token';
+  var DAILY_DIR = 'daily';
+  // Test hook: ?api=<url> is honoured ONLY when the page itself is served from localhost,
+  // so a crafted link can never redirect the token to another host on the real site.
+  var API = (function () {
+    var def = 'https://api.github.com';
+    try {
+      var p = new URLSearchParams(location.search).get('api');
+      if (p && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) return new URL(p, location.href).href.replace(/\/+$/, '');
+    } catch (e) {}
+    return def;
+  })();
   var STATUSES = [
     ['inbox', '收件箱'], ['planned', '已计划'], ['in_progress', '进行中'],
     ['blocked', '阻塞'], ['done', '已完成'], ['reviewed', '已复盘']
   ];
   var LABEL = {}; STATUSES.forEach(function (s) { LABEL[s[0]] = s[1]; });
   var ACTION_LABEL = { create: '创建', plan: '计划', execute: '执行', status: '状态', review: '复盘', edit: '编辑' };
+  var SECTIONS = [['plan', '计划', 'plan', '计'], ['practice', '实践', 'prac', '实'], ['review', '复盘', 'rev', '复']];
+  var WEEK = ['日', '一', '二', '三', '四', '五', '六'];
 
-  var state = { tasks: [], logs: [], source: '' };
+  var state = {
+    tasks: [], logs: [],
+    daily: { list: {}, status: 'idle', error: '', cache: {}, pending: {} },
+    tab: 'board', month: null, selected: null, edit: null, historyLimit: 30, flash: null
+  };
   var $ = function (id) { return document.getElementById(id); };
 
   function esc(s) {
@@ -109,27 +293,82 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function parseYmd(s) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; }
+  function todayStr() { return ymd(new Date()); }
+  function fmtNow(d) { return ymd(d) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); }
+  function cnDate(s) { var d = parseYmd(s); return d ? d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日 星期' + WEEK[d.getDay()] : s; }
+
+  // ---------- UTF-8 base64 ----------
+  function utf8ToB64(str) {
+    var bytes = new TextEncoder().encode(String(str)), bin = '', CH = 0x8000;
+    for (var i = 0; i < bytes.length; i += CH) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CH));
+    return btoa(bin);
+  }
+  function b64ToUtf8(b64) {
+    var bin = atob(String(b64 || '').replace(/\s+/g, '')), bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder('utf-8').decode(bytes);
+  }
+  // git blob sha1 of text, used to detect stale Pages/raw copies. null if WebCrypto unavailable.
+  function gitBlobSha(text) {
+    if (!(window.crypto && crypto.subtle)) return Promise.resolve(null);
+    var body = new TextEncoder().encode(text), head = new TextEncoder().encode('blob ' + body.length + '\0');
+    var all = new Uint8Array(head.length + body.length); all.set(head, 0); all.set(body, head.length);
+    return crypto.subtle.digest('SHA-1', all).then(function (buf) {
+      return Array.prototype.map.call(new Uint8Array(buf), function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+    }, function () { return null; });
+  }
+
+  // ---------- token ----------
+  function getToken() { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } }
+  function setToken(t) { try { if (t) localStorage.setItem(TOKEN_KEY, t); else localStorage.removeItem(TOKEN_KEY); } catch (e) {} }
 
   // ---------- fetching ----------
   function fetchText(url) {
     var sep = url.indexOf('?') >= 0 ? '&' : '?';
     return fetch(url + sep + '_=' + Date.now(), { cache: 'no-store' }).then(function (r) {
-      if (!r.ok) throw new Error(url + ' → HTTP ' + r.status);
+      if (!r.ok) { var e = new Error(url + ' → HTTP ' + r.status); e.status = r.status; throw e; }
       return r.text();
     });
   }
   function loadFile(name) {
     return fetchText(name).then(function (t) { return { text: t, src: 'local' }; }, function (e1) {
       return fetchText(RAW + name).then(function (t) { return { text: t, src: 'raw' }; }, function (e2) {
-        throw new Error('无法读取 ' + name + '：' + e1.message + '；' + e2.message);
+        var e = new Error('无法读取 ' + name + '：' + e1.message + '；' + e2.message);
+        e.status = (e1.status === 404 && e2.status === 404) ? 404 : 0;
+        throw e;
       });
     });
   }
+  function api(method, path, body, useToken) {
+    var headers = { 'Accept': 'application/vnd.github+json' };
+    var token = useToken === false ? '' : getToken();
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    if (body) headers['Content-Type'] = 'application/json';
+    var url = API + path + (method === 'GET' ? (path.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now() : '');
+    return fetch(url, { method: method, headers: headers, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' }).then(function (r) {
+      return r.text().then(function (t) {
+        var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {}
+        return { status: r.status, ok: r.ok, json: j, remaining: r.headers.get('x-ratelimit-remaining') };
+      });
+    });
+  }
+  var repoPath = '/repos/' + OWNER + '/' + REPONAME;
+  function apiErrText(res) {
+    var m = res.json && res.json.message ? res.json.message : '';
+    if (res.status === 401) return '令牌无效或已过期（401），请在「设置」里重新填写。';
+    if (res.status === 403 && (res.remaining === '0' || /rate limit/i.test(m))) return 'GitHub API 调用次数已达上限（未登录每小时 60 次），请稍后再试或在「设置」里填写令牌。';
+    if (res.status === 403) return '没有权限（403）：令牌需要对 task-os 仓库有 Contents 读写权限。' + (m ? '（' + m + '）' : '');
+    if (res.status === 404) return '找不到（404）：仓库或文件不存在，或令牌无权访问此仓库。';
+    return 'GitHub API 错误 ' + res.status + (m ? '：' + m : '');
+  }
 
-  // ---------- parsing ----------
+  // ---------- parsing: index.md / log.csv (v1) ----------
   function stripMd(s) {
     s = String(s || '').trim();
-    s = s.replace(/\[([^\]]*)\]\(([^)]*)\)/g, '$1');     // [text](url) → text
+    s = s.replace(/\[([^\]]*)\]\(([^)]*)\)/g, '$1');
     s = s.replace(/^`+|`+$/g, '').replace(/\*\*|__/g, '');
     return s.trim();
   }
@@ -158,23 +397,17 @@
       var line = lines[i].trim();
       if (line.charAt(0) !== '|') continue;
       var cells = splitRow(line);
-      if (!header) {
-        if (cells.indexOf('ID') >= 0) header = cells;
-        continue;
-      }
+      if (!header) { if (cells.indexOf('ID') >= 0) header = cells; continue; }
       if (cells.every(function (c) { return /^:?-{2,}:?$/.test(c) || c === ''; })) continue;
-      if (cells.indexOf('ID') >= 0 && cells.indexOf('状态') >= 0) continue; // repeated header
+      if (cells.indexOf('ID') >= 0 && cells.indexOf('状态') >= 0) continue;
       var row = {};
       header.forEach(function (h, k) { row[h] = cells[k] == null ? '' : cells[k]; });
       var id = stripMd(row['ID']);
       if (!id) continue;
       var tagsRaw = stripMd(row['标签']);
       tasks.push({
-        id: id,
-        title: stripMd(row['标题']),
-        status: stripMd(row['状态']).toLowerCase(),
-        priority: stripMd(row['优先级']).toUpperCase(),
-        due: stripMd(row['截止']),
+        id: id, title: stripMd(row['标题']), status: stripMd(row['状态']).toLowerCase(),
+        priority: stripMd(row['优先级']).toUpperCase(), due: stripMd(row['截止']),
         tags: tagsRaw ? tagsRaw.split(/[\s,，、]+/).filter(Boolean).map(function (t) { return t.charAt(0) === '#' ? t : '#' + t; }) : [],
         path: mdLink(row['路径']).replace(/^\.?\//, '')
       });
@@ -187,9 +420,8 @@
     for (var i = 0; i < text.length; i++) {
       var c = text.charAt(i);
       if (q) {
-        if (c === '"') {
-          if (text.charAt(i + 1) === '"') { field += '"'; i++; } else q = false;
-        } else field += c;
+        if (c === '"') { if (text.charAt(i + 1) === '"') { field += '"'; i++; } else q = false; }
+        else field += c;
       } else if (c === '"') q = true;
       else if (c === ',') { row.push(field); field = ''; }
       else if (c === '\n' || c === '\r') {
@@ -208,33 +440,217 @@
     });
   }
 
-  // ---------- helpers ----------
-  function todayStr() {
-    var d = new Date();
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  // ---------- parsing: daily/YYYY-MM-DD.md ----------
+  function sectionKey(heading) {
+    var h = heading.replace(/^[\s\d.、）)]+/, '');
+    if (/^计划/.test(h)) return 'plan';
+    if (/^(实践|执行)/.test(h)) return 'practice';
+    if (/^复盘/.test(h)) return 'review';
+    return null;
   }
+  function trimBlank(lines) {
+    var a = 0, b = lines.length;
+    while (a < b && lines[a].trim() === '') a++;
+    while (b > a && lines[b - 1].trim() === '') b--;
+    return lines.slice(a, b).map(function (l) { return l.replace(/\s+$/, ''); }).join('\n');
+  }
+  // → { title, preamble, plan, practice, review, others:[{heading, body}] }
+  function parseDaily(text) {
+    var lines = String(text || '').replace(/^\uFEFF/, '').split(/\r?\n/);
+    var title = '', pre = [], secs = [], cur = null, fence = false;
+    lines.forEach(function (line) {
+      if (/^\s*(```|~~~)/.test(line)) { fence = !fence; (cur ? cur.lines : pre).push(line); return; }
+      if (!fence) {
+        var h1 = /^#\s+(.*?)\s*#*\s*$/.exec(line);
+        if (h1 && !title && !cur) { title = h1[1]; return; }
+        var h2 = /^##\s+(.*?)\s*#*\s*$/.exec(line);
+        if (h2) { cur = { heading: h2[1], key: sectionKey(h2[1]), lines: [] }; secs.push(cur); return; }
+      }
+      (cur ? cur.lines : pre).push(line);
+    });
+    var out = { title: title, preamble: trimBlank(pre), plan: '', practice: '', review: '', others: [] };
+    secs.forEach(function (s) {
+      var body = trimBlank(s.lines);
+      if (s.key) out[s.key] = out[s.key] ? out[s.key] + (body ? '\n\n' + body : '') : body;
+      else out.others.push({ heading: s.heading, body: body });
+    });
+    return out;
+  }
+  function sectionEmpty(s) { return String(s || '').replace(/<!--[\s\S]*?-->/g, '').trim() === ''; }
+  function serializeDaily(date, base, edits) {
+    base = base || { preamble: '', others: [] };
+    var parts = ['# ' + date, ''];
+    if (base.preamble) parts.push(base.preamble, '');
+    SECTIONS.forEach(function (s) {
+      var body = trimBlank(String(edits[s[0]] || '').replace(/\r\n?/g, '\n').split('\n'));
+      parts.push('## ' + s[1], '');
+      if (body) parts.push(body, '');
+    });
+    (base.others || []).forEach(function (o) { parts.push('## ' + o.heading, ''); if (o.body) parts.push(o.body, ''); });
+    return parts.join('\n').replace(/\n+$/, '') + '\n';
+  }
+
+  // ---------- simple, safe markdown ----------
+  function safeHref(raw) {
+    raw = raw.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
+    if (/^[a-z][a-z0-9+.-]*:/i.test(raw) && !/^(https?|mailto):/i.test(raw)) return null;
+    try { return new URL(raw, REPO + '/blob/' + BRANCH + '/' + DAILY_DIR + '/').href; } catch (e) { return null; }
+  }
+  function taskLink(id) {
+    var t = state.tasks.filter(function (x) { return x.id === id; })[0];
+    if (t && t.path) return '<a href="' + esc(taskUrl(t.path)) + '" target="_blank" rel="noopener" title="' + esc(t.title) + '">' + id + '</a>';
+    return '<b>' + id + '</b>';
+  }
+  function inline(s) {
+    var store = [];
+    function keep(html) { store.push(html); return '\u0000' + (store.length - 1) + '\u0000'; }
+    s = esc(s);
+    s = s.replace(/`([^`]+)`/g, function (_, c) { return keep('<code>' + c + '</code>'); });
+    s = s.replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+&quot;[^)]*&quot;)?\)/g, function (_, t, u) {
+      var h = safeHref(u);
+      return h ? keep('<a href="' + esc(h) + '" target="_blank" rel="noopener">' + t + '</a>') : t;
+    });
+    s = s.replace(/&lt;(https?:\/\/[^\s&]+)&gt;/g, function (_, u) { var h = safeHref(u); return h ? keep('<a href="' + esc(h) + '" target="_blank" rel="noopener">' + u + '</a>') : u; });
+    s = s.replace(/\bT-\d{8}-\d{2}\b/g, function (id) { return keep(taskLink(id)); });
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/__([^_]+)__/g, '<strong>$1</strong>');
+    s = s.replace(/(^|[^*])\*([^*\s](?:[^*]*[^*\s])?)\*(?!\*)/g, '$1<em>$2</em>');
+    s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+    return s.replace(/\u0000(\d+)\u0000/g, function (_, i) { return store[+i]; });
+  }
+  function renderMd(src) {
+    var lines = String(src || '').replace(/<!--[\s\S]*?-->/g, '').replace(/\r\n?/g, '\n').split('\n');
+    var out = [], para = [], list = null, i = 0;
+    function flushPara() { if (para.length) { out.push('<p>' + para.map(inline).join('<br>') + '</p>'); para = []; } }
+    function closeList() { if (list) { out.push('</' + list + '>'); list = null; } }
+    while (i < lines.length) {
+      var line = lines[i], m;
+      if ((m = /^\s*(```|~~~)/.exec(line))) {
+        flushPara(); closeList();
+        var fence = m[1], code = []; i++;
+        while (i < lines.length && lines[i].trim().indexOf(fence) !== 0) { code.push(lines[i]); i++; }
+        out.push('<pre><code>' + esc(code.join('\n')) + '</code></pre>'); i++; continue;
+      }
+      if (/^\s*$/.test(line)) { flushPara(); closeList(); i++; continue; }
+      if ((m = /^(#{1,6})\s+(.*?)\s*#*\s*$/.exec(line))) { flushPara(); closeList(); var lv = Math.min(6, m[1].length + 2); out.push('<h' + lv + '>' + inline(m[2]) + '</h' + lv + '>'); i++; continue; }
+      if (/^\s*([-*_])(\s*\1){2,}\s*$/.test(line)) { flushPara(); closeList(); out.push('<hr>'); i++; continue; }
+      if ((m = /^\s*>\s?(.*)$/.exec(line))) { flushPara(); closeList(); out.push('<blockquote>' + inline(m[1]) + '</blockquote>'); i++; continue; }
+      if ((m = /^(\s*)([-*+]|\d+[.)])\s+(.*)$/.exec(line))) {
+        flushPara();
+        var type = /\d/.test(m[2]) ? 'ol' : 'ul';
+        if (list !== type) { closeList(); out.push('<' + type + '>'); list = type; }
+        var body = m[3], cls = '', ind = m[1].replace(/\t/g, '  ').length >= 2 ? ' style="margin-left:' + Math.min(4, Math.floor(m[1].replace(/\t/g, '  ').length / 2)) * 16 + 'px"' : '';
+        var tm = /^\[([ xX])\]\s+(.*)$/.exec(body);
+        if (tm) { cls = ' class="task-li"'; body = (tm[1] === ' ' ? '☐ ' : '☑ ') + tm[2]; }
+        out.push('<li' + cls + ind + '>' + inline(body) + '</li>'); i++; continue;
+      }
+      closeList(); para.push(line.trim()); i++;
+    }
+    flushPara(); closeList();
+    return out.join('');
+  }
+  function plainSnippet(src, n) {
+    var t = String(src || '').replace(/<!--[\s\S]*?-->/g, '').replace(/```[\s\S]*?```/g, ' ')
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/^\s*(#+|>|[-*+]|\d+[.)])\s+(\[[ xX]\]\s+)?/gm, '')
+      .replace(/[*_`~]/g, '').replace(/\s+/g, ' ').trim();
+    return t.length > n ? t.slice(0, n) + '…' : t;
+  }
+
+  // ---------- daily files ----------
+  function listDaily() {
+    state.daily.status = 'loading';
+    var attempt = function (withToken) {
+      return api('GET', repoPath + '/contents/' + DAILY_DIR + '?ref=' + BRANCH, null, withToken).then(function (res) {
+        if (res.status === 401 && withToken && getToken()) return attempt(false);
+        if (res.status === 404) { state.daily.list = {}; state.daily.status = 'missing'; state.daily.error = ''; return; }
+        if (!res.ok || !Array.isArray(res.json)) { state.daily.status = 'error'; state.daily.error = apiErrText(res); return; }
+        var list = {};
+        res.json.forEach(function (f) {
+          var m = /^(\d{4}-\d{2}-\d{2})\.md$/.exec(f.name || '');
+          if (f.type === 'file' && m) list[m[1]] = f.sha;
+        });
+        state.daily.list = list; state.daily.status = 'ok'; state.daily.error = '';
+      });
+    };
+    return attempt(true).catch(function (e) { state.daily.status = 'error'; state.daily.error = '无法连接 GitHub API：' + e.message; });
+  }
+  function dailyPath(date) { return DAILY_DIR + '/' + date + '.md'; }
+  function putCache(date, sha, text, stale) {
+    state.daily.cache[date] = { sha: sha, text: text, parsed: parseDaily(text), stale: !!stale };
+    return state.daily.cache[date];
+  }
+  function fetchBlob(sha) {
+    return api('GET', repoPath + '/git/blobs/' + sha).then(function (res) {
+      if (!res.ok || !res.json) throw new Error(apiErrText(res));
+      return b64ToUtf8(res.json.content);
+    });
+  }
+  // Resolves to cache entry {sha,text,parsed} or null when the day has no file.
+  function loadDay(date) {
+    var d = state.daily, sha = d.list[date];
+    var listed = d.status === 'ok' || d.status === 'missing';
+    if (listed && !sha) return Promise.resolve(null);
+    if (d.cache[date] && (!sha || d.cache[date].sha === sha)) return Promise.resolve(d.cache[date]);
+    if (d.pending[date]) return d.pending[date];
+    var p = loadFile(dailyPath(date)).then(function (res) {
+      if (!sha) return putCache(date, null, res.text);            // listing unavailable: trust what we got
+      return gitBlobSha(res.text).then(function (got) {
+        if (got === sha || got === null) return putCache(date, sha, res.text, false);
+        return fetchBlob(sha).then(function (t) { return putCache(date, sha, t); },
+          function () { return putCache(date, sha, res.text, true); });  // stale copy is better than nothing
+      });
+    }, function (e) {
+      if (!sha && e.status === 404) return null;
+      if (sha) return fetchBlob(sha).then(function (t) { return putCache(date, sha, t); });
+      throw e;
+    }).catch(function (e) { d.cache[date] = { sha: sha, text: '', parsed: parseDaily(''), error: e.message }; return d.cache[date]; })
+      .then(function (r) { delete d.pending[date]; return r; });
+    d.pending[date] = p;
+    return p;
+  }
+  function loadMany(dates, onEach) {
+    var queue = dates.slice(), running = 0;
+    return new Promise(function (resolve) {
+      function next() {
+        if (!queue.length && !running) return resolve();
+        while (running < 4 && queue.length) {
+          running++;
+          loadDay(queue.shift()).then(function () { running--; onEach && onEach(); next(); });
+        }
+      }
+      next();
+    });
+  }
+  function dayInfo(date) {
+    var c = state.daily.cache[date], sha = state.daily.list[date];
+    var info = { exists: !!(sha || (c && c.text)), loaded: !!c, parsed: c ? c.parsed : null, stale: c && c.stale, error: c && c.error };
+    info.has = {};
+    SECTIONS.forEach(function (s) { info.has[s[0]] = !!(info.parsed && !sectionEmpty(info.parsed[s[0]])); });
+    return info;
+  }
+
+  // ---------- helpers ----------
   function normDate(s) {
     var m = /^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/.exec(s || '');
     return m ? m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0') : '';
   }
+  function isClosed(t) { return t.status === 'done' || t.status === 'reviewed'; }
   function dueClass(t) {
     var d = normDate(t.due);
-    if (!d || t.status === 'done' || t.status === 'reviewed') return '';
+    if (!d || isClosed(t)) return '';
     var today = todayStr();
     return d < today ? 'overdue' : d === today ? 'today' : '';
   }
-  function cmpLogDesc(a, b) {
-    if (a.time !== b.time) return a.time < b.time ? 1 : -1;
-    return b._i - a._i;  // same minute: later line in file is newer
-  }
-  function taskUrl(p) { return REPO + '/tree/main/' + encodeURI(p.replace(/\/+$/, '')); }
-  function fileUrl(p) { return REPO + '/blob/main/' + encodeURI(p); }
-  function fmtNow(d) {
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') +
-      ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + ':' + String(d.getSeconds()).padStart(2, '0');
-  }
+  function cmpLogDesc(a, b) { if (a.time !== b.time) return a.time < b.time ? 1 : -1; return b._i - a._i; }
+  function cmpLogAsc(a, b) { return -cmpLogDesc(a, b); }
+  function taskUrl(p) { return REPO + '/tree/' + BRANCH + '/' + encodeURI(p.replace(/\/+$/, '')); }
+  function fileUrl(p) { return REPO + '/blob/' + BRANCH + '/' + encodeURI(p); }
+  function logDate(l) { return normDate(l.time); }
+  function logsOn(date) { return state.logs.filter(function (l) { return logDate(l) === date; }).sort(cmpLogAsc); }
+  function dueOn(date) { return state.tasks.filter(function (t) { return normDate(t.due) === date; }); }
+  function titleOf(id) { var t = state.tasks.filter(function (x) { return x.id === id; })[0]; return t ? t.title : ''; }
+  function flash(kind, text) { state.flash = { kind: kind, text: text }; }
 
-  // ---------- rendering ----------
+  // ---------- board (v1) ----------
   function latestByTask() {
     var m = {};
     state.logs.slice().sort(cmpLogDesc).forEach(function (l) { if (!m[l.task_id]) m[l.task_id] = l; });
@@ -255,9 +671,7 @@
     state.tasks.forEach(function (t) { t.tags.forEach(function (g) { tags[g] = 1; }); if (t.priority) pris[t.priority] = 1; });
     function fill(sel, first, values) {
       var cur = sel.value;
-      sel.innerHTML = '<option value="">' + first + '</option>' + values.map(function (v) {
-        return '<option value="' + esc(v) + '">' + esc(v) + '</option>';
-      }).join('');
+      sel.innerHTML = '<option value="">' + first + '</option>' + values.map(function (v) { return '<option value="' + esc(v) + '">' + esc(v) + '</option>'; }).join('');
       if (values.indexOf(cur) >= 0) sel.value = cur;
     }
     fill($('fTag'), '全部标签', Object.keys(tags).sort());
@@ -270,9 +684,7 @@
       var c = dueClass(t); if (c === 'overdue') overdue++; if (c === 'today') dueToday++;
     });
     var html = '<div class="stat"><div class="n">' + state.tasks.length + '</div><div class="l">全部任务</div></div>';
-    STATUSES.forEach(function (s) {
-      html += '<div class="stat"><div class="n">' + (counts[s[0]] || 0) + '</div><div class="l">' + s[1] + ' · ' + s[0] + '</div></div>';
-    });
+    STATUSES.forEach(function (s) { html += '<div class="stat"><div class="n">' + (counts[s[0]] || 0) + '</div><div class="l">' + s[1] + ' · ' + s[0] + '</div></div>'; });
     html += '<div class="stat' + (overdue ? ' warn' : '') + '"><div class="n">' + overdue + '</div><div class="l">已逾期</div></div>';
     html += '<div class="stat' + (dueToday ? ' warn' : '') + '"><div class="n">' + dueToday + '</div><div class="l">今天到期</div></div>';
     $('summary').innerHTML = html;
@@ -289,9 +701,8 @@
     return h + '</a>';
   }
   function renderBoard() {
-    var last = latestByTask();
-    var cols = STATUSES.slice();
-    var known = {}; cols.forEach(function (s) { known[s[0]] = 1; });
+    var last = latestByTask(), cols = STATUSES.slice(), known = {};
+    cols.forEach(function (s) { known[s[0]] = 1; });
     state.tasks.forEach(function (t) { if (!known[t.status]) { known[t.status] = 1; cols.push([t.status, '其他']); } });
     var html = '';
     cols.forEach(function (s) {
@@ -306,44 +717,356 @@
     });
     $('board').innerHTML = html;
   }
+  function logLine(l, withDate) {
+    var trans = (l.from_status || l.to_status) ? ' <span class="trans">' + esc(LABEL[l.from_status] || l.from_status || '—') + ' → ' + esc(LABEL[l.to_status] || l.to_status || '—') + '</span>' : '';
+    var file = l.file ? ' · <a target="_blank" rel="noopener" href="' + esc(fileUrl(l.file)) + '">' + esc(l.file.split('/').pop()) + '</a>' : '';
+    return '<span class="act">' + esc(ACTION_LABEL[l.action] || l.action) + '</span><b>' + esc(l.task_id) + '</b> ' + esc(l.summary) + trans + file;
+  }
   function renderTimeline() {
-    var titles = {}; state.tasks.forEach(function (t) { titles[t.id] = t.title; });
     var q = $('q').value.trim().toLowerCase();
     var rows = state.logs.slice().sort(cmpLogDesc).filter(function (l) {
-      return !q || [l.time, l.task_id, titles[l.task_id] || '', l.action, l.from_status, l.to_status, l.summary, l.file].join(' ').toLowerCase().indexOf(q) >= 0;
+      return !q || [l.time, l.task_id, titleOf(l.task_id), l.action, l.from_status, l.to_status, l.summary, l.file].join(' ').toLowerCase().indexOf(q) >= 0;
     });
-    if (!rows.length) { $('timeline').innerHTML = '<li><span class="empty">暂无记录</span></li>'; return; }
-    $('timeline').innerHTML = rows.map(function (l) {
-      var trans = (l.from_status || l.to_status) ?
-        ' <span class="trans">' + esc(LABEL[l.from_status] || l.from_status || '—') + ' → ' + esc(LABEL[l.to_status] || l.to_status || '—') + '</span>' : '';
-      var file = l.file ? ' · <a target="_blank" rel="noopener" href="' + esc(fileUrl(l.file)) + '">' + esc(l.file.split('/').pop()) + '</a>' : '';
-      return '<li><span class="t">' + esc(l.time) + '</span><span>' +
-        '<span class="act">' + esc(ACTION_LABEL[l.action] || l.action) + '</span>' +
-        '<b>' + esc(l.task_id) + '</b> ' + esc(l.summary) + trans + file + '</span></li>';
-    }).join('');
+    $('timeline').innerHTML = rows.length ? rows.map(function (l) {
+      return '<li><span class="t">' + esc(l.time) + '</span><span>' + logLine(l) + '</span></li>';
+    }).join('') : '<li><span class="empty">暂无记录</span></li>';
   }
-  function renderAll() { renderSummary(); renderBoard(); renderTimeline(); }
+
+  // ---------- calendar ----------
+  function gridDates() {
+    var first = state.month, start = new Date(first.getFullYear(), first.getMonth(), 1 - ((first.getDay() + 6) % 7));
+    var out = [];
+    for (var i = 0; i < 42; i++) out.push(new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
+    // drop a trailing week that is entirely next month
+    if (out[35].getMonth() !== first.getMonth()) out = out.slice(0, 35);
+    if (out[28].getMonth() !== first.getMonth()) out = out.slice(0, 28);
+    return out;
+  }
+  function renderCalendar() {
+    var m = state.month, today = todayStr();
+    $('calTitle').textContent = m.getFullYear() + '年' + (m.getMonth() + 1) + '月';
+    var html = ['一', '二', '三', '四', '五', '六', '日'].map(function (w) { return '<div class="wd">' + w + '</div>'; }).join('');
+    var logCount = {};
+    state.logs.forEach(function (l) { var d = logDate(l); if (d) logCount[d] = (logCount[d] || 0) + 1; });
+    gridDates().forEach(function (d) {
+      var ds = ymd(d), info = dayInfo(ds), due = dueOn(ds);
+      var cls = 'day' + (d.getMonth() !== m.getMonth() ? ' other' : '') + (ds === today ? ' today' : '') + (ds === state.selected ? ' sel' : '') + (d.getDay() === 0 || d.getDay() === 6 ? ' weekend' : '');
+      var marks = '';
+      if (info.exists && !info.loaded) marks += '<span class="mk pending" title="加载中">…</span>';
+      SECTIONS.forEach(function (s) { if (info.has[s[0]]) marks += '<span class="mk ' + s[2] + '" title="' + s[1] + '">' + s[3] + '</span>'; });
+      var chips = '';
+      if (logCount[ds]) chips += '<span class="chip log" title="log.csv ' + logCount[ds] + ' 条"><span class="w">日志 </span>' + logCount[ds] + '</span>';
+      if (due.length) {
+        var od = due.some(function (t) { return !isClosed(t) && ds < today; });
+        chips += '<span class="chip due' + (od ? ' overdue' : '') + '" title="' + esc(due.map(function (t) { return t.id + ' ' + t.title; }).join('\n')) + '"><span class="w">到期 </span>' + due.length + '</span>';
+      }
+      html += '<button type="button" class="' + cls + '" data-date="' + ds + '"><span class="num">' + d.getDate() + '</span>' +
+        (marks ? '<span class="marks">' + marks + '</span>' : '') + (chips ? '<span class="marks">' + chips + '</span>' : '') + '</button>';
+    });
+    $('cal').innerHTML = html;
+    var note = '';
+    if (state.daily.status === 'error') note = '<div class="msg error" style="margin-top:8px">无法列出 daily/ 目录：' + esc(state.daily.error) + ' 日历上的日记标记可能不完整，点开某一天仍会尝试读取。</div>';
+    else if (state.daily.status === 'missing') note = '<div class="msg info" style="margin-top:8px">仓库里还没有 daily/ 目录。点任意一天 →「编辑」保存后会自动创建。</div>';
+    $('dailyNote').innerHTML = note;
+  }
+  function loadVisibleMonth() {
+    var dates = gridDates().map(ymd).filter(function (ds) { return state.daily.list[ds]; });
+    var raf = 0;
+    return loadMany(dates, function () {
+      if (raf) return;
+      raf = requestAnimationFrame(function () { raf = 0; if (state.tab === 'calendar') renderCalendar(); if (state.tab === 'history') renderHistory(); });
+    });
+  }
+
+  function renderDetail() {
+    var el = $('detail'), date = state.selected;
+    if (!date) { el.innerHTML = '<div class="nodata">点击日历中的某一天查看详情</div>'; return; }
+    if (state.edit && state.edit.date === date) return renderEditor();
+    var info = dayInfo(date), today = todayStr(), due = dueOn(date), logs = logsOn(date);
+    var rel = date === today ? '<span class="todaytag">今天</span>' : date > today ? '<span class="future">未来</span>' : '';
+    var h = '<h3>' + esc(cnDate(date)) + '</h3><div class="sub">' + rel + '<span>' + esc(date) + '</span>';
+    if (info.exists) h += '<a href="' + esc(fileUrl(dailyPath(date))) + '" target="_blank" rel="noopener">在 GitHub 查看 daily/' + esc(date) + '.md</a>';
+    h += '</div>';
+    if (state.flash) { h += '<div class="msg ' + state.flash.kind + '">' + state.flash.text + '</div>'; }
+    h += '<div class="actions"><button type="button" class="primary" data-act="edit">编辑</button>' +
+      (date >= today ? '<button type="button" data-act="plan">写计划</button>' : '') + '</div>';
+    if (info.exists && !info.loaded) {
+      h += '<div class="nodata">正在读取日记…</div>';
+    } else {
+      if (info.error) h += '<div class="msg error">读取日记失败：' + esc(info.error) + '</div>';
+      if (info.stale) h += '<div class="msg info">这是缓存中的旧版本，GitHub 可能还在更新，稍后点「刷新」。</div>';
+      var anySec = SECTIONS.some(function (s) { return info.has[s[0]]; });
+      if (!anySec && !due.length && !logs.length) {
+        h += '<div class="nodata">还没有记录<br><br><button type="button" class="primary" data-act="edit">编辑</button></div>';
+      } else {
+        SECTIONS.forEach(function (s) {
+          var body = info.parsed ? info.parsed[s[0]] : '';
+          h += '<div class="dsec ' + s[2] + '"><h4>' + s[1] + '</h4>' + (sectionEmpty(body) ? '<div class="none">（空）</div>' : '<div class="md">' + renderMd(body) + '</div>') + '</div>';
+        });
+        if (info.parsed && info.parsed.others.length) info.parsed.others.forEach(function (o) {
+          h += '<div class="dsec"><h4>' + esc(o.heading) + '</h4><div class="md">' + renderMd(o.body) + '</div></div>';
+        });
+      }
+    }
+    if (due.length) {
+      h += '<h4 style="margin:12px 0 4px">当天截止的任务</h4>' + due.map(function (t) { return renderCard(t, latestByTask()[t.id]); }).join('');
+    }
+    if (logs.length) {
+      h += '<h4 style="margin:12px 0 4px">当天日志（log.csv）</h4><ul class="mini">' + logs.map(function (l) {
+        return '<li><span class="t">' + esc(l.time.slice(11) || l.time) + '</span>' + logLine(l) + '</li>';
+      }).join('') + '</ul>';
+    }
+    el.innerHTML = h;
+  }
+
+  // ---------- editor ----------
+  function startEdit(date, focus) {
+    if (!getToken()) {
+      state.pendingEdit = { date: date, focus: focus };
+      openSettings('保存日记需要 GitHub 令牌，请先填写。');
+      return;
+    }
+    state.selected = date; state.flash = null;
+    state.edit = { date: date, loading: true, focus: focus || 'plan' };
+    renderDetail();
+    loadDay(date).then(function (c) {
+      if (!state.edit || state.edit.date !== date) return;
+      var p = c && c.text ? c.parsed : parseDaily('');
+      state.edit = { date: date, loading: false, focus: focus || 'plan', base: p, baseText: c && c.text ? c.text : '', sha: c ? c.sha : null,
+        values: { plan: p.plan, practice: p.practice, review: p.review }, remote: null, status: null };
+      renderDetail();
+    });
+  }
+  function renderEditor() {
+    var e = state.edit, el = $('detail');
+    SECTIONS.forEach(function (s) { var old = $('ed-' + s[0]); if (old && !e.loading) e.values[s[0]] = old.value; });
+    var h = '<h3>编辑 ' + esc(cnDate(e.date)) + '</h3><div class="sub">保存到 <code>daily/' + esc(e.date) + '.md</code>（main 分支）</div>';
+    if (e.loading) { el.innerHTML = h + '<div class="nodata">正在读取…</div>'; return; }
+    h += '<div class="editor">';
+    SECTIONS.forEach(function (s) {
+      h += '<label for="ed-' + s[0] + '"><span class="mk ' + s[2] + '">' + s[3] + '</span> ' + s[1] + '</label>' +
+        '<textarea id="ed-' + s[0] + '" data-key="' + s[0] + '">' + esc(e.values[s[0]]) + '</textarea>';
+    });
+    h += '<div class="hint">支持 Markdown（标题、列表、<code>- [ ]</code> 待办、**粗体**、链接、代码）。写 <code>T-YYYYMMDD-NN</code> 会自动链接到任务。任务状态变更仍需按规则改 task.md + index.md + log.csv。</div>';
+    if (e.status) h += '<div class="msg ' + e.status.kind + '" style="margin-top:8px">' + e.status.text + '</div>';
+    if (e.remote != null) h += '<details class="remote" open><summary>远端最新内容（' + (e.remote ? '已存在' : '文件不存在') + '）</summary><pre>' + esc(e.remote || '（空）') + '</pre></details>';
+    h += '<div class="actions" style="margin-top:10px"><button type="button" class="primary" data-act="save"' + (e.saving ? ' disabled' : '') + '>' + (e.saving ? '保存中…' : '保存') + '</button>' +
+      '<button type="button" data-act="cancel"' + (e.saving ? ' disabled' : '') + '>取消</button></div></div>';
+    // re-renders must not lose the caret / what is being typed
+    var act = document.activeElement, keepId = act && /^ed-/.test(act.id) ? act.id : null;
+    var selA = keepId ? act.selectionStart : 0, selB = keepId ? act.selectionEnd : 0;
+    el.innerHTML = h;
+    SECTIONS.forEach(function (s) { $('ed-' + s[0]).addEventListener('input', function (ev) { e.values[s[0]] = ev.target.value; }); });
+    if (keepId && $(keepId)) { $(keepId).focus(); try { $(keepId).setSelectionRange(selA, selB); } catch (x) {} }
+    else if (e.focus && !e.focused) { e.focused = true; var ta = $('ed-' + e.focus); if (ta) ta.focus(); }
+  }
+  function fetchLatest(date) {
+    return api('GET', repoPath + '/contents/' + dailyPath(date) + '?ref=' + BRANCH).then(function (res) {
+      if (res.status === 404) return { sha: null, text: '' };
+      if (!res.ok || !res.json) throw new Error(apiErrText(res));
+      return { sha: res.json.sha, text: b64ToUtf8(res.json.content) };
+    });
+  }
+  function saveEdit() {
+    var e = state.edit; if (!e || e.saving) return;
+    if (!getToken()) { openSettings('保存日记需要 GitHub 令牌，请先填写。'); return; }
+    var text = serializeDaily(e.date, e.base, e.values);
+    var changed = SECTIONS.filter(function (s) { return String(e.values[s[0]] || '').trim() !== String(e.base[s[0]] || '').trim(); });
+    if (e.baseText && text === e.baseText) { e.status = { kind: 'info', text: '没有改动。' }; renderEditor(); return; }
+    var labels = (changed.length ? changed : SECTIONS).map(function (s) { return s[1]; }).join('/');
+    var body = { message: '日记 ' + e.date + '：' + (e.baseText ? '更新' : '新建') + labels, content: utf8ToB64(text), branch: BRANCH };
+    if (e.sha) body.sha = e.sha;
+    e.saving = true; e.status = null; renderEditor();
+    api('PUT', repoPath + '/contents/' + dailyPath(e.date), body).then(function (res) {
+      e.saving = false;
+      if (res.ok && res.json && res.json.content) {
+        var sha = res.json.content.sha, commit = res.json.commit && res.json.commit.sha ? res.json.commit.sha.slice(0, 7) : '';
+        putCache(e.date, sha, text);
+        state.daily.list[e.date] = sha;
+        if (state.daily.status === 'missing') state.daily.status = 'ok';
+        state.edit = null;
+        flash('ok', '已保存' + (commit ? '（提交 <a target="_blank" rel="noopener" href="' + esc(REPO + '/commit/' + res.json.commit.sha) + '">' + commit + '</a>）' : '') +
+          '。页面已直接显示保存后的内容；GitHub Pages / raw 的文件可能要 1–2 分钟才更新。');
+        renderAllDaily();
+        return;
+      }
+      if (res.status === 409 || res.status === 422) {
+        return fetchLatest(e.date).then(function (latest) {
+          if (latest.sha === e.sha) { e.status = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) }; renderEditor(); return; }
+          e.sha = latest.sha; e.baseText = latest.text; e.base = parseDaily(latest.text); e.remote = latest.text;
+          if (latest.sha) putCache(e.date, latest.sha, latest.text); else delete state.daily.cache[e.date];
+          if (latest.sha) state.daily.list[e.date] = latest.sha; else delete state.daily.list[e.date];
+          e.status = { kind: 'error', text: '保存失败：这个文件在别处被修改过（版本冲突）。已获取远端最新内容（见下方），你的输入仍保留在上面的输入框里，请对照合并后再点「保存」。' };
+          renderEditor(); renderCalendar();
+        });
+      }
+      e.status = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) };
+      if (res.status === 401) e.status.text += ' <button type="button" class="small" data-act="settings">打开设置</button>';
+      renderEditor();
+    }).catch(function (err) { e.saving = false; e.status = { kind: 'error', text: '保存失败：' + esc(err.message) }; renderEditor(); });
+  }
+
+  // ---------- history ----------
+  function historyDates() {
+    var set = {};
+    Object.keys(state.daily.list).forEach(function (d) { set[d] = 1; });
+    Object.keys(state.daily.cache).forEach(function (d) { if (state.daily.cache[d].text) set[d] = 1; });
+    state.logs.forEach(function (l) { var d = logDate(l); if (d) set[d] = 1; });
+    return Object.keys(set).sort().reverse();
+  }
+  function renderHistory() {
+    var q = $('hq').value.trim().toLowerCase(), today = todayStr();
+    var all = historyDates(), dates = all.slice(0, state.historyLimit), html = '', shown = 0;
+    dates.forEach(function (ds) {
+      var info = dayInfo(ds), logs = logsOn(ds);
+      var snips = SECTIONS.filter(function (s) { return info.has[s[0]]; }).map(function (s) {
+        return { k: s, t: plainSnippet(info.parsed[s[0]], 120) };
+      });
+      if (q) {
+        var hay = [ds, snips.map(function (x) { return x.t; }).join(' '), info.parsed ? [info.parsed.plan, info.parsed.practice, info.parsed.review].join(' ') : '',
+          logs.map(function (l) { return [l.task_id, titleOf(l.task_id), l.summary, l.action].join(' '); }).join(' ')].join(' ').toLowerCase();
+        if (hay.indexOf(q) < 0) return;
+      }
+      shown++;
+      var rel = ds === today ? '<span class="todaytag">今天</span>' : ds > today ? '<span class="future">计划中</span>' : '';
+      html += '<div class="hday"><div class="hd"><a href="#calendar/' + ds + '">' + esc(cnDate(ds)) + '</a>' + rel +
+        (logs.length ? '<span class="chip log">日志 ' + logs.length + '</span>' : '') + '</div>';
+      if (info.exists && !info.loaded) html += '<div class="snip" style="color:var(--muted)">日记加载中…</div>';
+      snips.forEach(function (x) { html += '<div class="snip"><span class="k ' + x.k[2] + '">' + x.k[1] + '</span>' + esc(x.t) + '</div>'; });
+      if (logs.length) html += '<ul class="mini">' + logs.map(function (l) { return '<li><span class="t">' + esc(l.time.slice(11)) + '</span>' + logLine(l) + '</li>'; }).join('') + '</ul>';
+      html += '</div>';
+    });
+    if (!shown) html = '<div class="nodata">' + (q ? '没有匹配的记录' : '还没有记录') + '</div>';
+    if (all.length > dates.length) html += '<div style="text-align:center"><button type="button" id="histMore">加载更早的 ' + Math.min(30, all.length - dates.length) + ' 天</button></div>';
+    $('history').innerHTML = html;
+    var more = $('histMore');
+    if (more) more.addEventListener('click', function () { state.historyLimit += 30; renderHistory(); loadHistory(); });
+  }
+  function loadHistory() {
+    var need = historyDates().slice(0, state.historyLimit).filter(function (d) { return state.daily.list[d] && !state.daily.cache[d]; });
+    var raf = 0;
+    return loadMany(need, function () { if (raf) return; raf = requestAnimationFrame(function () { raf = 0; if (state.tab === 'history') renderHistory(); }); });
+  }
+
+  // ---------- settings dialog ----------
+  function tokenStatus() {
+    var t = getToken();
+    $('tokenStatus').textContent = t ? '已保存令牌（…' + t.slice(-4) + '）' : '尚未保存令牌。';
+  }
+  function openSettings(note) {
+    $('tokenInput').value = '';
+    tokenStatus();
+    if (note) $('tokenStatus').textContent = note + ' ' + $('tokenStatus').textContent;
+    var d = $('settings');
+    if (d.showModal) { if (!d.open) d.showModal(); } else d.setAttribute('open', '');
+  }
+  function closeSettings() { var d = $('settings'); if (d.close) d.close(); else d.removeAttribute('open'); }
+
+  // ---------- routing / rendering ----------
+  function renderAllDaily() { renderCalendar(); renderDetail(); if (state.tab === 'history') renderHistory(); }
+  function renderAll() { renderSummary(); renderBoard(); renderTimeline(); renderCalendar(); renderDetail(); renderHistory(); }
+  function applyHash() {
+    var h = decodeURIComponent(location.hash.replace(/^#/, '')), parts = h.split('/');
+    var tab = ['board', 'calendar', 'history'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
+    state.tab = tab;
+    if (tab === 'calendar' && parseYmd(parts[1])) {
+      var d = parseYmd(parts[1]);
+      if (state.selected !== parts[1]) { state.selected = parts[1]; state.flash = null; if (state.edit && state.edit.date !== parts[1]) state.edit = null; }
+      // keep the current month if the day is already visible (e.g. a leading/trailing cell)
+      if (gridDates().map(ymd).indexOf(parts[1]) < 0) state.month = new Date(d.getFullYear(), d.getMonth(), 1);
+    }
+    document.querySelectorAll('nav.tabs a').forEach(function (a) { a.classList.toggle('active', a.getAttribute('data-tab') === tab); });
+    document.querySelectorAll('.tab').forEach(function (s) { s.classList.toggle('active', s.id === 'tab-' + tab); });
+    if (tab === 'calendar') {
+      renderCalendar(); renderDetail();
+      var redraw = function () { renderCalendar(); if (!state.edit || state.edit.loading) renderDetail(); };
+      loadVisibleMonth().then(redraw);
+      if (state.selected) loadDay(state.selected).then(redraw);
+    }
+    if (tab === 'history') { renderHistory(); loadHistory(); }
+  }
+  function selectDay(ds) {
+    if (location.hash !== '#calendar/' + ds) location.hash = '#calendar/' + ds; else applyHash();
+  }
+  function shiftMonth(n) {
+    state.month = new Date(state.month.getFullYear(), state.month.getMonth() + n, 1);
+    renderCalendar(); loadVisibleMonth();
+  }
 
   function load() {
     $('refresh').disabled = true;
     $('updated').textContent = '加载中…';
-    Promise.all([loadFile('index.md'), loadFile('log.csv')]).then(function (res) {
+    state.daily.cache = {}; state.daily.pending = {};  // fresh read; fixes stale copies too
+    var core = Promise.all([loadFile('index.md'), loadFile('log.csv')]);
+    var daily = listDaily();
+    return core.then(function (res) {
       state.tasks = parseIndex(res[0].text);
       state.logs = parseCSV(res[1].text);
       var src = (res[0].src === 'raw' || res[1].src === 'raw') ? '（来自 raw.githubusercontent.com）' : '';
       var newest = state.logs.slice().sort(cmpLogDesc)[0];
       $('updated').textContent = '数据更新于 ' + fmtNow(new Date()) + src + (newest ? ' · 最新日志 ' + newest.time : '');
       $('msg').innerHTML = state.tasks.length ? '' : '<div class="msg info">index.md 中没有解析到任务。</div>';
-      renderFilters(); renderAll();
+      renderFilters(); renderSummary(); renderBoard(); renderTimeline();
     }).catch(function (e) {
       $('updated').textContent = '加载失败';
       $('msg').innerHTML = '<div class="msg error">' + esc(e.message) + '</div>';
+    }).then(function () { return daily; }).then(function () {
+      applyHash();
     }).then(function () { $('refresh').disabled = false; });
   }
 
-  ['q', 'fTag', 'fPri'].forEach(function (id) { $(id).addEventListener('input', renderAll); $(id).addEventListener('change', renderAll); });
+  // ---------- events ----------
+  ['q', 'fTag', 'fPri'].forEach(function (id) { $(id).addEventListener('input', function () { renderBoard(); renderTimeline(); }); });
+  $('hq').addEventListener('input', renderHistory);
   $('refresh').addEventListener('click', load);
-  window.__taskos = { parseIndex: parseIndex, parseCSV: parseCSV };
+  $('openSettings').addEventListener('click', function () { state.pendingEdit = null; openSettings(); });
+  $('calPrev').addEventListener('click', function () { shiftMonth(-1); });
+  $('calNext').addEventListener('click', function () { shiftMonth(1); });
+  $('calToday').addEventListener('click', function () { var t = new Date(); state.month = new Date(t.getFullYear(), t.getMonth(), 1); selectDay(todayStr()); });
+  $('quickDate').value = ymd(new Date(Date.now() + 86400000));
+  $('quickPlan').addEventListener('click', function () {
+    var ds = $('quickDate').value; if (!parseYmd(ds)) return;
+    selectDay(ds); startEdit(ds, 'plan');
+  });
+  $('cal').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-date]'); if (b) selectDay(b.getAttribute('data-date'));
+  });
+  $('detail').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-act]'); if (!b) return;
+    var act = b.getAttribute('data-act');
+    if (act === 'edit') startEdit(state.selected, 'plan');
+    else if (act === 'plan') startEdit(state.selected, 'plan');
+    else if (act === 'save') saveEdit();
+    else if (act === 'cancel') { state.edit = null; renderDetail(); }
+    else if (act === 'settings') openSettings();
+  });
+  window.addEventListener('hashchange', applyHash);
+  $('tokenShow').addEventListener('click', function () { var i = $('tokenInput'); i.type = i.type === 'password' ? 'text' : 'password'; });
+  $('tokenSave').addEventListener('click', function () {
+    var v = $('tokenInput').value.trim();
+    if (!v) { $('tokenStatus').textContent = '请先粘贴令牌。'; return; }
+    setToken(v); tokenStatus();
+    closeSettings();
+    var pe = state.pendingEdit; state.pendingEdit = null;
+    listDaily().then(function () { renderCalendar(); });
+    if (pe) startEdit(pe.date, pe.focus);
+  });
+  $('tokenClear').addEventListener('click', function () { setToken(''); $('tokenInput').value = ''; tokenStatus(); });
+  $('tokenTest').addEventListener('click', function () {
+    var v = $('tokenInput').value.trim();
+    if (v) setToken(v);
+    if (!getToken()) { $('tokenStatus').textContent = '请先粘贴令牌。'; return; }
+    $('tokenStatus').textContent = '验证中…';
+    api('GET', repoPath).then(function (res) {
+      if (res.ok) $('tokenStatus').textContent = '令牌有效，可以访问 ' + OWNER + '/' + REPONAME + '（已保存）。写权限会在第一次保存时确认。';
+      else $('tokenStatus').textContent = '验证失败：' + apiErrText(res);
+    }, function (e) { $('tokenStatus').textContent = '验证失败：' + e.message; });
+  });
+  $('settingsClose').addEventListener('click', function () { state.pendingEdit = null; closeSettings(); });
+
+  var now = new Date(); state.month = new Date(now.getFullYear(), now.getMonth(), 1);
+  window.__taskos = { parseIndex: parseIndex, parseCSV: parseCSV, parseDaily: parseDaily, serializeDaily: serializeDaily,
+    utf8ToB64: utf8ToB64, b64ToUtf8: b64ToUtf8, renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, API: API, state: state };
   load();
 })();
 </script>
