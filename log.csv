@@ -3,3 +3,5 @@ time,task_id,action,from_status,to_status,summary,file
 2026-09-29 13:53,T-20260928-01,plan,inbox,planned,写好计划,tasks/T-20260928-01-建立任务系统/plan.md
 2026-09-29 13:53,T-20260928-01,status,planned,in_progress,开始执行系统初始化,tasks/T-20260928-01-建立任务系统/task.md
 2026-09-29 13:53,T-20260928-01,execute,,,系统初始化：创建目录、模板、索引和日志,tasks/T-20260928-01-建立任务系统/execution.md
+2026-09-30 23:35,T-20260930-01,create,,inbox,创建任务：国庆十天计划,tasks/T-20260930-01-国庆十天计划/task.md
+2026-09-30 23:35,T-20260930-01,plan,inbox,planned,写好计划：10-01 至 10-10 十天日历与每日固定时段，并写入 daily/ 十天计划,tasks/T-20260930-01-国庆十天计划/plan.md
