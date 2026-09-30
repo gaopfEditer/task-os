@@ -177,119 +177,200 @@
 ### 候选清单（93 条）
 
 > 分项：相关(0-2) / 冲击(0-2) / 可信(0-2) / 时效(0-1) / 可证伪(0-1)。「站方重要」= Foresight `is_important`。合并事件的分数按事件计，写在每一行。
+> 「主小类」「副小类」按 `categories.md`（14 大类 / 79 小类）和 `filter.md`「分类标注」补标，补标时间 2026-09-30T21:40:00+08:00（`date -Iseconds`）；分类只做归纳，**不改变分数和去向**。副小类最多 2 个，无则写「—」。
 
-| ID | 时间（HKT） | 标题（Foresight 原题） | Foresight 链接 | 站方重要 | 第一/二层结果 | 出处与备注 | 分项 | 总分 | 去向 |
-|---|---|---|---|---|---|---|---|---|---|
-| F01 | 09-28 17:11 | Bitget BTC 提现开放后处理顺畅，首批约 6900 笔已完成链上确认 | https://foresightnews.pro/news/detail/114143 | 是 | 通过 | Bitget 直播数据，无链接 | 2/2/2/1/1 | **8** | **进日报**（合并 R1 Bitget） |
-| F02 | 09-28 17:12 | Bybit 推出事件市场 ByPick | https://foresightnews.pro/news/detail/114144 | — | 第一层排除①广告/拉新活动 | 交易所活动奖池 | — | — | 丢弃 |
-| F03 | 09-28 17:21 | Capital B 增持 13 枚 BTC，累计持仓达 3538 枚 | https://foresightnews.pro/news/detail/114145 | — | 第二层丢弃：不改变四件事 | 13 BTC，量太小 | — | — | 丢弃 |
-| F04 | 09-28 17:44 | GoPlus：Robinhood Chain 上一欺诈 Meme 工厂近 30 天流水超 900 万美元 | https://foresightnews.pro/news/detail/114146 | — | 通过 | 安全公司 X（未抽查）；链与标的不在主线 | 0/0/2/1/1 | 4 | inbox |
-| F05 | 09-28 17:59 | 某地址 4 天内向币安转入 1.3 亿枚 USD1 | https://foresightnews.pro/news/detail/114147 | — | 第二层丢弃：不改变四件事 | 单地址转账，无背景 | — | — | 丢弃 |
-| F06 | 09-28 18:01 | 币安股票交易将新增 BRUN、GRML、OCTV、USDE、WSE 五只股票 | https://foresightnews.pro/news/detail/114148 | — | 第二层丢弃：不改变四件事 | 交易所上新股票，不属四件事 | — | — | 丢弃 |
-| F07 | 09-28 18:04 | Compound 基金会被指挪用 842 万枚 DAI 储备金兑换 COMP 用于治理投票 | https://foresightnews.pro/news/detail/114149 | 是 | 通过 | 治理论坛指控帖；链上可查但属指控 | 1/1/1/1/1 | 5 | inbox |
-| F08 | 09-28 18:10 | Bybit 上线 KII USDT 永续合约 | https://foresightnews.pro/news/detail/114150 | 是 | 第一层排除⑤无关山寨 | 山寨合约上新 | — | — | 丢弃 |
-| F09 | 09-28 18:23 | OKX 上线 ETH 专属闪赚 Lite，申购 ETH 可瓜分 400,000 USDT | https://foresightnews.pro/news/detail/114151 | — | 第一层排除②空投 | 空投/理财活动 | — | — | 丢弃 |
-| F10 | 09-28 18:31 | 路透社：民主党若胜选拟调查特朗普家族加密业务，相关公司已聘律师 | https://foresightnews.pro/news/detail/114152 | — | 通过 | 路透转述，前提是中期选举结果 | 1/0/1/1/0 | 3 | 丢弃 |
-| F11 | 09-28 18:43 | Wintermute 在 Hyperliquid 持有约 1.26 亿美元空单，最大仓位为 ETH 空单 | https://foresightnews.pro/news/detail/114153 | — | 通过 | 链上监测账号；做市商仓位可能是对冲 | 1/0/1/1/1 | 4 | inbox |
-| F12 | 09-28 19:03 | Ontology 关闭 stONT 流动性质押服务 | https://foresightnews.pro/news/detail/114154 | — | 通过 | 项目官方 X；标的不在主线 | 0/0/2/1/1 | 4 | inbox |
-| F13 | 09-28 19:11 | ZachXBT：疑似为朝鲜黑客清洗 Bitget 被盗资金的洗钱团伙公开求助 | https://foresightnews.pro/news/detail/114155 | 是 | 通过 | ZachXBT X（已核推文存在） | 2/2/2/1/1 | **8** | **进日报**（合并 R1 Bitget） |
-| F14 | 09-28 19:31 | WSJ：花旗与 Coinbase 合作，为企业客户提供稳定币收款服务 | https://foresightnews.pro/news/detail/114156 | 是 | 通过 | Foresight 引 WSJ；一手为试跑 1 已打开的 Citi 新闻稿 | 2/1/2/1/0 | 6 | inbox（并入试跑 1 C08） |
-| F15 | 09-28 19:37 | 富兰克林邓普顿与 Bybit 达成战略合作，首项为代币化货币基金场外抵押计划 | https://foresightnews.pro/news/detail/114157 | 是 | 通过 | 富兰克林邓普顿官方 X；无规模/日期 | 1/1/2/1/0 | 5 | inbox |
-| F16 | 09-28 19:58 | Strategy 上周增持 1665 枚 BTC，累计持仓达 847,666 枚 | https://foresightnews.pro/news/detail/114158 | 是 | 通过 | Foresight 引第三方 X；一手为 SEC 8-K（本次已打开） | 2/1/2/1/1 | **7** | **进日报**（合并 R5 Strategy） |
-| F17 | 09-28 20:00 | 甲骨文将集成 Swift 区块链账本，支持银行跨机构使用代币化存款 | https://foresightnews.pro/news/detail/114159 | — | 第二层丢弃：不改变四件事 | 银行基础设施集成，不改变四件事 | — | — | 丢弃 |
-| F18 | 09-28 20:02 | Strive 上周增持 1107 枚 BTC，累计持仓达 27,462 枚 | https://foresightnews.pro/news/detail/114160 | — | 通过 | SEC 8-K（未抽查）；规模小 | 1/0/2/1/1 | 5 | inbox |
-| F19 | 09-28 20:04 | Tether 与 Shiga 合作，在非洲和海湾地区推出基于 WDK 的自托管金融产品 | https://foresightnews.pro/news/detail/114161 | — | 第二层丢弃：不改变四件事 | 产品合作 | — | — | 丢弃 |
-| F20 | 09-28 20:09 | ENS Labs 与 GLEIF 探索将 ENS 域名与可验证法人识别编码关联 | https://foresightnews.pro/news/detail/114162 | — | 第二层丢弃：不改变四件事 | 身份标识探索 | — | — | 丢弃 |
-| F21 | 09-28 20:17 | Chainlink 宣布 CCIP 2.0 上线，支持机构自行运行跨链验证节点 | https://foresightnews.pro/news/detail/114163 | — | 通过 | Chainlink 博客（未抽查） | 1/0/2/1/1 | 5 | inbox（合并 CCIP/FCR） |
-| F22 | 09-28 20:24 | DeFi Development 上周增持 47,706 枚 SOL，总持仓达 253.8 万枚 | https://foresightnews.pro/news/detail/114164 | — | 第一层排除⑤无关山寨 | SOL 财库，非主线标的 | — | — | 丢弃 |
-| F23 | 09-28 20:28 | CoinMarketCap 任命前 CPO 为新任 CEO，前 CEO 转向集团新业务 | https://foresightnews.pro/news/detail/114165 | — | 第二层丢弃：不改变四件事 | 人事 | — | — | 丢弃 |
-| F24 | 09-28 20:31 | BitMine 上周增持 17,362 枚 ETH，总持仓突破 600 万枚 | https://foresightnews.pro/news/detail/114166 | 是 | 通过 | PR Newswire 公司公告（本次已打开） | 2/1/2/1/1 | **7** | **进日报**（R6 BitMine） |
-| F25 | 09-28 20:39 | BTCS：已完成代币化股票流动性提供的合规准备，拟依据 SEC 豁免开展业务 | https://foresightnews.pro/news/detail/114167 | — | 第二层丢弃：不改变四件事 | 单一公司合规准备，未开展业务 | — | — | 丢弃 |
-| F26 | 09-28 20:45 | 币安将以每股 4500 韩元预估股息，对 SAMSUNG USDT 永续合约进行股息调整 | https://foresightnews.pro/news/detail/114169 | — | 第二层丢弃：不改变四件事 | 合约股息调整，不属四件事 | — | — | 丢弃 |
-| F27 | 09-28 20:46 | LSEG 成为 Canton Network 超级验证节点 | https://foresightnews.pro/news/detail/114168 | — | 第二层丢弃：不改变四件事 | 节点角色 | — | — | 丢弃 |
-| F28 | 09-28 21:03 | OKX 将上线 XDP 永续合约 | https://foresightnews.pro/news/detail/114170 | — | 第一层排除⑤无关山寨 | 山寨合约上新 | — | — | 丢弃 |
-| F29 | 09-28 21:06 | Circle 与 Volante 支持银行在现有支付系统中测试 USDC 业务流程 | https://foresightnews.pro/news/detail/114171 | — | 第二层丢弃：不改变四件事 | 合作测试，无上线数据 | — | — | 丢弃 |
-| F30 | 09-28 21:14 | 塔斯社：白俄罗斯首批两家加密银行注册为高科技园区入驻企业 | https://foresightnews.pro/news/detail/114172 | — | 通过 | 塔斯社转述；机构未具名、无时间表 | 1/0/1/1/0 | 3 | 丢弃 |
-| F31 | 09-28 21:19 | Tether：今年已协助冻结约 5.5 亿美元与伊朗相关的 USDT | https://foresightnews.pro/news/detail/114173 | 是 | 通过 | Tether 官网（本次已打开） | 2/1/2/1/1 | **7** | **进日报**（合并 R4 Tether/PSI） |
-| F32 | 09-28 21:24 | Polymarket 公布新 Rust CLOB 开发时间表，做市商测试 11 月开放 | https://foresightnews.pro/news/detail/114174 | — | 第二层丢弃：不改变四件事 | 产品开发时间表 | — | — | 丢弃 |
-| F33 | 09-28 21:30 | Bitget 美股行情：多数下跌，BitMine 涨 0.04%，CEA Industries 跌 4.46% | https://foresightnews.pro/news/detail/114175 | 是 | 第二层丢弃：不改变四件事 | 加密股涨跌表，无结构变化 | — | — | 丢弃 |
-| F34 | 09-28 21:43 | BNB Chain 任命 Thomas Chen 为首席商务官，聚焦机构、稳定币与 RWA | https://foresightnews.pro/news/detail/114176 | — | 第二层丢弃：不改变四件事 | 人事 | — | — | 丢弃 |
-| F35 | 09-28 22:04 | HBAR 短时触及 0.1249 USDT，24 小时涨幅 27.6% | https://foresightnews.pro/news/detail/114177 | 是 | 第一层排除⑤无关山寨 | 单币涨幅 | — | — | 丢弃 |
-| F36 | 09-28 22:13 | 币安 Alpha 将于 22:30 开放空投领取，门槛为 230 积分 | https://foresightnews.pro/news/detail/114178 | — | 第一层排除②空投 | 空投 | — | — | 丢弃 |
-| F37 | 09-28 22:31 | 币安 Alpha 上线 Doppler Finance（XDP） | https://foresightnews.pro/news/detail/114179 | 是 | 第一层排除②空投 | 空投 | — | — | 丢弃 |
-| F38 | 09-28 23:01 | WLFI「启动治理参与激励计划」提案投票通过 | https://foresightnews.pro/news/detail/114180 | 是 | 第一层排除⑤无关山寨 | 单币治理 | — | — | 丢弃 |
-| F39 | 09-28 23:24 | REX-Osprey 多只拟发行加密 ETF 生效日定为 10 月 23 日 | https://foresightnews.pro/news/detail/114181 | — | 通过 | 485BXT 申报（未抽查）；9/24 提交，窗口外；仅推迟生效日 | 1/0/2/0/1 | 4 | inbox |
-| F40 | 09-29 00:26 | 比特币升破 84000 USDT | https://foresightnews.pro/news/detail/114182 | 是 | 通过 | Bitget 行情转述，无链接 | 2/0/1/1/1 | 5 | inbox（合并 BTC 价格） |
-| F41 | 09-29 08:30 | 今日恐慌贪婪指数降至 73，市场处于「贪婪状态」 | https://foresightnews.pro/news/detail/114183 | 是 | 第二层丢弃：不改变四件事 | 情绪指数 74→73，无结构变化 | — | — | 丢弃 |
-| F42 | 09-29 08:39 | Aave App 已支持以太坊主网 USDC 及 USDT 存款 | https://foresightnews.pro/news/detail/114184 | 是 | 第二层丢弃：不改变四件事 | 产品功能 | — | — | 丢弃 |
-| F43 | 09-29 08:44 | 更正：美参议院民主党人指控 Tether 为伊朗政权的「金融生命线」 | https://foresightnews.pro/news/detail/114185 | 是 | 通过 | 参议院 PSI 报告 PDF（本次已打开）；Foresight 标「更正」 | 2/1/2/1/1 | **7** | **进日报**（合并 R4 Tether/PSI） |
-| F44 | 09-29 08:49 | 消息人士：Blockchain.com 寻求 5 亿美元 IPO，估值或达 60 亿美元 | https://foresightnews.pro/news/detail/114186 | 是 | 第一层排除③无来源/单方爆料 | 彭博「消息人士」，无第二来源/官方文件 | — | — | 丢弃 |
-| F45 | 09-29 08:56 | 美 SEC 更新加密货币常见问题解答：无中央主体的代币回购通常不构成投资合同 | https://foresightnews.pro/news/detail/114187 | 是 | 通过 | 记者 X 转述；SEC 原文未找到【待核】 | 2/1/1/1/1 | 6 | inbox |
-| F46 | 09-29 08:59 | World 基金会完成 4900 万美元 WLD 代币场外销售 | https://foresightnews.pro/news/detail/114188 | — | 第一层排除⑤无关山寨 | 单币场外销售 | — | — | 丢弃 |
-| F47 | 09-29 09:07 | BUN 市值今晨最高触及 1.19 亿美元，24 小时涨幅 49.85% | https://foresightnews.pro/news/detail/114189 | — | 第一层排除⑤无关山寨 | Meme 币市值 | — | — | 丢弃 |
-| F48 | 09-29 09:11 | 某聪明钱疑似清仓 1026 万枚「牛来」，获利超 88.5 万美元 | https://foresightnews.pro/news/detail/114190 | — | 第一层排除⑤无关山寨 | Meme 币地址获利 | — | — | 丢弃 |
-| F49 | 09-29 09:14 | 比特币跌破 83000 USDT | https://foresightnews.pro/news/detail/114191 | — | 通过 | Bitget 行情转述，无链接 | 2/0/1/1/1 | 5 | inbox（合并 BTC 价格） |
-| F50 | 09-29 09:19 | 慢雾 CISO：苹果或已修复被用于窃取加密钱包的零日漏洞 | https://foresightnews.pro/news/detail/114192 | — | 通过 | 慢雾 CISO X，「或已修复」措辞；苹果原文未打开 | 1/1/1/1/1 | 5 | inbox |
-| F51 | 09-29 09:21 | Polygon Chain 质押奖励预计将于 10 月 1 日升至 7.7% | https://foresightnews.pro/news/detail/114193 | 是 | 第一层排除⑤无关山寨 | 单链质押收益 | — | — | 丢弃 |
-| F52 | 09-29 09:33 | Strategy 过去 9 小时内转出 3568 枚 BTC，价值约 2.97 亿美元 | https://foresightnews.pro/news/detail/114194 | — | 通过 | Lookonchain 链上监测；转出目的不明（原推自问「卖出还是换钱包」） | 2/1/1/1/1 | 6 | inbox |
-| F53 | 09-29 09:36 | 香港证监会：持牌虚拟资产交易平台 DFX Labs 汇报 4 个欺诈网站 | https://foresightnews.pro/news/detail/114195 | — | 通过 | 香港证监会可疑平台名单（未抽查）；例行警示 | 1/0/2/1/1 | 5 | inbox |
-| F54 | 09-29 09:38 | Coinbase 获美 CFTC 批准注册清算机构 Coinbase Clearing | https://foresightnews.pro/news/detail/114196 | — | 通过 | Coinbase 官方博客（本次已打开） | 2/2/2/1/1 | **8** | **进日报**（合并 R2 Coinbase DCO） |
-| F55 | 09-29 09:51 | Velodrome 与 Aerodrome 定于 10 月 21 日升级为 Aero，xVELO 须于 10 月 15 日前跨回 OP | https://foresightnews.pro/news/detail/114197 | 是 | 第一层排除⑤无关山寨 | DEX 合并 | — | — | 丢弃 |
-| F56 | 09-29 09:57 | 某以太坊 OG 再次出售 1000 枚 ETH，价值约 268 万美元 | https://foresightnews.pro/news/detail/114198 | — | 第二层丢弃：不改变四件事 | 单地址卖 1000 ETH，量小 | — | — | 丢弃 |
-| F57 | 09-29 10:00 | Arbitrum 基金会推出为期 12 个月的安全计划，预算投入约 780 万美元 | https://foresightnews.pro/news/detail/114199 | — | 第二层丢弃：不改变四件事 | 安全资助计划，非风险事件 | — | — | 丢弃 |
-| F58 | 09-29 10:05 | Bitget BTC 保护基金已流出 3215 枚 BTC，价值约 2.66 亿美元 | https://foresightnews.pro/news/detail/114200 | 是 | 通过 | 链上分析师 X（已核推文存在） | 2/2/2/1/1 | **8** | **进日报**（合并 R1 Bitget） |
-| F59 | 09-29 10:07 | 高盛将国债基金 FTIXX 引入 Avalanche 许可链 Lynq | https://foresightnews.pro/news/detail/114201 | — | 通过 | Avalanche X（非高盛一手） | 1/1/1/1/1 | 5 | inbox（并入试跑 1 C09） |
-| F60 | 09-29 10:19 | Paid 上线网页版手续费申领门户，X Money 打款仍暂停 | https://foresightnews.pro/news/detail/114202 | — | 第一层排除⑤无关山寨 | 小项目 | — | — | 丢弃 |
-| F61 | 09-29 10:26 | Coinbase 预告应用拆卡包功能：每抽对应一张实体卡，可选择放入保管库或寄出 | https://foresightnews.pro/news/detail/114203 | — | 第二层丢弃：不改变四件事 | 产品预告 | — | — | 丢弃 |
-| F62 | 09-29 10:36 | NMR 今晨最高触及 15.4 USDT，24 小时涨幅 37.36% | https://foresightnews.pro/news/detail/114204 | — | 第一层排除⑤无关山寨 | 单币涨幅 | — | — | 丢弃 |
-| F63 | 09-29 10:40 | 7 年前建仓 QNT 的地址时隔三年止盈 9000 枚，价值 199.8 万美元 | https://foresightnews.pro/news/detail/114205 | — | 第一层排除⑤无关山寨 | 单币地址止盈 | — | — | 丢弃 |
-| F64 | 09-29 10:58 | USV 合伙人推出 Supertake：可用自然语言观点生成投资组合，计划接入加密及预测市场 | https://foresightnews.pro/news/detail/114206 | 是 | 第二层丢弃：不改变四件事 | AI 投资产品封测，不属四件事 | — | — | 丢弃 |
-| F65 | 09-29 11:09 | ZC 24 小时涨逾 47 倍，市值短时触及 2089 万美元 | https://foresightnews.pro/news/detail/114207 | — | 第一层排除⑤无关山寨 | Meme 币涨幅 | — | — | 丢弃 |
-| F66 | 09-29 11:16 | MistTrack：Bitget 攻击者试图通过 Chainflip 转移被盗资金被拒 | https://foresightnews.pro/news/detail/114208 | — | 通过 | MistTrack X（安全公司，已核推文） | 2/2/2/1/1 | **8** | **进日报**（合并 R1 Bitget） |
-| F67 | 09-29 11:25 | 某独立调查员协调 Circle 冻结约 20.1 万美元 Bitget 被盗相关资金 | https://foresightnews.pro/news/detail/114209 | 是 | 通过 | 独立调查员 X（已核推文存在）；Circle 未单独确认 | 2/2/2/1/1 | **8** | **进日报**（合并 R1 Bitget） |
-| F68 | 09-29 11:29 | PAID 24 小时跌逾 45%，市值降至 1400 万美元下方 | https://foresightnews.pro/news/detail/114210 | — | 第一层排除⑤无关山寨 | 单币跌幅 | — | — | 丢弃 |
-| F69 | 09-29 11:30 | 某巨鲸卖出 2.5 万枚 ZEC 获利超 2700 万美元，价值约 3784 万美元 | https://foresightnews.pro/news/detail/114211 | — | 第一层排除⑤无关山寨 | 单币巨鲸 | — | — | 丢弃 |
-| F70 | 09-29 11:47 | Relay API 曾暴露待处理交易信息致用户被夹，将赔付约 31.2 万美元 | https://foresightnews.pro/news/detail/114212 | — | 通过 | 联创 X；标的不在主线，事件 9/12–26 | 0/0/2/1/1 | 4 | inbox |
-| F71 | 09-29 11:53 | Variational 未平仓合约量已突破 20 亿美元 | https://foresightnews.pro/news/detail/114213 | — | 第一层排除⑤无关山寨 | 项目自报数据 | — | — | 丢弃 |
-| F72 | 09-29 12:55 | BlockTower 创始人：Coinbase 曾造成 BlockTower 约 2500 万美元损失 | https://foresightnews.pro/news/detail/114214 | — | 通过 | 单方指控，无公开证据，Coinbase 未回应 | 1/1/0/1/0 | 3 | 丢弃 |
-| F73 | 09-29 13:01 | SharpLink 今日质押 4.2 万枚 ETH，价值约 1.128 亿美元 | https://foresightnews.pro/news/detail/114215 | 是 | 通过 | Lookonchain；质押存量资产，非新增买入 | 2/0/1/1/1 | 5 | inbox |
-| F74 | 09-29 13:02 | 比特币现货 ETF 昨日总净流入 3107.06 万美元，持续 8 日净流入 | https://foresightnews.pro/news/detail/114216 | — | 通过 | SoSoValue（被 Cloudflare 拦截）；Farside 已核 | 2/1/2/1/1 | **7** | **进日报**（合并 R3 ETF 资金流） |
-| F75 | 09-29 13:02 | 以太坊现货 ETF 昨日总净流入 1709.59 万美元，持续 7 日净流入 | https://foresightnews.pro/news/detail/114217 | — | 通过 | SoSoValue（被拦截）；Farside 已核 | 2/1/2/1/1 | **7** | **进日报**（合并 R3 ETF 资金流） |
-| F76 | 09-29 13:14 | Verona AI 代理稳定币 verUSD 获超 1 亿美元机构启动承诺 | https://foresightnews.pro/news/detail/114218 | — | 第二层丢弃：不改变四件事 | 小项目自报承诺额 | — | — | 丢弃 |
-| F77 | 09-29 13:27 | 某巨鲸一周内净积累约 2.3 万枚 ZEC，价值约 3170 万美元 | https://foresightnews.pro/news/detail/114219 | — | 第一层排除⑤无关山寨 | 单币巨鲸 | — | — | 丢弃 |
-| F78 | 09-29 13:44 | Jumper 将于今日在 Legion 开启 JUMP 代币销售 | https://foresightnews.pro/news/detail/114220 | — | 第一层排除①广告/拉新活动 | 代币销售推广 | — | — | 丢弃 |
-| F79 | 09-29 13:51 | Q 日内最低触及 0.02 USDT，24 小时跌幅 29.75% | https://foresightnews.pro/news/detail/114221 | — | 第一层排除⑤无关山寨 | 单币跌幅 | — | — | 丢弃 |
-| F80 | 09-29 13:57 | 某新建地址于 3 小时内从币安提取 9132 枚 ETH，价值约 2437 万美元 | https://foresightnews.pro/news/detail/114222 | — | 第二层丢弃：不改变四件事 | 单地址提币，无背景 | — | — | 丢弃 |
-| F81 | 09-29 14:05 | 某新地址从 FalconX 提取 1884 万枚 ENA，价值约 491 万美元 | https://foresightnews.pro/news/detail/114223 | — | 第一层排除⑤无关山寨 | 单币提币 | — | — | 丢弃 |
-| F82 | 09-29 14:13 | 韩国执政党议员呼吁推迟加密征税，经济部长称仍将按法案于 2027 年 1 月起征 | https://foresightnews.pro/news/detail/114224 | — | 通过 | 韩国时报转述；维持 2027 起征 | 1/1/1/1/1 | 5 | inbox |
-| F83 | 09-29 14:14 | Bitget PoolX 上线 ETH 锁仓活动 | https://foresightnews.pro/news/detail/114225 | — | 第一层排除①广告/拉新活动 | 交易所理财活动 | — | — | 丢弃 |
-| F84 | 09-29 14:48 | Ethlabs：FCR 集成 Chainlink CCIP 2.0，相关跨链场景中以太坊确认可降至 12–24 秒 | https://foresightnews.pro/news/detail/114226 | 是 | 通过 | Ethlabs 公告（未抽查） | 1/0/2/1/1 | 5 | inbox（合并 CCIP/FCR） |
-| F85 | 09-29 14:49 | 某巨鲸以 5 倍杠杆做多 ZEC，浮亏超 45 万美元 | https://foresightnews.pro/news/detail/114227 | — | 第一层排除⑤无关山寨 | 单币杠杆仓位 | — | — | 丢弃 |
-| F86 | 09-29 15:05 | Liquid Network：Elements v23.3.4 独立外部审计进行中，Federation 正协调更新 PAK 名单 | https://foresightnews.pro/news/detail/114228 | — | 通过 | Liquid 官方 X（未抽查）；Peg-out 暂停起止【待核】 | 1/1/2/1/1 | 6 | inbox |
-| F87 | 09-29 15:35 | Coinbase 任命 Martin Carrica 为稳定币负责人 | https://foresightnews.pro/news/detail/114229 | — | 第二层丢弃：不改变四件事 | 人事 | — | — | 丢弃 |
-| F88 | 09-29 15:55 | 数据：过去 24 小时全网爆仓约 3.76 亿美元，多单爆仓约 2.88 亿美元 | https://foresightnews.pro/news/detail/114230 | — | 通过 | CoinAnk 页面为前端渲染，读不到数字【待核】 | 2/1/1/1/1 | 6 | inbox |
-| F89 | 09-29 16:06 | Bybit 上线 Perp Options 活动 | https://foresightnews.pro/news/detail/114231 | — | 第一层排除①广告/拉新活动 | 交易所活动奖池 | — | — | 丢弃 |
-| F90 | 09-29 16:08 | Kakao Pay Securities 与 Ondo、Dinari 签约探索代币化 | https://foresightnews.pro/news/detail/114232 | — | 第二层丢弃：不改变四件事 | 谅解备忘录 | — | — | 丢弃 |
-| F91 | 09-29 16:18 | 韩国国民银行与纽约梅隆银行签署数字资产结算合作协议 | https://foresightnews.pro/news/detail/114234 | — | 第二层丢弃：不改变四件事 | 银行合作协议 | — | — | 丢弃 |
-| F92 | 09-29 16:20 | Bitget PoolX 上线 ETH 锁仓活动，当前 APR 37.11% | https://foresightnews.pro/news/detail/114235 | 是 | 第一层排除①广告/拉新活动 | 交易所理财活动 | — | — | 丢弃 |
-| F93 | 09-29 16:50 | 以太坊基金会将于 10 月 6 日在 Sepolia 测试网上激活 Glamsterdam 升级 | https://foresightnews.pro/news/detail/114236 | 是 | 通过 | 以太坊基金会博客，原文 9/17 发布（旧闻） | 2/1/2/0/1 | 6 | inbox |
+| ID | 时间（HKT） | 标题（Foresight 原题） | Foresight 链接 | 站方重要 | 第一/二层结果 | 出处与备注 | 分项 | 总分 | 去向 | 主小类 | 副小类 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| F01 | 09-28 17:11 | Bitget BTC 提现开放后处理顺畅，首批约 6900 笔已完成链上确认 | https://foresightnews.pro/news/detail/114143 | 是 | 通过 | Bitget 直播数据，无链接 | 2/2/2/1/1 | **8** | **进日报**（合并 R1 Bitget） | security.hack | security.withdraw |
+| F02 | 09-28 17:12 | Bybit 推出事件市场 ByPick | https://foresightnews.pro/news/detail/114144 | — | 第一层排除①广告/拉新活动 | 交易所活动奖池 | — | — | 丢弃 | exchange.airdrop | exchange.product |
+| F03 | 09-28 17:21 | Capital B 增持 13 枚 BTC，累计持仓达 3538 枚 | https://foresightnews.pro/news/detail/114145 | — | 第二层丢弃：不改变四件事 | 13 BTC，量太小 | — | — | 丢弃 | people.treasury | — |
+| F04 | 09-28 17:44 | GoPlus：Robinhood Chain 上一欺诈 Meme 工厂近 30 天流水超 900 万美元 | https://foresightnews.pro/news/detail/114146 | — | 通过 | 安全公司 X（未抽查）；链与标的不在主线 | 0/0/2/1/1 | 4 | inbox | security.phishing | narrative.meme |
+| F05 | 09-28 17:59 | 某地址 4 天内向币安转入 1.3 亿枚 USD1 | https://foresightnews.pro/news/detail/114147 | — | 第二层丢弃：不改变四件事 | 单地址转账，无背景 | — | — | 丢弃 | onchain.whale | structure.exchange_flow |
+| F06 | 09-28 18:01 | 币安股票交易将新增 BRUN、GRML、OCTV、USDE、WSE 五只股票 | https://foresightnews.pro/news/detail/114148 | — | 第二层丢弃：不改变四件事 | 交易所上新股票，不属四件事 | — | — | 丢弃 | exchange.listing | metastory.onchain_equity |
+| F07 | 09-28 18:04 | Compound 基金会被指挪用 842 万枚 DAI 储备金兑换 COMP 用于治理投票 | https://foresightnews.pro/news/detail/114149 | 是 | 通过 | 治理论坛指控帖；链上可查但属指控 | 1/1/1/1/1 | 5 | inbox | people.founder | — |
+| F08 | 09-28 18:10 | Bybit 上线 KII USDT 永续合约 | https://foresightnews.pro/news/detail/114150 | 是 | 第一层排除⑤无关山寨 | 山寨合约上新 | — | — | 丢弃 | exchange.listing | — |
+| F09 | 09-28 18:23 | OKX 上线 ETH 专属闪赚 Lite，申购 ETH 可瓜分 400,000 USDT | https://foresightnews.pro/news/detail/114151 | — | 第一层排除②空投 | 空投/理财活动 | — | — | 丢弃 | exchange.airdrop | — |
+| F10 | 09-28 18:31 | 路透社：民主党若胜选拟调查特朗普家族加密业务，相关公司已聘律师 | https://foresightnews.pro/news/detail/114152 | — | 通过 | 路透转述，前提是中期选举结果 | 1/0/1/1/0 | 3 | 丢弃 | policy.enforcement | — |
+| F11 | 09-28 18:43 | Wintermute 在 Hyperliquid 持有约 1.26 亿美元空单，最大仓位为 ETH 空单 | https://foresightnews.pro/news/detail/114153 | — | 通过 | 链上监测账号；做市商仓位可能是对冲 | 1/0/1/1/1 | 4 | inbox | onchain.whale | narrative.perp_dex |
+| F12 | 09-28 19:03 | Ontology 关闭 stONT 流动性质押服务 | https://foresightnews.pro/news/detail/114154 | — | 通过 | 项目官方 X；标的不在主线 | 0/0/2/1/1 | 4 | inbox | infra.staking | — |
+| F13 | 09-28 19:11 | ZachXBT：疑似为朝鲜黑客清洗 Bitget 被盗资金的洗钱团伙公开求助 | https://foresightnews.pro/news/detail/114155 | 是 | 通过 | ZachXBT X（已核推文存在） | 2/2/2/1/1 | **8** | **进日报**（合并 R1 Bitget） | security.hack | onchain.flow |
+| F14 | 09-28 19:31 | WSJ：花旗与 Coinbase 合作，为企业客户提供稳定币收款服务 | https://foresightnews.pro/news/detail/114156 | 是 | 通过 | Foresight 引 WSJ；一手为试跑 1 已打开的 Citi 新闻稿 | 2/1/2/1/0 | 6 | inbox（并入试跑 1 C08） | metastory.stable_rail | metastory.institutional |
+| F15 | 09-28 19:37 | 富兰克林邓普顿与 Bybit 达成战略合作，首项为代币化货币基金场外抵押计划 | https://foresightnews.pro/news/detail/114157 | 是 | 通过 | 富兰克林邓普顿官方 X；无规模/日期 | 1/1/2/1/0 | 5 | inbox | narrative.rwa | metastory.institutional |
+| F16 | 09-28 19:58 | Strategy 上周增持 1665 枚 BTC，累计持仓达 847,666 枚 | https://foresightnews.pro/news/detail/114158 | 是 | 通过 | Foresight 引第三方 X；一手为 SEC 8-K（本次已打开） | 2/1/2/1/1 | **7** | **进日报**（合并 R5 Strategy） | people.treasury | — |
+| F17 | 09-28 20:00 | 甲骨文将集成 Swift 区块链账本，支持银行跨机构使用代币化存款 | https://foresightnews.pro/news/detail/114159 | — | 第二层丢弃：不改变四件事 | 银行基础设施集成，不改变四件事 | — | — | 丢弃 | metastory.institutional | metastory.stable_rail |
+| F18 | 09-28 20:02 | Strive 上周增持 1107 枚 BTC，累计持仓达 27,462 枚 | https://foresightnews.pro/news/detail/114160 | — | 通过 | SEC 8-K（未抽查）；规模小 | 1/0/2/1/1 | 5 | inbox | people.treasury | — |
+| F19 | 09-28 20:04 | Tether 与 Shiga 合作，在非洲和海湾地区推出基于 WDK 的自托管金融产品 | https://foresightnews.pro/news/detail/114161 | — | 第二层丢弃：不改变四件事 | 产品合作 | — | — | 丢弃 | metastory.stable_rail | — |
+| F20 | 09-28 20:09 | ENS Labs 与 GLEIF 探索将 ENS 域名与可验证法人识别编码关联 | https://foresightnews.pro/news/detail/114162 | — | 第二层丢弃：不改变四件事 | 身份标识探索 | — | — | 丢弃 | 未归类 | — |
+| F21 | 09-28 20:17 | Chainlink 宣布 CCIP 2.0 上线，支持机构自行运行跨链验证节点 | https://foresightnews.pro/news/detail/114163 | — | 通过 | Chainlink 博客（未抽查） | 1/0/2/1/1 | 5 | inbox（合并 CCIP/FCR） | security.bridge | metastory.institutional |
+| F22 | 09-28 20:24 | DeFi Development 上周增持 47,706 枚 SOL，总持仓达 253.8 万枚 | https://foresightnews.pro/news/detail/114164 | — | 第一层排除⑤无关山寨 | SOL 财库，非主线标的 | — | — | 丢弃 | people.treasury | narrative.l1 |
+| F23 | 09-28 20:28 | CoinMarketCap 任命前 CPO 为新任 CEO，前 CEO 转向集团新业务 | https://foresightnews.pro/news/detail/114165 | — | 第二层丢弃：不改变四件事 | 人事 | — | — | 丢弃 | people.founder | — |
+| F24 | 09-28 20:31 | BitMine 上周增持 17,362 枚 ETH，总持仓突破 600 万枚 | https://foresightnews.pro/news/detail/114166 | 是 | 通过 | PR Newswire 公司公告（本次已打开） | 2/1/2/1/1 | **7** | **进日报**（R6 BitMine） | people.treasury | — |
+| F25 | 09-28 20:39 | BTCS：已完成代币化股票流动性提供的合规准备，拟依据 SEC 豁免开展业务 | https://foresightnews.pro/news/detail/114167 | — | 第二层丢弃：不改变四件事 | 单一公司合规准备，未开展业务 | — | — | 丢弃 | metastory.onchain_equity | policy.sec |
+| F26 | 09-28 20:45 | 币安将以每股 4500 韩元预估股息，对 SAMSUNG USDT 永续合约进行股息调整 | https://foresightnews.pro/news/detail/114169 | — | 第二层丢弃：不改变四件事 | 合约股息调整，不属四件事 | — | — | 丢弃 | exchange.product | metastory.onchain_equity |
+| F27 | 09-28 20:46 | LSEG 成为 Canton Network 超级验证节点 | https://foresightnews.pro/news/detail/114168 | — | 第二层丢弃：不改变四件事 | 节点角色 | — | — | 丢弃 | metastory.institutional | — |
+| F28 | 09-28 21:03 | OKX 将上线 XDP 永续合约 | https://foresightnews.pro/news/detail/114170 | — | 第一层排除⑤无关山寨 | 山寨合约上新 | — | — | 丢弃 | exchange.listing | — |
+| F29 | 09-28 21:06 | Circle 与 Volante 支持银行在现有支付系统中测试 USDC 业务流程 | https://foresightnews.pro/news/detail/114171 | — | 第二层丢弃：不改变四件事 | 合作测试，无上线数据 | — | — | 丢弃 | metastory.stable_rail | metastory.institutional |
+| F30 | 09-28 21:14 | 塔斯社：白俄罗斯首批两家加密银行注册为高科技园区入驻企业 | https://foresightnews.pro/news/detail/114172 | — | 通过 | 塔斯社转述；机构未具名、无时间表 | 1/0/1/1/0 | 3 | 丢弃 | metastory.institutional | — |
+| F31 | 09-28 21:19 | Tether：今年已协助冻结约 5.5 亿美元与伊朗相关的 USDT | https://foresightnews.pro/news/detail/114173 | 是 | 通过 | Tether 官网（本次已打开） | 2/1/2/1/1 | **7** | **进日报**（合并 R4 Tether/PSI） | policy.enforcement | policy.stable |
+| F32 | 09-28 21:24 | Polymarket 公布新 Rust CLOB 开发时间表，做市商测试 11 月开放 | https://foresightnews.pro/news/detail/114174 | — | 第二层丢弃：不改变四件事 | 产品开发时间表 | — | — | 丢弃 | exchange.product | — |
+| F33 | 09-28 21:30 | Bitget 美股行情：多数下跌，BitMine 涨 0.04%，CEA Industries 跌 4.46% | https://foresightnews.pro/news/detail/114175 | 是 | 第二层丢弃：不改变四件事 | 加密股涨跌表，无结构变化 | — | — | 丢弃 | macro.equities | people.treasury |
+| F34 | 09-28 21:43 | BNB Chain 任命 Thomas Chen 为首席商务官，聚焦机构、稳定币与 RWA | https://foresightnews.pro/news/detail/114176 | — | 第二层丢弃：不改变四件事 | 人事 | — | — | 丢弃 | people.founder | narrative.l1 |
+| F35 | 09-28 22:04 | HBAR 短时触及 0.1249 USDT，24 小时涨幅 27.6% | https://foresightnews.pro/news/detail/114177 | 是 | 第一层排除⑤无关山寨 | 单币涨幅 | — | — | 丢弃 | 未归类 | — |
+| F36 | 09-28 22:13 | 币安 Alpha 将于 22:30 开放空投领取，门槛为 230 积分 | https://foresightnews.pro/news/detail/114178 | — | 第一层排除②空投 | 空投 | — | — | 丢弃 | exchange.airdrop | strategy.airdrop |
+| F37 | 09-28 22:31 | 币安 Alpha 上线 Doppler Finance（XDP） | https://foresightnews.pro/news/detail/114179 | 是 | 第一层排除②空投 | 空投 | — | — | 丢弃 | exchange.airdrop | exchange.listing |
+| F38 | 09-28 23:01 | WLFI「启动治理参与激励计划」提案投票通过 | https://foresightnews.pro/news/detail/114180 | 是 | 第一层排除⑤无关山寨 | 单币治理 | — | — | 丢弃 | fundamental.tokenomics | — |
+| F39 | 09-28 23:24 | REX-Osprey 多只拟发行加密 ETF 生效日定为 10 月 23 日 | https://foresightnews.pro/news/detail/114181 | — | 通过 | 485BXT 申报（未抽查）；9/24 提交，窗口外；仅推迟生效日 | 1/0/2/0/1 | 4 | inbox | policy.etf | — |
+| F40 | 09-29 00:26 | 比特币升破 84000 USDT | https://foresightnews.pro/news/detail/114182 | 是 | 通过 | Bitget 行情转述，无链接 | 2/0/1/1/1 | 5 | inbox（合并 BTC 价格） | ta.sr | — |
+| F41 | 09-29 08:30 | 今日恐慌贪婪指数降至 73，市场处于「贪婪状态」 | https://foresightnews.pro/news/detail/114183 | 是 | 第二层丢弃：不改变四件事 | 情绪指数 74→73，无结构变化 | — | — | 丢弃 | 未归类 | — |
+| F42 | 09-29 08:39 | Aave App 已支持以太坊主网 USDC 及 USDT 存款 | https://foresightnews.pro/news/detail/114184 | 是 | 第二层丢弃：不改变四件事 | 产品功能 | — | — | 丢弃 | exchange.product | — |
+| F43 | 09-29 08:44 | 更正：美参议院民主党人指控 Tether 为伊朗政权的「金融生命线」 | https://foresightnews.pro/news/detail/114185 | 是 | 通过 | 参议院 PSI 报告 PDF（本次已打开）；Foresight 标「更正」 | 2/1/2/1/1 | **7** | **进日报**（合并 R4 Tether/PSI） | policy.enforcement | policy.stable |
+| F44 | 09-29 08:49 | 消息人士：Blockchain.com 寻求 5 亿美元 IPO，估值或达 60 亿美元 | https://foresightnews.pro/news/detail/114186 | 是 | 第一层排除③无来源/单方爆料 | 彭博「消息人士」，无第二来源/官方文件 | — | — | 丢弃 | metastory.institutional | — |
+| F45 | 09-29 08:56 | 美 SEC 更新加密货币常见问题解答：无中央主体的代币回购通常不构成投资合同 | https://foresightnews.pro/news/detail/114187 | 是 | 通过 | 记者 X 转述；SEC 原文未找到【待核】 | 2/1/1/1/1 | 6 | inbox | policy.sec | fundamental.buyback |
+| F46 | 09-29 08:59 | World 基金会完成 4900 万美元 WLD 代币场外销售 | https://foresightnews.pro/news/detail/114188 | — | 第一层排除⑤无关山寨 | 单币场外销售 | — | — | 丢弃 | fundamental.tokenomics | fundamental.unlock |
+| F47 | 09-29 09:07 | BUN 市值今晨最高触及 1.19 亿美元，24 小时涨幅 49.85% | https://foresightnews.pro/news/detail/114189 | — | 第一层排除⑤无关山寨 | Meme 币市值 | — | — | 丢弃 | narrative.meme | — |
+| F48 | 09-29 09:11 | 某聪明钱疑似清仓 1026 万枚「牛来」，获利超 88.5 万美元 | https://foresightnews.pro/news/detail/114190 | — | 第一层排除⑤无关山寨 | Meme 币地址获利 | — | — | 丢弃 | narrative.meme | onchain.flow |
+| F49 | 09-29 09:14 | 比特币跌破 83000 USDT | https://foresightnews.pro/news/detail/114191 | — | 通过 | Bitget 行情转述，无链接 | 2/0/1/1/1 | 5 | inbox（合并 BTC 价格） | ta.sr | — |
+| F50 | 09-29 09:19 | 慢雾 CISO：苹果或已修复被用于窃取加密钱包的零日漏洞 | https://foresightnews.pro/news/detail/114192 | — | 通过 | 慢雾 CISO X，「或已修复」措辞；苹果原文未打开 | 1/1/1/1/1 | 5 | inbox | security.hack | — |
+| F51 | 09-29 09:21 | Polygon Chain 质押奖励预计将于 10 月 1 日升至 7.7% | https://foresightnews.pro/news/detail/114193 | 是 | 第一层排除⑤无关山寨 | 单链质押收益 | — | — | 丢弃 | infra.staking | fundamental.tokenomics |
+| F52 | 09-29 09:33 | Strategy 过去 9 小时内转出 3568 枚 BTC，价值约 2.97 亿美元 | https://foresightnews.pro/news/detail/114194 | — | 通过 | Lookonchain 链上监测；转出目的不明（原推自问「卖出还是换钱包」） | 2/1/1/1/1 | 6 | inbox | onchain.whale | people.treasury |
+| F53 | 09-29 09:36 | 香港证监会：持牌虚拟资产交易平台 DFX Labs 汇报 4 个欺诈网站 | https://foresightnews.pro/news/detail/114195 | — | 通过 | 香港证监会可疑平台名单（未抽查）；例行警示 | 1/0/2/1/1 | 5 | inbox | security.phishing | — |
+| F54 | 09-29 09:38 | Coinbase 获美 CFTC 批准注册清算机构 Coinbase Clearing | https://foresightnews.pro/news/detail/114196 | — | 通过 | Coinbase 官方博客（本次已打开） | 2/2/2/1/1 | **8** | **进日报**（合并 R2 Coinbase DCO） | policy.cftc | — |
+| F55 | 09-29 09:51 | Velodrome 与 Aerodrome 定于 10 月 21 日升级为 Aero，xVELO 须于 10 月 15 日前跨回 OP | https://foresightnews.pro/news/detail/114197 | 是 | 第一层排除⑤无关山寨 | DEX 合并 | — | — | 丢弃 | fundamental.tokenomics | calendar.mainnet |
+| F56 | 09-29 09:57 | 某以太坊 OG 再次出售 1000 枚 ETH，价值约 268 万美元 | https://foresightnews.pro/news/detail/114198 | — | 第二层丢弃：不改变四件事 | 单地址卖 1000 ETH，量小 | — | — | 丢弃 | onchain.whale | — |
+| F57 | 09-29 10:00 | Arbitrum 基金会推出为期 12 个月的安全计划，预算投入约 780 万美元 | https://foresightnews.pro/news/detail/114199 | — | 第二层丢弃：不改变四件事 | 安全资助计划，非风险事件 | — | — | 丢弃 | security.hack | — |
+| F58 | 09-29 10:05 | Bitget BTC 保护基金已流出 3215 枚 BTC，价值约 2.66 亿美元 | https://foresightnews.pro/news/detail/114200 | 是 | 通过 | 链上分析师 X（已核推文存在） | 2/2/2/1/1 | **8** | **进日报**（合并 R1 Bitget） | security.hack | security.withdraw、onchain.flow |
+| F59 | 09-29 10:07 | 高盛将国债基金 FTIXX 引入 Avalanche 许可链 Lynq | https://foresightnews.pro/news/detail/114201 | — | 通过 | Avalanche X（非高盛一手） | 1/1/1/1/1 | 5 | inbox（并入试跑 1 C09） | narrative.rwa | metastory.institutional |
+| F60 | 09-29 10:19 | Paid 上线网页版手续费申领门户，X Money 打款仍暂停 | https://foresightnews.pro/news/detail/114202 | — | 第一层排除⑤无关山寨 | 小项目 | — | — | 丢弃 | exchange.product | — |
+| F61 | 09-29 10:26 | Coinbase 预告应用拆卡包功能：每抽对应一张实体卡，可选择放入保管库或寄出 | https://foresightnews.pro/news/detail/114203 | — | 第二层丢弃：不改变四件事 | 产品预告 | — | — | 丢弃 | exchange.product | — |
+| F62 | 09-29 10:36 | NMR 今晨最高触及 15.4 USDT，24 小时涨幅 37.36% | https://foresightnews.pro/news/detail/114204 | — | 第一层排除⑤无关山寨 | 单币涨幅 | — | — | 丢弃 | 未归类 | — |
+| F63 | 09-29 10:40 | 7 年前建仓 QNT 的地址时隔三年止盈 9000 枚，价值 199.8 万美元 | https://foresightnews.pro/news/detail/114205 | — | 第一层排除⑤无关山寨 | 单币地址止盈 | — | — | 丢弃 | onchain.whale | — |
+| F64 | 09-29 10:58 | USV 合伙人推出 Supertake：可用自然语言观点生成投资组合，计划接入加密及预测市场 | https://foresightnews.pro/news/detail/114206 | 是 | 第二层丢弃：不改变四件事 | AI 投资产品封测，不属四件事 | — | — | 丢弃 | narrative.ai | exchange.product |
+| F65 | 09-29 11:09 | ZC 24 小时涨逾 47 倍，市值短时触及 2089 万美元 | https://foresightnews.pro/news/detail/114207 | — | 第一层排除⑤无关山寨 | Meme 币涨幅 | — | — | 丢弃 | narrative.meme | — |
+| F66 | 09-29 11:16 | MistTrack：Bitget 攻击者试图通过 Chainflip 转移被盗资金被拒 | https://foresightnews.pro/news/detail/114208 | — | 通过 | MistTrack X（安全公司，已核推文） | 2/2/2/1/1 | **8** | **进日报**（合并 R1 Bitget） | security.hack | onchain.flow |
+| F67 | 09-29 11:25 | 某独立调查员协调 Circle 冻结约 20.1 万美元 Bitget 被盗相关资金 | https://foresightnews.pro/news/detail/114209 | 是 | 通过 | 独立调查员 X（已核推文存在）；Circle 未单独确认 | 2/2/2/1/1 | **8** | **进日报**（合并 R1 Bitget） | security.hack | onchain.flow |
+| F68 | 09-29 11:29 | PAID 24 小时跌逾 45%，市值降至 1400 万美元下方 | https://foresightnews.pro/news/detail/114210 | — | 第一层排除⑤无关山寨 | 单币跌幅 | — | — | 丢弃 | 未归类 | — |
+| F69 | 09-29 11:30 | 某巨鲸卖出 2.5 万枚 ZEC 获利超 2700 万美元，价值约 3784 万美元 | https://foresightnews.pro/news/detail/114211 | — | 第一层排除⑤无关山寨 | 单币巨鲸 | — | — | 丢弃 | onchain.whale | — |
+| F70 | 09-29 11:47 | Relay API 曾暴露待处理交易信息致用户被夹，将赔付约 31.2 万美元 | https://foresightnews.pro/news/detail/114212 | — | 通过 | 联创 X；标的不在主线，事件 9/12–26 | 0/0/2/1/1 | 4 | inbox | infra.censorship | security.hack |
+| F71 | 09-29 11:53 | Variational 未平仓合约量已突破 20 亿美元 | https://foresightnews.pro/news/detail/114213 | — | 第一层排除⑤无关山寨 | 项目自报数据 | — | — | 丢弃 | narrative.perp_dex | ta.oi |
+| F72 | 09-29 12:55 | BlockTower 创始人：Coinbase 曾造成 BlockTower 约 2500 万美元损失 | https://foresightnews.pro/news/detail/114214 | — | 通过 | 单方指控，无公开证据，Coinbase 未回应 | 1/1/0/1/0 | 3 | 丢弃 | security.hack | people.kol |
+| F73 | 09-29 13:01 | SharpLink 今日质押 4.2 万枚 ETH，价值约 1.128 亿美元 | https://foresightnews.pro/news/detail/114215 | 是 | 通过 | Lookonchain；质押存量资产，非新增买入 | 2/0/1/1/1 | 5 | inbox | people.treasury | infra.staking |
+| F74 | 09-29 13:02 | 比特币现货 ETF 昨日总净流入 3107.06 万美元，持续 8 日净流入 | https://foresightnews.pro/news/detail/114216 | — | 通过 | SoSoValue（被 Cloudflare 拦截）；Farside 已核 | 2/1/2/1/1 | **7** | **进日报**（合并 R3 ETF 资金流） | structure.etf_flow | — |
+| F75 | 09-29 13:02 | 以太坊现货 ETF 昨日总净流入 1709.59 万美元，持续 7 日净流入 | https://foresightnews.pro/news/detail/114217 | — | 通过 | SoSoValue（被拦截）；Farside 已核 | 2/1/2/1/1 | **7** | **进日报**（合并 R3 ETF 资金流） | structure.etf_flow | — |
+| F76 | 09-29 13:14 | Verona AI 代理稳定币 verUSD 获超 1 亿美元机构启动承诺 | https://foresightnews.pro/news/detail/114218 | — | 第二层丢弃：不改变四件事 | 小项目自报承诺额 | — | — | 丢弃 | narrative.ai | metastory.stable_rail |
+| F77 | 09-29 13:27 | 某巨鲸一周内净积累约 2.3 万枚 ZEC，价值约 3170 万美元 | https://foresightnews.pro/news/detail/114219 | — | 第一层排除⑤无关山寨 | 单币巨鲸 | — | — | 丢弃 | onchain.whale | — |
+| F78 | 09-29 13:44 | Jumper 将于今日在 Legion 开启 JUMP 代币销售 | https://foresightnews.pro/news/detail/114220 | — | 第一层排除①广告/拉新活动 | 代币销售推广 | — | — | 丢弃 | calendar.tge | — |
+| F79 | 09-29 13:51 | Q 日内最低触及 0.02 USDT，24 小时跌幅 29.75% | https://foresightnews.pro/news/detail/114221 | — | 第一层排除⑤无关山寨 | 单币跌幅 | — | — | 丢弃 | 未归类 | — |
+| F80 | 09-29 13:57 | 某新建地址于 3 小时内从币安提取 9132 枚 ETH，价值约 2437 万美元 | https://foresightnews.pro/news/detail/114222 | — | 第二层丢弃：不改变四件事 | 单地址提币，无背景 | — | — | 丢弃 | onchain.whale | structure.exchange_flow |
+| F81 | 09-29 14:05 | 某新地址从 FalconX 提取 1884 万枚 ENA，价值约 491 万美元 | https://foresightnews.pro/news/detail/114223 | — | 第一层排除⑤无关山寨 | 单币提币 | — | — | 丢弃 | onchain.whale | — |
+| F82 | 09-29 14:13 | 韩国执政党议员呼吁推迟加密征税，经济部长称仍将按法案于 2027 年 1 月起征 | https://foresightnews.pro/news/detail/114224 | — | 通过 | 韩国时报转述；维持 2027 起征 | 1/1/1/1/1 | 5 | inbox | people.regulator | — |
+| F83 | 09-29 14:14 | Bitget PoolX 上线 ETH 锁仓活动 | https://foresightnews.pro/news/detail/114225 | — | 第一层排除①广告/拉新活动 | 交易所理财活动 | — | — | 丢弃 | exchange.airdrop | — |
+| F84 | 09-29 14:48 | Ethlabs：FCR 集成 Chainlink CCIP 2.0，相关跨链场景中以太坊确认可降至 12–24 秒 | https://foresightnews.pro/news/detail/114226 | 是 | 通过 | Ethlabs 公告（未抽查） | 1/0/2/1/1 | 5 | inbox（合并 CCIP/FCR） | narrative.l1 | security.bridge |
+| F85 | 09-29 14:49 | 某巨鲸以 5 倍杠杆做多 ZEC，浮亏超 45 万美元 | https://foresightnews.pro/news/detail/114227 | — | 第一层排除⑤无关山寨 | 单币杠杆仓位 | — | — | 丢弃 | onchain.whale | narrative.perp_dex |
+| F86 | 09-29 15:05 | Liquid Network：Elements v23.3.4 独立外部审计进行中，Federation 正协调更新 PAK 名单 | https://foresightnews.pro/news/detail/114228 | — | 通过 | Liquid 官方 X（未抽查）；Peg-out 暂停起止【待核】 | 1/1/2/1/1 | 6 | inbox | security.bridge | security.withdraw |
+| F87 | 09-29 15:35 | Coinbase 任命 Martin Carrica 为稳定币负责人 | https://foresightnews.pro/news/detail/114229 | — | 第二层丢弃：不改变四件事 | 人事 | — | — | 丢弃 | people.founder | metastory.stable_rail |
+| F88 | 09-29 15:55 | 数据：过去 24 小时全网爆仓约 3.76 亿美元，多单爆仓约 2.88 亿美元 | https://foresightnews.pro/news/detail/114230 | — | 通过 | CoinAnk 页面为前端渲染，读不到数字【待核】 | 2/1/1/1/1 | 6 | inbox | ta.liquidation | — |
+| F89 | 09-29 16:06 | Bybit 上线 Perp Options 活动 | https://foresightnews.pro/news/detail/114231 | — | 第一层排除①广告/拉新活动 | 交易所活动奖池 | — | — | 丢弃 | exchange.airdrop | exchange.product、metastory.onchain_equity |
+| F90 | 09-29 16:08 | Kakao Pay Securities 与 Ondo、Dinari 签约探索代币化 | https://foresightnews.pro/news/detail/114232 | — | 第二层丢弃：不改变四件事 | 谅解备忘录 | — | — | 丢弃 | metastory.onchain_equity | narrative.rwa |
+| F91 | 09-29 16:18 | 韩国国民银行与纽约梅隆银行签署数字资产结算合作协议 | https://foresightnews.pro/news/detail/114234 | — | 第二层丢弃：不改变四件事 | 银行合作协议 | — | — | 丢弃 | metastory.institutional | metastory.stable_rail |
+| F92 | 09-29 16:20 | Bitget PoolX 上线 ETH 锁仓活动，当前 APR 37.11% | https://foresightnews.pro/news/detail/114235 | 是 | 第一层排除①广告/拉新活动 | 交易所理财活动 | — | — | 丢弃 | exchange.airdrop | — |
+| F93 | 09-29 16:50 | 以太坊基金会将于 10 月 6 日在 Sepolia 测试网上激活 Glamsterdam 升级 | https://foresightnews.pro/news/detail/114236 | 是 | 通过 | 以太坊基金会博客，原文 9/17 发布（旧闻） | 2/1/2/0/1 | 6 | inbox | calendar.mainnet | — |
+
+### 分类标注汇总（93 条，按主小类计）
+
+> 补标于 2026-09-30T21:40:00+08:00。每条只计 1 次（按主小类）；副小类不计入下表。包含被排除和丢弃的条目。
+
+**按大类**（只列非零；合计 87 条已归类 + 6 条未归类 = 93）
+
+| 大类 | 条数 | 其中 ≥7 分（快讯条数） |
+|---|---|---|
+| 1. 宏观与传统金融 | 1 | — |
+| 2. 监管、政策与司法 | 6 | 3 |
+| 3. 市场结构与资金流 | 2 | 2 |
+| 4. 币种与板块叙事 | 9 | — |
+| 5. 项目与代币基本面 | 3 | — |
+| 6. 技术分析与微观结构 | 3 | — |
+| 7. 链上分析 | 10 | — |
+| 8. 安全、攻击与风险事件 | 12 | 5 |
+| 9. 交易所、产品与交易基础设施 | 15 | — |
+| 10. 人物、机构与舆论 | 11 | 2 |
+| 11. 矿业、质押与基础设施层 | 3 | — |
+| 12. 宏观叙事包装 | 10 | — |
+| 13. 日历与事件驱动 | 2 | — |
+| 未归类 | 6 | — |
+| **合计** | **93** | **12** |
+
+主小类为 0 的大类：14. 组合与策略话题。
+
+≥7 分按**事件**计：2. 监管、政策与司法 2 件（R2、R4）；3. 市场结构与资金流 1 件（R3）；8. 安全、攻击与风险事件 1 件（R1，5 条快讯）；10. 人物、机构与舆论 2 件（R5、R6），合计 6 件 / 12 条快讯。
+
+**按主小类**（只列非零，按大类顺序）
+
+| 大类 | 主小类 id | 小类 | 条数 | 条目 |
+|---|---|---|---|---|
+| 1. 宏观与传统金融 | macro.equities | 美股联动 | 1 | F33 |
+| 2. 监管、政策与司法 | policy.sec | SEC / 执法 | 1 | F45 |
+| 2. 监管、政策与司法 | policy.etf | ETF 审批 / 政策 | 1 | F39 |
+| 2. 监管、政策与司法 | policy.enforcement | 重大执法 / 和解案 | 3 | F10、F31、F43 |
+| 2. 监管、政策与司法 | policy.cftc | CFTC / 衍生品监管 | 1 | F54 |
+| 3. 市场结构与资金流 | structure.etf_flow | 现货 ETF 流入 | 2 | F74、F75 |
+| 4. 币种与板块叙事 | narrative.l1 | L1 / 公链竞争 | 1 | F84 |
+| 4. 币种与板块叙事 | narrative.rwa | RWA / 上链国债 | 2 | F15、F59 |
+| 4. 币种与板块叙事 | narrative.perp_dex | Perp DEX | 1 | F71 |
+| 4. 币种与板块叙事 | narrative.ai | AI x Crypto | 2 | F64、F76 |
+| 4. 币种与板块叙事 | narrative.meme | Meme / 文化币 | 3 | F47、F48、F65 |
+| 5. 项目与代币基本面 | fundamental.tokenomics | 代币模型变更 | 3 | F38、F46、F55 |
+| 6. 技术分析与微观结构 | ta.liquidation | 爆仓 / 清算 cascade | 1 | F88 |
+| 6. 技术分析与微观结构 | ta.sr | 支撑 / 阻力 | 2 | F40、F49 |
+| 7. 链上分析 | onchain.whale | 鲸鱼 / 大额转账 | 10 | F05、F11、F52、F56、F63、F69、F77、F80、F81、F85 |
+| 8. 安全、攻击与风险事件 | security.hack | 黑客 / 漏洞 exploit | 8 | F01、F13、F50、F57、F58、F66、F67、F72 |
+| 8. 安全、攻击与风险事件 | security.phishing | 钓鱼 / 假空投 | 2 | F04、F53 |
+| 8. 安全、攻击与风险事件 | security.bridge | 跨链桥风险 | 2 | F21、F86 |
+| 9. 交易所、产品与交易基础设施 | exchange.listing | 上市 / 下架 | 3 | F06、F08、F28 |
+| 9. 交易所、产品与交易基础设施 | exchange.airdrop | 活动 / 空投 | 7 | F02、F09、F36、F37、F83、F89、F92 |
+| 9. 交易所、产品与交易基础设施 | exchange.product | 新产品 / 杠杆档位 | 5 | F26、F32、F42、F60、F61 |
+| 10. 人物、机构与舆论 | people.treasury | 财库公司 / DAT | 6 | F03、F16、F18、F22、F24、F73 |
+| 10. 人物、机构与舆论 | people.regulator | 监管官员讲话 | 1 | F82 |
+| 10. 人物、机构与舆论 | people.founder | 创始人 / 团队动态 | 4 | F07、F23、F34、F87 |
+| 11. 矿业、质押与基础设施层 | infra.staking | 质押 / 退出队列 | 2 | F12、F51 |
+| 11. 矿业、质押与基础设施层 | infra.censorship | 审查 / MEV | 1 | F70 |
+| 12. 宏观叙事包装 | metastory.institutional | 机构化 / 合法化 | 5 | F17、F27、F30、F44、F91 |
+| 12. 宏观叙事包装 | metastory.onchain_equity | 链上美股 / RWA 权益 | 2 | F25、F90 |
+| 12. 宏观叙事包装 | metastory.stable_rail | 稳定币支付轨道 | 3 | F14、F19、F29 |
+| 13. 日历与事件驱动 | calendar.tge | TGE / 上所 | 1 | F78 |
+| 13. 日历与事件驱动 | calendar.mainnet | 主网 / 升级 | 1 | F93 |
+
+**未归类（6 条，待用户决定是否补类目）**
+
+| ID | 时间（HKT） | 标题 | 去向 | 为什么归不进 |
+|---|---|---|---|---|
+| F20 | 09-28 20:09 | ENS Labs 与 GLEIF 探索将 ENS 域名与可验证法人识别编码关联 | 丢弃 | 链上身份（ENS 域名 × 法人识别编码），表中没有「身份/域名」类小类 |
+| F35 | 09-28 22:04 | HBAR 短时触及 0.1249 USDT，24 小时涨幅 27.6% | 丢弃 | 单币 24 小时涨跌幅，没有关键位、结构或量价内容，ta.* 各小类都不对应；表中没有「单币行情异动」类 |
+| F41 | 09-29 08:30 | 今日恐慌贪婪指数降至 73，市场处于「贪婪状态」 | 丢弃 | 恐慌贪婪指数（情绪指数），表中没有「市场情绪指标」类小类 |
+| F62 | 09-29 10:36 | NMR 今晨最高触及 15.4 USDT，24 小时涨幅 37.36% | 丢弃 | 同 F35：单币 24 小时涨跌幅 |
+| F68 | 09-29 11:29 | PAID 24 小时跌逾 45%，市值降至 1400 万美元下方 | 丢弃 | 同 F35：单币 24 小时跌幅 |
+| F79 | 09-29 13:51 | Q 日内最低触及 0.02 USDT，24 小时跌幅 29.75% | 丢弃 | 同 F35：单币 24 小时跌幅 |
+
+**口径说明（归类时的取舍，供用户复核）**
+
+- 同一事件的多条快讯主小类保持一致（如 Bitget 5 条都是 security.hack），副小类按各条内容补。
+- 交易所的活动、理财、奖池类（F02、F09、F83、F89、F92 等）统一归 exchange.airdrop（活动 / 空投）；币安 Alpha 空投（F36、F37）同样归此类。
+- 无背景的单地址转账、巨鲸买卖（F05、F11、F56、F63、F69、F77、F80、F81、F85）归 onchain.whale；Strategy 转出 3,568 BTC（F52）也归 onchain.whale，副类 people.treasury。
+- Meme 币涨幅（F47 BUN、F65 ZC）归 narrative.meme；非 Meme 的单币涨跌（F35、F62、F68、F79）归不进，标「未归类」。BTC 升破 84,000 / 跌破 83,000（F40、F49）按「整数关口」归 ta.sr。
+- 韩国经济部长谈加密征税（F82）：表中没有税收类小类，按「官员口径」归 people.regulator。
+- 表中没有「DeFi / 应用产品」类小类，Aave App、Polymarket CLOB、Coinbase 拆卡包、Paid 申领门户（F42、F32、F61、F60）暂归 exchange.product（新产品）；Arbitrum 安全计划（F57）暂归 security.hack（漏洞防护）。这几条都是就近归类，用户如补类目可改。
+- 路透「民主党若胜选拟调查」（F10）归 policy.enforcement，但前提（中期选举结果）尚未发生。
 
 ### ≥7 分：拟进日报（6 条事件，未凑数）
 
 > 本次 ≥7 分共 **6 条事件**（对应 12 条快讯），在 5–8 条的目标范围内。其中 5 条与试跑 1 的 5 条入选**重复**，已合并（下面注明新增信息）；新增 1 条（BitMine）。每条至少 2 个链接；一手出处都是本次实际打开或读取过的。
+>
+> 按 `filter.md`「分类标注」，下面 6 条按主小类所在大类分组排列（大类按 categories.md 顺序）；R 编号不变。分类不改变分数。
 
-**R1【8 分｜安全与风险】Bitget 约 $387.5M 被盗后续：BTC 提币已恢复，被盗资金追踪与冻结**（合并试跑 1 第 1 条）
-- 分项：相关 2 / 冲击 2 / 可信 2 / 时效 1 / 可证伪 1。
-- Foresight：F01 09-28 17:11 https://foresightnews.pro/news/detail/114143 ；F13 09-28 19:11 https://foresightnews.pro/news/detail/114155 ；F58 09-29 10:05 https://foresightnews.pro/news/detail/114200 ；F66 09-29 11:16 https://foresightnews.pro/news/detail/114208 ；F67 09-29 11:25 https://foresightnews.pro/news/detail/114209
-- 一手出处：MistTrack 推文 https://x.com/MistTrack_io/status/2104767013117694156 （安全公司，推文日期 2026-09-29，已通过 oEmbed 读取）；Bitget 官方公告 https://www.bitget.com/support/articles/12560603896110 （试跑 1 已打开，作背景）。
-- 一句话：BTC 提币按计划 9/28 16:00 HKT 恢复；攻击者经 Chainflip 转移资金被拒；独立调查员称与 Circle 协调冻结约 $20.1 万。
-- 事实：MistTrack 称攻击者尝试经 Chainflip 转移被盗资金，被经纪商拒收并退回，资金**没有被冻结**（安全公司披露）。
-- 当事方自述：tanuki42 称与 Circle 协调冻结约 $201k（https://x.com/tanuki42_/status/2104760876389519756 ，推文已读取；Circle 方面没有单独确认）。
-- 未核实：① Foresight 转述 CEO 直播（F01，无链接）：截至 9/28 16:50 处理约 7,683 笔 BTC 提现、约 3,609 BTC，直播本身没核；② 链上分析师 @ai_9684xtpa（F58）称保护基金 5,500 BTC 中已流出 3,215.28 BTC，链上数据本次没有独立核对；③ 归因：ZachXBT（F13，推文 2026-09-28 已读取）称洗钱团伙替「被指为朝鲜的攻击者」（alleged DPRK）清洗资金，属**指控**，待正式事件报告。
-- 下一步观察：ETH 提币原定 9/29 16:00 HKT 开放；**截至 17:01 HKT，窗口内 Foresight 没有相关快讯，是否按时开放【待核】**；USDT 9/30 16:00 HKT；本周正式调查报告。
+#### 2. 监管、政策与司法（2 条）
 
 **R2【8 分｜监管】CFTC 批准 Coinbase Clearing LLC 注册为衍生品清算机构（DCO）**（合并试跑 1 第 3 条；可信度由 1 升到 2）
 - 分项：2 / 2 / 2 / 1 / 1。
+- 分类：主 policy.cftc（2. 监管、政策与司法）；副 —
 - Foresight：F54 09-29 09:38 https://foresightnews.pro/news/detail/114196
 - 一手出处：Coinbase 官方博客 https://www.coinbase.com/blog/coinbase-receives-cftc-approval-for-coinbase-clearing-llc （页面日期 2026-09-28，无时刻；WebFetch 被 Cloudflare 拦截，改用 curl 读到正文）；第二来源：The Block https://www.theblock.co/news/business/2026-09-28-coinbase-dco-approval-417105 （试跑 1 已打开）。
 - 一句话：Coinbase 自有清算所获批，可直接创建并结算全额抵押合约，以 USDC 作抵押、7×24 结算。
@@ -298,16 +379,9 @@
 - 未核实：CFTC 官方原文仍未打开。
 - 下一步观察：首批自清算产品。
 
-**R3【7 分｜市场】美国现货 BTC、ETH ETF 9/28 均净流入：BTC +$31.0M（连续 8 个交易日），ETH +$17.1M（连续 7 个交易日）**（合并试跑 1 第 2 条，新增 ETH 部分）
-- 分项：2 / 1 / 2 / 1 / 1。
-- Foresight：F74 09-29 13:02 https://foresightnews.pro/news/detail/114216 ；F75 09-29 13:02 https://foresightnews.pro/news/detail/114217
-- 一手出处：Farside Investors https://farside.co.uk/btc/ 、https://farside.co.uk/eth/ （2026-09-29 17:03 HKT curl 读取，表中还没有 9/29 行）。Foresight 引的 SoSoValue 页面被 Cloudflare 拦截，**没能打开**。
-- 事实（Farside，单位百万美元）：BTC 9/28 IBIT +54.8、FBTC −10.9、GBTC −23.2、BTC Mini +10.3，合计 +31.0；从 9/17 起连续 8 个交易日净流入。ETH 9/28 ETHA +15.4、TETH +1.7，合计 +17.1；从 9/18 起连续 7 个交易日净流入。
-- 事实（Foresight 转述 SoSoValue）：BTC 合计 +$3,107.06 万，ETH 合计 +$1,709.59 万，与 Farside 一致（四舍五入差异）。
-- 下一步观察：9/29 的流量。
-
 **R4【7 分｜监管·稳定币】美国参议院 PSI 少数党报告点名 USDT；Tether 称 2026 年内协助冻结约 $5.5 亿伊朗相关 USDT**（合并试跑 1 第 4 条）
 - 分项：2 / 1 / 2 / 1 / 1。
+- 分类：主 policy.enforcement（2. 监管、政策与司法）；副 policy.stable
 - Foresight：F31 09-28 21:19 https://foresightnews.pro/news/detail/114173 ；F43 09-29 08:44（标题带「更正」）https://foresightnews.pro/news/detail/114185
 - 一手出处：参议院 PSI 报告 PDF https://www.hsgac.senate.gov/wp-content/uploads/2026-09-28-Crypto-and-Irans-Shadow-Banking-Network.pdf （本次重新下载，封面日期 2026-09-28，署名 Ranking Member Richard Blumenthal & Minority Staff）；Tether 官网 https://tether.io/news/tether-has-supported-nearly-550-million-in-iran-linked-usd%e2%82%ae-freezes-as-u-s-expands-sanctions-campaign/ （页面日期 2026-09-28）。
 - 一句话：少数党报告指控 USDT 是伊朗影子银行的主要支付工具；Tether 同日发文强调配合执法冻结。
@@ -316,8 +390,35 @@
 - 口径更正：试跑 1 写成「过去一年协助冻结近 $550M」，Tether 原文是「During 2026 alone」（2026 年内），以原文为准。
 - 下一步观察：司法部/财政部是否回应。
 
+#### 3. 市场结构与资金流（1 条）
+
+**R3【7 分｜市场】美国现货 BTC、ETH ETF 9/28 均净流入：BTC +$31.0M（连续 8 个交易日），ETH +$17.1M（连续 7 个交易日）**（合并试跑 1 第 2 条，新增 ETH 部分）
+- 分项：2 / 1 / 2 / 1 / 1。
+- 分类：主 structure.etf_flow（3. 市场结构与资金流）；副 —
+- Foresight：F74 09-29 13:02 https://foresightnews.pro/news/detail/114216 ；F75 09-29 13:02 https://foresightnews.pro/news/detail/114217
+- 一手出处：Farside Investors https://farside.co.uk/btc/ 、https://farside.co.uk/eth/ （2026-09-29 17:03 HKT curl 读取，表中还没有 9/29 行）。Foresight 引的 SoSoValue 页面被 Cloudflare 拦截，**没能打开**。
+- 事实（Farside，单位百万美元）：BTC 9/28 IBIT +54.8、FBTC −10.9、GBTC −23.2、BTC Mini +10.3，合计 +31.0；从 9/17 起连续 8 个交易日净流入。ETH 9/28 ETHA +15.4、TETH +1.7，合计 +17.1；从 9/18 起连续 7 个交易日净流入。
+- 事实（Foresight 转述 SoSoValue）：BTC 合计 +$3,107.06 万，ETH 合计 +$1,709.59 万，与 Farside 一致（四舍五入差异）。
+- 下一步观察：9/29 的流量。
+
+#### 8. 安全、攻击与风险事件（1 条）
+
+**R1【8 分｜安全与风险】Bitget 约 $387.5M 被盗后续：BTC 提币已恢复，被盗资金追踪与冻结**（合并试跑 1 第 1 条）
+- 分项：相关 2 / 冲击 2 / 可信 2 / 时效 1 / 可证伪 1。
+- 分类：主 security.hack（8. 安全、攻击与风险事件）；副 security.withdraw（Bitget 5 条快讯的逐条副类见候选表）
+- Foresight：F01 09-28 17:11 https://foresightnews.pro/news/detail/114143 ；F13 09-28 19:11 https://foresightnews.pro/news/detail/114155 ；F58 09-29 10:05 https://foresightnews.pro/news/detail/114200 ；F66 09-29 11:16 https://foresightnews.pro/news/detail/114208 ；F67 09-29 11:25 https://foresightnews.pro/news/detail/114209
+- 一手出处：MistTrack 推文 https://x.com/MistTrack_io/status/2104767013117694156 （安全公司，推文日期 2026-09-29，已通过 oEmbed 读取）；Bitget 官方公告 https://www.bitget.com/support/articles/12560603896110 （试跑 1 已打开，作背景）。
+- 一句话：BTC 提币按计划 9/28 16:00 HKT 恢复；攻击者经 Chainflip 转移资金被拒；独立调查员称与 Circle 协调冻结约 $20.1 万。
+- 事实：MistTrack 称攻击者尝试经 Chainflip 转移被盗资金，被经纪商拒收并退回，资金**没有被冻结**（安全公司披露）。
+- 当事方自述：tanuki42 称与 Circle 协调冻结约 $201k（https://x.com/tanuki42_/status/2104760876389519756 ，推文已读取；Circle 方面没有单独确认）。
+- 未核实：① Foresight 转述 CEO 直播（F01，无链接）：截至 9/28 16:50 处理约 7,683 笔 BTC 提现、约 3,609 BTC，直播本身没核；② 链上分析师 @ai_9684xtpa（F58）称保护基金 5,500 BTC 中已流出 3,215.28 BTC，链上数据本次没有独立核对；③ 归因：ZachXBT（F13，推文 2026-09-28 已读取）称洗钱团伙替「被指为朝鲜的攻击者」（alleged DPRK）清洗资金，属**指控**，待正式事件报告。
+- 下一步观察：ETH 提币原定 9/29 16:00 HKT 开放；**截至 17:01 HKT，窗口内 Foresight 没有相关快讯，是否按时开放【待核】**；USDT 9/30 16:00 HKT；本周正式调查报告。
+
+#### 10. 人物、机构与舆论（2 条）
+
 **R5【7 分｜市场】Strategy 9/21–27 买入 1,665 BTC，持仓 847,666 BTC**（合并试跑 1 第 5 条）
 - 分项：2 / 1 / 2 / 1 / 1。
+- 分类：主 people.treasury（10. 人物、机构与舆论）；副 —
 - Foresight：F16 09-28 19:58 https://foresightnews.pro/news/detail/114158 （Foresight 的 source_link 是第三方 X 账号，不是一手）
 - 一手出处：SEC EDGAR 8-K https://www.sec.gov/Archives/edgar/data/1050446/000119312526403417/mstr-20260914.htm （本次重新打开；Date of Report 2026-09-28）；第二来源：Decrypt https://decrypt.co/379415/strategy-sets-new-btc-holdings-record-after-143m-bitcoin-purchase （试跑 1）。
 - 事实：1,665 BTC，合计 $142.7M，均价 $85,681（含费用）；截至 9/27 持有 847,666 BTC，总成本 $63.95B，均价 $75,437；资金来自出售 MSTR 股票。
@@ -325,6 +426,7 @@
 
 **R6【7 分｜市场·ETH】BitMine 上周增持 17,362 ETH，持仓 6,001,302 ETH（约占供应 4.9%）**（新增，试跑 1 没有）
 - 分项：2 / 1 / 2 / 1 / 1。
+- 分类：主 people.treasury（10. 人物、机构与舆论）；副 —
 - Foresight：F24 09-28 20:31 https://foresightnews.pro/news/detail/114166
 - 一手出处：BitMine 新闻稿（PR Newswire）https://www.prnewswire.com/apac/news-releases/bitmine-immersion-technologies-bmnr-announces-eth-holdings-reach-over-6-million-tokens-with-total-crypto-cash--marketable-securities-holdings-of-17-2-billion-302891187.html （页面标注「28 Sep, 2026, 20:30 CST」，没写 UTC 偏移；如果是中国标准时间，就是 20:30 HKT，和 Foresight 20:31 发布相符）。第二来源：暂无独立媒体链接（只有 Foresight 转述）。
 - 事实（公司公告）：截至 2026-09-27 15:00 ET 持有 6,001,302 ETH（按 $2,698/ETH，Coinbase 价），占 1.221 亿 ETH 供应的 4.9%；上周买入 17,362 ETH；质押 5,067,309 ETH；另有 213 BTC、现金及有价证券 $6.72 亿。
@@ -332,12 +434,12 @@
 - 下一步观察：下周一周报是否继续买入；距「5%」目标的进度。
 
 **备选（6 分，不进日报，供用户决定）**
-- F14 花旗 × Coinbase 企业稳定币收款（09-28 19:31，https://foresightnews.pro/news/detail/114156 ）：并入试跑 1 C08；Foresight 引 WSJ，一手是试跑 1 打开的 Citi 新闻稿；仍没有上线日期，可证伪 0。
-- F45 SEC 更新加密 FAQ：无中央主体的代币回购通常不构成投资合同（09-29 08:56，https://foresightnews.pro/news/detail/114187 ）：来源是记者 Eleanor Terrett 推文（2026-09-28，已读取），SEC 原文没找到（搜索只找到 9/25 版 FAQ），可信度 1【待核】。找到 SEC 原文可升到 7。
-- F52 Strategy 9 小时转出 3,568 BTC（见 R5）：目的不明。
-- F86 Liquid Network 启动 Elements v23.3.4 外部审计、更新 PAK 名单（09-29 15:05，https://foresightnews.pro/news/detail/114228 ）：措辞暗示 Peg-out 尚未恢复，暂停起止时间【待核】。
-- F88 过去 24 小时全网爆仓约 $3.76 亿（多单 $2.88 亿）（09-29 15:55，https://foresightnews.pro/news/detail/114230 ）：CoinAnk 页面是前端渲染，读不到数字，【待核】，可信度 1。注意与试跑 1 的 $511M（TokenPost）统计窗口不同，不能直接比。
-- F93 以太坊 Glamsterdam 10/6 在 Sepolia 激活（09-29 16:50，https://foresightnews.pro/news/detail/114236 ）：以太坊基金会原文 9/17 发布，旧闻，时效 0；进日历，不进日报（同试跑 1 C22）。
+- F14 花旗 × Coinbase 企业稳定币收款（09-28 19:31，https://foresightnews.pro/news/detail/114156 ）：并入试跑 1 C08；Foresight 引 WSJ，一手是试跑 1 打开的 Citi 新闻稿；仍没有上线日期，可证伪 0。【主小类 metastory.stable_rail】
+- F45 SEC 更新加密 FAQ：无中央主体的代币回购通常不构成投资合同（09-29 08:56，https://foresightnews.pro/news/detail/114187 ）：来源是记者 Eleanor Terrett 推文（2026-09-28，已读取），SEC 原文没找到（搜索只找到 9/25 版 FAQ），可信度 1【待核】。找到 SEC 原文可升到 7。【主小类 policy.sec】
+- F52 Strategy 9 小时转出 3,568 BTC（见 R5）：目的不明。【主小类 onchain.whale】
+- F86 Liquid Network 启动 Elements v23.3.4 外部审计、更新 PAK 名单（09-29 15:05，https://foresightnews.pro/news/detail/114228 ）：措辞暗示 Peg-out 尚未恢复，暂停起止时间【待核】。【主小类 security.bridge】
+- F88 过去 24 小时全网爆仓约 $3.76 亿（多单 $2.88 亿）（09-29 15:55，https://foresightnews.pro/news/detail/114230 ）：CoinAnk 页面是前端渲染，读不到数字，【待核】，可信度 1。注意与试跑 1 的 $511M（TokenPost）统计窗口不同，不能直接比。【主小类 ta.liquidation】
+- F93 以太坊 Glamsterdam 10/6 在 Sepolia 激活（09-29 16:50，https://foresightnews.pro/news/detail/114236 ）：以太坊基金会原文 9/17 发布，旧闻，时效 0；进日历，不进日报（同试跑 1 C22）。【主小类 calendar.mainnet】
 
 ### 被丢掉的类型举例
 

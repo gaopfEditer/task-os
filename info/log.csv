@@ -16,3 +16,6 @@ time,content_id,action,from_status,to_status,summary,file
 2026-09-29T16:53:03+08:00,SYSTEM,edit,,,sources.md 登记 REG-01 Foresight News 为已确认（用户确认）,sources.md
 2026-09-29T16:55:06+08:00,SYSTEM,edit,,,sources.md REG-01 抓取方式改为公开只读接口（网页和浏览器均 403）,sources.md
 2026-09-29T17:05:13+08:00,C-20260929-02,research,researching,researching,"试跑 2：Foresight News（REG-01）快讯 2026-09-28 17:11 至 09-29 16:50 HKT 共 93 条（分页接口核对无缺漏）；第一层排除 30、第二层丢弃 25、≥7 分 12 条/6 件事、4–6 分 23 条、≤3 分 3 条；站方重要 28 条中 8 条进 ≥7；与试跑 1 五条合并，新增 BitMine",topics/C-20260929-02-币圈日报/research.md
+2026-09-30T21:34:07+08:00,SYSTEM,create,,,新建 categories.md：用户提供的 14 个大类、79 个小类,categories.md
+2026-09-30T21:34:07+08:00,SYSTEM,edit,,,filter.md 增加「分类标注」规则；README 规则第 10 条加分类要求,filter.md;README.md
+2026-09-30T21:40:46+08:00,C-20260929-02,research,researching,researching,"试跑 2 按 categories.md 补标分类：93 条全部标主小类（副小类≤2），候选表加「主小类/副小类」两列；新增分类汇总（13 个大类有条目，14. 组合与策略为 0；未归类 6 条：F20、F35、F41、F62、F68、F79）；≥7 分 6 件事按大类分组（监管 2、市场结构 1、安全 1、人物机构 2）；分数和去向不变",topics/C-20260929-02-币圈日报/research.md

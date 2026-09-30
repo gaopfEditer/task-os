@@ -90,7 +90,7 @@ inbox → researching → drafting → reviewing → ready → published → arc
 7. **不改任务状态**：排期只在稿件写 `related_task: T-xxxx`，由任务管家建任务。
 8. **每次变更**都要更新 index.md 并追加一行到 log.csv（只追加，不删旧记录）。
 9. **查历史**：先读 index.md 和 log.csv，再读单个选题文件，不凭记忆回答。
-10. **线索先落 inbox/**：每条资讯必须带标题、链接、时间、来源平台、一句话摘要、与 watchlist/thesis 的相关性；事实、观点、未核实分开，价格和事件带时间戳。线索按 `filter.md` 三层漏斗筛选打分（≥7 进日报，4–6 留 inbox，≤3 丢弃）。升级为选题时才建 `topics/C-YYYYMMDD-NN-短标题/`。
+10. **线索先落 inbox/**：每条资讯必须带标题、链接、时间、来源平台、一句话摘要、与 watchlist/thesis 的相关性；事实、观点、未核实分开，价格和事件带时间戳。每条还要按 `categories.md` 标 1 个主小类 id（必填，最多再加 2 个副小类），不自造类目。线索按 `filter.md` 三层漏斗筛选打分（≥7 进日报，4–6 留 inbox，≤3 丢弃）。升级为选题时才建 `topics/C-YYYYMMDD-NN-短标题/`。
 11. **缺文件不标 ready**：brief.md / research.md / draft.md 任一缺失或仅为模板，不得标 ready。
 12. **ID 规则**：`C-YYYYMMDD-NN`，当天序号 NN 从 01 起递增，先查 index.md 当天已有最大序号。
 13. **不假装已发布**：未实际发布前，状态不得写 published，不得编造阅读量等数据。
