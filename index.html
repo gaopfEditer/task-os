@@ -6,7 +6,7 @@
 <title>Task OS</title>
 <style>
   :root {
-    --bg: #f5f6f8; --card: #fff; --text: #1f2328; --muted: #656d76; --faint: #8c959f; --border: #d0d7de; --line: #eaeef2;
+    --bg: #f5f6f8; --card: #fff; --text: #1f2328; --muted: #656d76; --faint: #8c959f; --border: #d0d7de; --line: #eaeef2; --foc: #bf8700; --idea: #bf3989; --gain: #1b7c83;
     --accent: #0969da; --red: #cf222e; --orange: #bc4c00; --green: #1a7f37;
     --plan: #0969da; --prac: #1a7f37; --rev: #8250df;
   }
@@ -161,6 +161,16 @@
   .editor label { display: flex; align-items: center; gap: 6px; font-weight: 600; margin: 10px 0 4px; }
   .editor textarea { width: 100%; min-height: 84px; resize: vertical; line-height: 1.5; }
   .editor textarea::placeholder { color: #a0a8b0; }
+  .rcol { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .pnote + .pnote { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 10px; }
+  .phd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .phd b { font-size: 15px; } .phd .pkey { color: var(--muted); font-size: 12px; } .phd a { font-size: 12px; }
+  .phd button { margin-left: auto; font-size: 12px; padding: 2px 10px; }
+  .pnote .none { color: var(--faint); font-size: 12px; margin-top: 6px; }
+  .dsec.foc { border-color: var(--foc); } .dsec.idea { border-color: var(--idea); } .dsec.gain { border-color: var(--gain); }
+  .k.foc { background: var(--foc); } .k.idea { background: var(--idea); } .k.gain { background: var(--gain); }
+  .day.wk-note::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 2px 2px 0; background: var(--foc); }
+  .wkbar { display: inline-block; width: 3px; height: 10px; border-radius: 2px; background: var(--foc); vertical-align: -1px; margin-right: 3px; }
   details.remote { margin-top: 8px; font-size: 13px; }
   details.remote pre { white-space: pre-wrap; background: #f6f8fa; padding: 8px; border-radius: 6px; max-height: 240px; overflow: auto; }
   .todaytag { font-size: 11px; background: #fd8c73; color: #fff; border-radius: 10px; padding: 0 6px; }
@@ -263,7 +273,7 @@
           <span class="month" id="calTitle"></span>
           <button type="button" id="calNext" aria-label="下个月">›</button>
           <button type="button" id="calToday">今天</button>
-          <span class="legend"><span><span class="dot plan on"></span>计划</span><span><span class="dot prac on"></span>实践</span><span><span class="dot rev on"></span>复盘</span><span><span class="duebadge" style="position:static;display:inline-block">n</span> 到期</span></span>
+          <span class="legend"><span><span class="dot plan on"></span>计划</span><span><span class="dot prac on"></span>实践</span><span><span class="dot rev on"></span>复盘</span><span><span class="duebadge" style="position:static;display:inline-block">n</span> 到期</span><span title="这周有周记"><span class="wkbar"></span>周记</span></span>
           <span class="spacer"></span>
           <span class="jump"><input type="date" id="jumpDate" aria-label="跳转到日期"><button type="button" id="jumpGo">跳转</button></span>
         </div>
@@ -271,20 +281,23 @@
         <div id="dailyNote"></div>
         <div class="hint" style="margin-top:6px">键盘：← → 前后一天，↑ ↓ 前后一周</div>
       </div>
-      <div class="panel" id="detail"><div class="nodata">点击日历中的某一天查看详情</div></div>
+      <div class="rcol">
+        <div class="panel" id="detail"><div class="nodata">点击日历中的某一天查看详情</div></div>
+        <div class="panel" id="periods"></div>
+      </div>
     </div>
   </section>
 
   <section class="tab" id="tab-history">
     <div class="hist-bar">
-      <input id="hq" type="search" placeholder="搜索日记正文和任务流水…">
+      <input id="hq" type="search" placeholder="搜索日记、周记 / 月记和任务流水…">
       <span class="hint" id="histInfo"></span>
     </div>
     <div id="history"></div>
   </section>
 
   <footer>
-    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/YYYY-MM-DD.md</code>。日志时间按 log.csv 原样显示（UTC+8）。
+    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>。日志时间按 log.csv 原样显示（UTC+8）。
   </footer>
 </main>
 
@@ -529,7 +542,8 @@
     while (b > a && lines[b - 1].trim() === '') b--;
     return lines.slice(a, b).map(function (l) { return l.trim() === '' ? '' : l; }).join('\n');
   }
-  function parseDaily(text) {
+  function parseDaily(text) { return parseDoc(text, SECTIONS, sectionKey); }
+  function parseDoc(text, secDefs, keyOf) {
     var lines = String(text || '').replace(/^\uFEFF/, '').split(/\r?\n/);
     var title = '', pre = [], secs = [], cur = null, fence = false;
     lines.forEach(function (line) {
@@ -538,11 +552,12 @@
         var h1 = /^#\s+(.*?)\s*#*\s*$/.exec(line);
         if (h1 && !title && !cur) { title = h1[1]; return; }
         var h2 = /^##\s+(.*?)\s*#*\s*$/.exec(line);
-        if (h2) { cur = { heading: h2[1], key: sectionKey(h2[1]), lines: [] }; secs.push(cur); return; }
+        if (h2) { cur = { heading: h2[1], key: keyOf(h2[1]), lines: [] }; secs.push(cur); return; }
       }
       (cur ? cur.lines : pre).push(line);
     });
-    var out = { title: title, preamble: trimBlank(pre), plan: '', practice: '', review: '', others: [] };
+    var out = { title: title, preamble: trimBlank(pre), others: [] };
+    secDefs.forEach(function (d) { out[d[0]] = ''; });
     secs.forEach(function (s) {
       var body = trimBlank(s.lines);
       if (s.key) out[s.key] = out[s.key] ? out[s.key] + (body ? '\n\n' + body : '') : body;
@@ -551,11 +566,12 @@
     return out;
   }
   function sectionEmpty(s) { return String(s || '').replace(/<!--[\s\S]*?-->/g, '').trim() === ''; }
-  function serializeDaily(date, base, edits) {
+  function serializeDaily(date, base, edits) { return serializeDoc(date, base, edits, SECTIONS); }
+  function serializeDoc(title, base, edits, secDefs) {
     base = base || { preamble: '', others: [] };
-    var parts = ['# ' + date, ''];
+    var parts = ['# ' + title, ''];
     if (base.preamble) parts.push(base.preamble, '');
-    SECTIONS.forEach(function (s) {
+    secDefs.forEach(function (s) {
       var body = trimBlank(String(edits[s[0]] || '').replace(/\r\n?/g, '\n').split('\n'));
       parts.push('## ' + s[1], '');
       if (body) parts.push(body, '');
@@ -922,8 +938,9 @@
       var ds = ymd(d), info = dayInfo(ds);
       var due = state.tasks.filter(function (t) { return normDate(t.due) === ds; });
       var off = d.getMonth() !== m.getMonth() ? (d < m ? '上月' : '下月') : '';
-      var cls = 'day' + (off ? ' other' : '') + (ds === today ? ' today' : '') + (ds === state.selected ? ' sel' : '') + (d.getDay() === 0 || d.getDay() === 6 ? ' weekend' : '');
-      var h = '<button type="button" class="' + cls + '" data-date="' + ds + '" aria-label="' + esc(cnDate(ds, true)) + '">';
+      var wkNote = d.getDay() === 1 && !!state.notes.week.list[isoWeek(ds).key];
+      var cls = 'day' + (off ? ' other' : '') + (ds === today ? ' today' : '') + (ds === state.selected ? ' sel' : '') + (d.getDay() === 0 || d.getDay() === 6 ? ' weekend' : '') + (wkNote ? ' wk-note' : '');
+      var h = '<button type="button" class="' + cls + '" data-date="' + ds + '" aria-label="' + esc(cnDate(ds, true)) + '"' + (wkNote ? ' title="' + esc(isoWeek(ds).key + ' 有周记') + '"' : '') + '>';
       h += '<span class="num"><b>' + d.getDate() + '</b>' + (off ? '<i>' + off + '</i>' : '') + '</span>';
       if (due.length) {
         var open = due.filter(function (t) { return !isClosed(t); });
@@ -949,7 +966,7 @@
   // an editor with textareas on screen must never be re-rendered underneath the user (IME, caret)
   function editorActive() { return !!(state.edit && !state.edit.loading && state.edit.date === state.selected && $('ed-plan')); }
   var calRedraw = throttled(function () {
-    if (state.tab === 'calendar') { renderCalendar(); if (!editorActive()) renderDetail(); }
+    if (state.tab === 'calendar') { renderCalendar(); if (!editorActive()) renderDetail(); if (!periodEditorActive()) renderPeriods(); }
     if (state.tab === 'history') renderHistory();
   });
   function needsLoad(ds) { var c = state.daily.cache[ds], sha = state.daily.list[ds]; return !!sha && !(c && c.sha === sha); }
@@ -1121,6 +1138,232 @@
     }).catch(function (err) { e.saving = false; setEditStatus('error', '保存失败：' + esc(err.message)); });
   }
 
+
+  // ---------- week / month notes: weekly/YYYY-Www.md (ISO week, Monday start), monthly/YYYY-MM.md ----------
+  var PSECTIONS = [['focus', '重点', 'foc'], ['idea', '灵感', 'idea'], ['gain', '额外收获', 'gain']];
+  var PPLACE = { focus: '最重要的 1～3 件事，可写任务 ID', idea: '想到就记一句', gain: '计划外的产出、收获（建议以日期开头，如 - 10-01 …）' };
+  var PERIOD = { week: { dir: 'weekly', label: '本周', noun: '周记', re: /^(\d{4}-W\d{2})\.md$/ }, month: { dir: 'monthly', label: '本月', noun: '月记', re: /^(\d{4}-\d{2})\.md$/ } };
+  state.notes = { week: { list: {}, status: '', error: '', cache: {}, pending: {} }, month: { list: {}, status: '', error: '', cache: {}, pending: {} } };
+  state.pedit = null; state.pflash = null;
+  function isoWeek(ds) {   // → { key: '2026-W40', monday: '2026-09-28', sunday: '2026-10-04' }
+    var d = parseYmd(ds); if (!d) return null;
+    var mon = new Date(d.getFullYear(), d.getMonth(), d.getDate() - (d.getDay() + 6) % 7);
+    var y = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 3).getFullYear();   // ISO year = year of that week's Thursday
+    var jan4 = new Date(y, 0, 4), w1 = new Date(y, 0, 4 - (jan4.getDay() + 6) % 7);
+    var wk = 1 + Math.round((mon - w1) / 604800000);
+    return { key: y + '-W' + pad(wk), monday: ymd(mon), sunday: addDays(ymd(mon), 6) };
+  }
+  function weekMonday(key) {
+    var m = /^(\d{4})-W(\d{2})$/.exec(key || ''); if (!m) return '';
+    var jan4 = new Date(+m[1], 0, 4);
+    return ymd(new Date(+m[1], 0, 4 - (jan4.getDay() + 6) % 7 + (+m[2] - 1) * 7));
+  }
+  function periodTitle(kind, key) {
+    if (kind === 'month') return key;
+    var mon = weekMonday(key); return key + '（' + mon.slice(5) + ' 至 ' + addDays(mon, 6).slice(5) + '）';
+  }
+  function periodPath(kind, key) { return PERIOD[kind].dir + '/' + key + '.md'; }
+  function periodStart(kind, key) { return kind === 'week' ? weekMonday(key) : key + '-01'; }
+  function psecKey(heading) {
+    var h = heading.replace(/^[\s\d.、）)]+/, '').replace(/^(本周|本月)/, '');
+    for (var i = 0; i < PSECTIONS.length; i++) if (h.indexOf(PSECTIONS[i][1]) === 0) return PSECTIONS[i][0];
+    return null;
+  }
+  function parseNote(text) { return parseDoc(text, PSECTIONS, psecKey); }
+  function serializeNote(kind, key, base, edits) { return serializeDoc((base && base.title) || periodTitle(kind, key), base, edits, PSECTIONS); }
+  function listNotes(kind) {
+    var st = state.notes[kind]; st.status = 'loading';
+    var attempt = function (withToken) {
+      return api('GET', repoPath + '/contents/' + PERIOD[kind].dir + '?ref=' + BRANCH, null, withToken).then(function (res) {
+        if (res.status === 401 && withToken && getToken()) return attempt(false);
+        if (res.status === 404) { st.list = {}; st.status = 'missing'; st.error = ''; return; }
+        if (!res.ok || !Array.isArray(res.json)) { st.status = 'error'; st.error = apiErrText(res); return; }
+        var list = {};
+        res.json.forEach(function (f) { var m = PERIOD[kind].re.exec(f.name || ''); if (f.type === 'file' && m) list[m[1]] = f.sha; });
+        st.list = list; st.status = 'ok'; st.error = '';
+      });
+    };
+    return attempt(true).catch(function (e) { st.status = 'error'; st.error = '无法连接 GitHub API：' + e.message; });
+  }
+  function noteListed(st) { return st.status === 'ok' || st.status === 'missing'; }
+  function needsNote(kind, key) {
+    var st = state.notes[kind], c = st.cache[key], sha = st.list[key];
+    if (st.pending[key]) return false;
+    return sha ? !(c && c.sha === sha) : (!noteListed(st) && !c && st.status !== 'loading');
+  }
+  // Same strategy as daily files: Pages copy first, verified against the listing's blob sha, API blob as fallback.
+  function loadNote(kind, key) {
+    var st = state.notes[kind], sha = st.list[key];
+    if (!needsNote(kind, key)) return st.pending[key] || Promise.resolve(st.cache[key] || null);
+    var put = function (s, text, stale) { st.cache[key] = { sha: s, text: text, parsed: parseNote(text), stale: !!stale }; return st.cache[key]; };
+    var p = loadFile(periodPath(kind, key)).then(function (res) {
+      if (!sha) return put(null, res.text);
+      return gitBlobSha(res.text).then(function (got) {
+        if (got === sha || got === null) return put(sha, res.text);
+        return fetchBlob(sha).then(function (t) { return put(sha, t); }, function () { return put(sha, res.text, true); });
+      });
+    }, function (e) {
+      if (sha) return fetchBlob(sha).then(function (t) { return put(sha, t); });
+      if (e.status === 404) return put(null, '');
+      throw e;
+    }).catch(function (e) { st.cache[key] = { sha: sha, text: '', parsed: parseNote(''), error: e.message }; return st.cache[key]; })
+      .then(function (r) { delete st.pending[key]; return r; });
+    st.pending[key] = p;
+    return p;
+  }
+  function noteInfo(kind, key) {
+    var st = state.notes[kind], c = st.cache[key], sha = st.list[key];
+    var info = { exists: !!(sha || (c && c.text)), loaded: !!c, parsed: c ? c.parsed : null, stale: c && c.stale, error: c && c.error };
+    info.ready = info.exists ? info.loaded : (noteListed(st) || !!c || st.status === 'error') && !st.pending[key];
+    info.has = {};
+    PSECTIONS.forEach(function (s) { info.has[s[0]] = !!(info.parsed && !sectionEmpty(info.parsed[s[0]])); });
+    info.any = info.has.focus || info.has.idea || info.has.gain;
+    return info;
+  }
+  function periodKeys() { return { week: isoWeek(state.selected || todayStr()).key, month: ymd(state.month).slice(0, 7) }; }
+  function periodEditorActive() { var pe = state.pedit; return !!(pe && !pe.loading && $('pe-focus')); }
+  function pdraftKey(kind, key) { return kind + ':' + key; }
+  function hasPDraft(kind, key) { try { return !!localStorage.getItem(DRAFT_KEY + pdraftKey(kind, key)); } catch (x) { return false; } }
+  function pIsDirty(pe) { return PSECTIONS.some(function (s) { return String(pe.values[s[0]] || '').trim() !== String(pe.base[s[0]] || '').trim(); }); }
+  function savePDraft(pe) { try { if (pIsDirty(pe)) localStorage.setItem(DRAFT_KEY + pdraftKey(pe.kind, pe.key), JSON.stringify(pe.values)); else localStorage.removeItem(DRAFT_KEY + pdraftKey(pe.kind, pe.key)); } catch (x) {} }
+  function readPInputs(pe) { PSECTIONS.forEach(function (s) { var ta = $('pe-' + s[0]); if (ta && ta.getAttribute('data-key') === pe.key) pe.values[s[0]] = ta.value; }); }
+  // keep the panels in sync with the selected week / displayed month; drop an editor for another period (its text stays as a draft)
+  function syncPeriods() {
+    var keys = periodKeys(), pe = state.pedit;
+    if (pe && !pe.saving && pe.key !== keys[pe.kind]) { if (!pe.loading) { readPInputs(pe); savePDraft(pe); } state.pedit = null; }
+    if (state.pflash && state.pflash.key !== keys[state.pflash.kind]) state.pflash = null;
+    if (!periodEditorActive()) renderPeriods();
+    ['week', 'month'].forEach(function (kind) {
+      if (needsNote(kind, keys[kind])) loadNote(kind, keys[kind]).then(function () { if (!periodEditorActive()) renderPeriods(); });
+    });
+  }
+  function renderPeriods() {
+    var el = $('periods'); if (!el) return;
+    var keys = periodKeys(), h = '';
+    ['week', 'month'].forEach(function (kind) {
+      var key = keys[kind], P = PERIOD[kind], info = noteInfo(kind, key);
+      var pe = state.pedit && state.pedit.kind === kind && state.pedit.key === key ? state.pedit : null;
+      h += '<div class="pnote" id="pn-' + kind + '"><div class="phd"><b>' + P.label + '</b><span class="pkey">' + esc(periodTitle(kind, key)) + '</span>';
+      if (info.exists) h += '<a href="' + esc(fileUrl(periodPath(kind, key))) + '" target="_blank" rel="noopener">GitHub 上的 ' + esc(periodPath(kind, key)) + '</a>';
+      if (!pe) h += '<button type="button" data-pact="edit" data-kind="' + kind + '">编辑</button>';
+      h += '</div>';
+      if (state.pflash && state.pflash.kind === kind && state.pflash.key === key) h += '<div class="msg ' + state.pflash.cls + '">' + state.pflash.text + '</div>';
+      if (pe) h += pe.loading ? '<div class="none">正在读取…</div>' : periodEditorHtml(pe);
+      else if (!info.ready) h += '<div class="none">正在读取' + P.noun + '…</div>';
+      else {
+        if (info.error) h += '<div class="msg error">读取' + P.noun + '失败：' + esc(info.error) + '</div>';
+        if (info.stale) h += '<div class="msg info">这是缓存中的旧版本，GitHub 可能还在更新，稍后点「刷新」。</div>';
+        if (hasPDraft(kind, key)) h += '<div class="msg info">有未保存的草稿，点「编辑」继续。</div>';
+        if (!info.any) h += '<div class="none">还没有' + P.noun + '：重点 / 灵感 / 额外收获，随时记一句。</div>';
+        else {
+          PSECTIONS.forEach(function (s) { if (info.has[s[0]]) h += '<div class="dsec ' + s[2] + '"><h4>' + s[1] + '</h4><div class="md">' + renderMd(info.parsed[s[0]]) + '</div></div>'; });
+          var empty = PSECTIONS.filter(function (s) { return !info.has[s[0]]; }).map(function (s) { return s[1]; });
+          if (empty.length) h += '<div class="none">' + empty.join('、') + '：空</div>';
+        }
+        if (info.parsed) info.parsed.others.forEach(function (o) { h += '<div class="dsec"><h4>' + esc(o.heading) + '</h4><div class="md">' + renderMd(o.body) + '</div></div>'; });
+      }
+      h += '</div>';
+    });
+    el.innerHTML = h;
+    var pe = state.pedit;
+    if (pe && !pe.loading && $('pe-focus')) {
+      PSECTIONS.forEach(function (s) { $('pe-' + s[0]).addEventListener('input', function (ev) { pe.values[s[0]] = ev.target.value; savePDraft(pe); }); });
+      if (pe.focus) { var ta = $('pe-' + pe.focus); pe.focus = null; if (ta) ta.focus(); }
+    }
+  }
+  function periodEditorHtml(pe) {
+    var h = '<div class="editor">';
+    PSECTIONS.forEach(function (s) {
+      h += '<label for="pe-' + s[0] + '"><span class="wkbar" style="background:var(--' + s[2] + ')"></span>' + s[1] + '</label>' +
+        '<textarea id="pe-' + s[0] + '" data-key="' + esc(pe.key) + '" placeholder="' + esc(PPLACE[s[0]]) + '">' + esc(pe.values[s[0]]) + '</textarea>';
+    });
+    if (pe.status) h += '<div class="msg ' + pe.status.kind + '">' + pe.status.text + '</div>';
+    if (pe.remote != null) h += '<details class="remote" open><summary>远端最新内容（' + (pe.remote ? '已存在' : '文件不存在') + '）</summary><pre>' + esc(pe.remote || '（空）') + '</pre></details>';
+    h += '<div class="actions"><button type="button" class="primary" data-pact="save"' + (pe.saving ? ' disabled' : '') + '>' + (pe.saving ? '保存中…' : '保存' + PERIOD[pe.kind].noun) + '</button>' +
+      '<button type="button" data-pact="cancel"' + (pe.saving ? ' disabled' : '') + '>取消</button>' + tokenHint() + '</div></div>';
+    return h;
+  }
+  function startPeriodEdit(kind) {
+    var key = periodKeys()[kind];
+    state.pflash = null;
+    state.pedit = { kind: kind, key: key, loading: true };
+    renderPeriods();
+    loadNote(kind, key).then(function () {
+      if (!state.pedit || state.pedit.kind !== kind || state.pedit.key !== key) return;
+      var c = state.notes[kind].cache[key], base = c && c.text ? c.parsed : parseNote('');
+      var values = { focus: base.focus, idea: base.idea, gain: base.gain }, status = null, dr = null;
+      try { dr = JSON.parse(localStorage.getItem(DRAFT_KEY + pdraftKey(kind, key)) || 'null'); } catch (x) {}
+      if (dr && typeof dr === 'object') { values = { focus: dr.focus || '', idea: dr.idea || '', gain: dr.gain || '' }; status = { kind: 'info', text: '已恢复未保存的草稿（还没提交到仓库）。' }; }
+      state.pedit = { kind: kind, key: key, base: base, baseText: c && c.text ? c.text : '', sha: c ? c.sha : null, values: values, status: status, remote: null, saving: false, focus: 'gain' };
+      renderPeriods();
+    });
+  }
+  function setPStatus(pe, kind, text) { pe.status = { kind: kind, text: text }; if (state.pedit === pe) renderPeriods(); }
+  function savePeriod() {
+    var pe = state.pedit; if (!pe || pe.saving || pe.loading) return;
+    readPInputs(pe);
+    var P = PERIOD[pe.kind], st = state.notes[pe.kind], path = periodPath(pe.kind, pe.key);
+    if (!getToken()) { state.pendingSave = 'period'; openSettings('保存' + P.noun + '需要 GitHub 令牌，填好后会自动继续保存。'); return; }
+    var text = serializeNote(pe.kind, pe.key, pe.base, pe.values);
+    if (pe.baseText ? text === pe.baseText : !pIsDirty(pe)) return setPStatus(pe, 'info', '没有改动。');
+    var changed = PSECTIONS.filter(function (s) { return String(pe.values[s[0]] || '').trim() !== String(pe.base[s[0]] || '').trim(); });
+    var body = { message: P.noun + ' ' + pe.key + '：' + (pe.baseText ? '更新' : '新建') + (changed.length ? changed : PSECTIONS).map(function (s) { return s[1]; }).join('/'), content: utf8ToB64(text), branch: BRANCH };
+    if (pe.sha) body.sha = pe.sha;
+    pe.saving = true; pe.status = null; renderPeriods();
+    api('PUT', repoPath + '/contents/' + path, body).then(function (res) {
+      pe.saving = false;
+      if (res.ok && res.json && res.json.content) {
+        var sha = res.json.content.sha, commit = res.json.commit && res.json.commit.sha ? res.json.commit.sha : '';
+        st.cache[pe.key] = { sha: sha, text: text, parsed: parseNote(text) }; st.list[pe.key] = sha;
+        if (st.status === 'missing') st.status = 'ok';
+        try { localStorage.removeItem(DRAFT_KEY + pdraftKey(pe.kind, pe.key)); } catch (x) {}
+        if (state.pedit === pe) state.pedit = null;
+        state.pflash = { kind: pe.kind, key: pe.key, cls: 'ok', text: '已保存' + (commit ? '（提交 <a target="_blank" rel="noopener" href="' + esc(REPO + '/commit/' + commit) + '">' + esc(commit.slice(0, 7)) + '</a>）' : '') + '。' };
+        renderCalendar(); renderPeriods();
+        return;
+      }
+      if (res.status === 409 || res.status === 422) {
+        return api('GET', repoPath + '/contents/' + path + '?ref=' + BRANCH).then(function (r) {
+          var latest = r.status === 404 ? { sha: null, text: '' } : (r.ok && r.json ? { sha: r.json.sha, text: b64ToUtf8(r.json.content) } : null);
+          if (!latest) return setPStatus(pe, 'error', '保存失败：' + esc(apiErrText(r)));
+          if (latest.sha === pe.sha) return setPStatus(pe, 'error', '保存失败：' + esc(apiErrText(res)));
+          pe.sha = latest.sha; pe.baseText = latest.text; pe.base = parseNote(latest.text); pe.remote = latest.text;
+          if (latest.sha) { st.cache[pe.key] = { sha: latest.sha, text: latest.text, parsed: pe.base }; st.list[pe.key] = latest.sha; } else { delete st.cache[pe.key]; delete st.list[pe.key]; }
+          renderCalendar();
+          setPStatus(pe, 'error', '保存失败：这个文件在别处被修改过（版本冲突）。已获取远端最新内容（见下方），你的输入仍保留在输入框里，请对照合并后再点「保存」。');
+        });
+      }
+      setPStatus(pe, 'error', '保存失败：' + esc(apiErrText(res)) + (res.status === 401 ? ' <button type="button" class="link" data-pact="settings">打开设置</button>' : ''));
+    }).catch(function (err) { pe.saving = false; setPStatus(pe, 'error', '保存失败：' + esc(err.message)); });
+  }
+  // history search over week / month notes
+  function noteKeys(kind) {
+    var st = state.notes[kind], set = {};
+    Object.keys(st.list).forEach(function (k) { set[k] = 1; });
+    Object.keys(st.cache).forEach(function (k) { if (st.cache[k].text) set[k] = 1; });
+    return Object.keys(set).sort().reverse();
+  }
+  function noteMatches(q) {
+    var out = [];
+    ['week', 'month'].forEach(function (kind) {
+      noteKeys(kind).forEach(function (key) {
+        var info = noteInfo(kind, key), p = info.parsed, secs = [], title = PERIOD[kind].noun + ' ' + periodTitle(kind, key);
+        if (p) {
+          PSECTIONS.forEach(function (s) { var x = excerpt(p[s[0]], q); if (x) secs.push({ cls: s[2], label: s[1], html: x }); });
+          p.others.forEach(function (o) { var x = excerpt(o.heading + ' ' + o.body, q); if (x) secs.push({ cls: 'log', label: o.heading, html: x }); });
+        }
+        if (secs.length || title.toLowerCase().indexOf(q) >= 0) out.push({ kind: kind, key: key, title: title, secs: secs });
+      });
+    });
+    return out;
+  }
+  function loadAllNotes() {
+    var need = [];
+    ['week', 'month'].forEach(function (kind) { Object.keys(state.notes[kind].list).forEach(function (k) { if (needsNote(kind, k)) need.push([kind, k]); }); });
+    var redraw = throttled(function () { if (state.tab === 'history') renderHistory(); });
+    return Promise.all(need.map(function (x) { return loadNote(x[0], x[1]).then(redraw); }));
+  }
+
   // ---------- history = 日历的检索 ----------
   function historyDates() {
     var set = {};
@@ -1170,11 +1413,18 @@
       }
       html += '</div>';
     });
-    if (!shown) html = '<div class="nodata">' + (q ? '没有匹配「' + esc(q) + '」的日记或流水' : '还没有记录') + '</div>';
+    var notes = q ? noteMatches(q) : [];
+    var nh = notes.map(function (m) {
+      return '<div class="hday open"><div class="hd"><span class="tog">▸</span><a href="#calendar/' + periodStart(m.kind, m.key) + '" title="在日历中打开">' + esc(m.title) + '</a></div><div class="hbody">' +
+        m.secs.map(function (x) { return '<div class="snip"><span class="k ' + x.cls + '">' + esc(x.label) + '</span>' + x.html + '</div>'; }).join('') +
+        '<div class="more"><a href="#calendar/' + periodStart(m.kind, m.key) + '">在日历中打开 →</a></div></div></div>';
+    }).join('');
+    if (!shown && !notes.length) html = '<div class="nodata">' + (q ? '没有匹配「' + esc(q) + '」的日记、周记 / 月记或流水' : '还没有记录') + '</div>';
+    else html = nh + html;
     if (!q && all.length > dates.length) html += '<div style="text-align:center"><button type="button" id="histMore">加载更早的 ' + Math.min(HIST_PAGE, all.length - dates.length) + ' 天</button></div>';
     $('history').innerHTML = html;
     var hl = state.histLoad;
-    $('histInfo').textContent = hl && hl.done < hl.total ? '正在读取日记 ' + hl.done + '/' + hl.total + '…' : (q ? '找到 ' + shown + ' 天' : '共 ' + all.length + ' 天');
+    $('histInfo').textContent = hl && hl.done < hl.total ? '正在读取日记 ' + hl.done + '/' + hl.total + '…' : (q ? '找到 ' + shown + ' 天' + (notes.length ? ' · 周记 / 月记 ' + notes.length + ' 篇' : '') : '共 ' + all.length + ' 天');
   }
   // history search needs every daily file: reuse the listing, fetch the uncached ones 4 at a time
   function loadAllDaily() {
@@ -1195,7 +1445,7 @@
     if (d.showModal) { if (!d.open) d.showModal(); } else d.setAttribute('open', '');
   }
   function closeSettings() { var d = $('settings'); if (d.close) d.close(); else d.removeAttribute('open'); }
-  function refreshTokenHints() { if (state.tab === 'calendar') renderDetail(); }
+  function refreshTokenHints() { if (state.tab === 'calendar') { renderDetail(); if (state.pedit && !state.pedit.loading) { readPInputs(state.pedit); renderPeriods(); } } }
 
   // ---------- routing ----------
   function setTab(tab) {
@@ -1212,7 +1462,7 @@
     state.month = new Date(d.getFullYear(), d.getMonth(), 1);   // month follows selection
     if (location.hash !== '#calendar/' + ds) history.replaceState(null, '', '#calendar/' + ds);
     $('jumpDate').value = ds;
-    renderCalendar(); renderDetail();
+    renderCalendar(); renderDetail(); syncPeriods();
     if (newMonth || fromHash) loadVisibleMonth();
     if (!dayInfo(ds).ready || needsLoad(ds)) loadDay(ds).then(function () { if (state.selected === ds) calRedraw(); });
   }
@@ -1226,12 +1476,12 @@
       if (parseYmd(parts[1])) state.histOpen[parts[1]] = true;
       renderHistory();
       if (parseYmd(parts[1])) { var el = $('h-' + parts[1]); if (el) el.scrollIntoView({ block: 'center' }); }
-      loadAllDaily();
+      loadAllDaily(); loadAllNotes();
     }
   }
   function shiftMonth(n) {
     state.month = new Date(state.month.getFullYear(), state.month.getMonth() + n, 1);
-    renderCalendar(); loadVisibleMonth();
+    renderCalendar(); loadVisibleMonth(); syncPeriods();
   }
 
   function load() {
@@ -1239,8 +1489,10 @@
     $('updated').textContent = '加载中…';
     state.daily.cache = {}; state.daily.pending = {}; state.daily.tried = {};
     if (state.edit && !state.edit.saving) state.edit = null;   // unsaved text survives as a local draft
+    if (state.pedit && !state.pedit.saving) { if (!state.pedit.loading) { readPInputs(state.pedit); savePDraft(state.pedit); } state.pedit = null; }
+    ['week', 'month'].forEach(function (k) { state.notes[k].cache = {}; state.notes[k].pending = {}; });
     var core = Promise.all([loadFile('index.md'), loadFile('log.csv')]);
-    var daily = listDaily();
+    var daily = Promise.all([listDaily(), listNotes('week'), listNotes('month')]);
     return core.then(function (res) {
       state.tasks = parseIndex(res[0].text);
       state.logs = parseCSV(res[1].text);
@@ -1307,6 +1559,15 @@
     var cell = document.querySelector('[data-date="' + state.selected + '"]'); if (cell) cell.focus({ preventScroll: true });
   });
   window.addEventListener('hashchange', applyHash);
+  $('periods').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-pact]'); if (!b) return;
+    var act = b.getAttribute('data-pact'), pe = state.pedit;
+    if (act === 'edit') startPeriodEdit(b.getAttribute('data-kind'));
+    else if (act === 'save') savePeriod();
+    else if (act === 'settings') { state.pendingSave = false; openSettings(); }
+    else if (act === 'cancel' && pe) { try { localStorage.removeItem(DRAFT_KEY + pdraftKey(pe.kind, pe.key)); } catch (x) {} state.pedit = null; renderPeriods(); }
+  });
+  $('periods').addEventListener('click', function (ev) { if (ev.target.closest('.tokenhint [data-act="settings"]')) { state.pendingSave = false; openSettings(); } });
   $('tokenShow').addEventListener('click', function () { var i = $('tokenInput'); i.type = i.type === 'password' ? 'text' : 'password'; });
   $('tokenSave').addEventListener('click', function () {
     var v = $('tokenInput').value.trim();
@@ -1315,7 +1576,7 @@
     var resume = state.pendingSave; state.pendingSave = false;
     closeSettings();
     listDaily().then(function () { if (state.tab === 'calendar') renderCalendar(); });
-    if (resume) saveEdit(); else refreshTokenHints();
+    if (resume === 'period') savePeriod(); else if (resume) saveEdit(); else refreshTokenHints();
   });
   $('tokenClear').addEventListener('click', function () { setToken(''); $('tokenInput').value = ''; tokenStatus(); refreshTokenHints(); });
   $('tokenTest').addEventListener('click', function () {
@@ -1332,7 +1593,7 @@
 
   var now = new Date(); state.month = new Date(now.getFullYear(), now.getMonth(), 1);
   window.__taskos = { parseIndex: parseIndex, parseCSV: parseCSV, parseDaily: parseDaily, serializeDaily: serializeDaily, utf8ToB64: utf8ToB64, b64ToUtf8: b64ToUtf8,
-    renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, relDayWord: relDayWord, firstLine: firstLine,
+    renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, relDayWord: relDayWord, firstLine: firstLine,
     excerpt: excerpt, addDays: addDays, metaText: metaText, API: API, state: state };
   load();
 })();
