@@ -140,6 +140,7 @@
   .why { font-size: 11px; border-radius: 4px; padding: 0 5px; background: #eef1f4; color: #57606a; line-height: 16px; }
   .why.today { background: #fff1e5; color: var(--orange); } .why.overdue { background: #ffebe9; color: var(--red); }
   .why.done { background: #dafbe1; color: var(--green); }
+  .why.diary { background: #ddf4ff; color: #0969da; }
   .dsec { border-left: 3px solid var(--border); padding: 2px 0 2px 10px; margin: 10px 0; }
   .dsec.plan { border-color: var(--plan); } .dsec.prac { border-color: var(--prac); } .dsec.rev { border-color: var(--rev); }
   .dsec h4 { margin: 0 0 4px; font-size: 14px; }
@@ -153,6 +154,9 @@
   .md pre code { background: none; padding: 0; }
   .md blockquote { margin: 4px 0; padding-left: 10px; border-left: 3px solid #d0d7de; color: var(--muted); }
   .md .task-li { list-style: none; margin-left: -18px; }
+  .md .task-li input { -webkit-appearance: none; appearance: none; width: 13px; height: 13px; margin: 0 6px 0 0; vertical-align: -2px; border: 1.5px solid #8c959f; border-radius: 3px; background: #fff center / 10px no-repeat; opacity: 1; }
+  .md .task-li input:checked { background-color: var(--green); border-color: var(--green); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 5.2l2.3 2.3 4.7-5' fill='none' stroke='white' stroke-width='1.8'/%3E%3C/svg%3E"); }
+  .tref { font-size: 10px; line-height: 12px; padding: 0 4px; border-radius: 4px; background: #ddf4ff; color: #0969da; margin-left: 2px; align-self: center; }
   .prompt { background: #fff8c5; border: 1px solid #eac54f; border-radius: 8px; padding: 8px 10px; margin: 6px 0; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13px; }
   .editor label { display: flex; align-items: center; gap: 6px; font-weight: 600; margin: 10px 0 4px; }
   .editor textarea { width: 100%; min-height: 84px; resize: vertical; line-height: 1.5; }
@@ -523,7 +527,7 @@
     var a = 0, b = lines.length;
     while (a < b && lines[a].trim() === '') a++;
     while (b > a && lines[b - 1].trim() === '') b--;
-    return lines.slice(a, b).map(function (l) { return l.replace(/\s+$/, ''); }).join('\n');
+    return lines.slice(a, b).map(function (l) { return l.trim() === '' ? '' : l; }).join('\n');
   }
   function parseDaily(text) {
     var lines = String(text || '').replace(/^\uFEFF/, '').split(/\r?\n/);
@@ -611,8 +615,9 @@
         if (list !== type) { closeList(); out.push('<' + type + '>'); list = type; }
         var body = m[3], cls = '', w = m[1].replace(/\t/g, '  ').length, ind = w >= 2 ? ' style="margin-left:' + Math.min(4, Math.floor(w / 2)) * 16 + 'px"' : '';
         var tm = /^\[([ xX])\]\s+(.*)$/.exec(body);
-        if (tm) { cls = ' class="task-li"'; body = (tm[1] === ' ' ? '☐ ' : '☑ ') + tm[2]; }
-        out.push('<li' + cls + ind + '>' + inline(body) + '</li>'); i++; continue;
+        var box = '';
+        if (tm) { cls = ' class="task-li"'; box = '<input type="checkbox" disabled' + (tm[1] === ' ' ? '' : ' checked') + '>'; body = tm[2]; }
+        out.push('<li' + cls + ind + '>' + box + inline(body) + '</li>'); i++; continue;
       }
       closeList(); para.push(line.trim()); i++;
     }
@@ -738,6 +743,15 @@
   function fileUrl(p) { return REPO + '/blob/' + BRANCH + '/' + encodeURI(p); }
   function logDate(l) { return normDate(l.time); }
   function logsOn(date) { return state.logs.filter(function (l) { return logDate(l) === date; }).sort(cmpLogAsc); }
+  // tasks whose ID (T-YYYYMMDD-NN) appears in a day's daily file (known tasks only, first mention order)
+  function dayMentions(date) {
+    var c = state.daily.cache[date], seen = {}, out = [];
+    if (!c || !c.text) return out;
+    String(c.text).replace(/<!--[\s\S]*?-->/g, '').replace(/\bT-\d{8}-\d{2}\b/g, function (id) {
+      var t = !seen[id] && taskById(id); seen[id] = 1; if (t) out.push(t); return id;
+    });
+    return out;
+  }
   function titleOf(id) { var t = taskById(id); return t ? t.title : ''; }
   // Tasks that land on a day. Today: in_progress + due today + done/reviewed today.
   // Other days: due that day + status changes that day (log.csv to_status).
@@ -764,6 +778,7 @@
       if (fin) add(t, { cls: 'done', text: (date === today ? '今天' : '这天') + (l.to_status === 'done' ? '完成' : '复盘') });
       else add(t, { cls: '', text: (LABEL[l.from_status] || l.from_status || '新建') + ' → ' + (LABEL[l.to_status] || l.to_status) });
     });
+    dayMentions(date).forEach(function (t) { add(t, { cls: 'diary', text: '日记提到' }); });
     return out;
   }
   function flash(kind, text) { state.flash = { kind: kind, text: text }; }
@@ -916,7 +931,10 @@
         h += '<span class="duebadge' + bcls + '" title="' + esc('到期：' + due.map(function (t) { return t.id + ' ' + t.title; }).join('；')) + '">' + due.length + '</span>';
       }
       h += '<span class="dots">' + (info.exists && !info.loaded ? '<span class="dot pending" title="加载中"></span>' :
-        SECTIONS.map(function (s) { return '<span class="dot ' + s[2] + (info.has[s[0]] ? ' on' : '') + '" title="' + s[1] + (info.has[s[0]] ? '：有' : '：空') + '"></span>'; }).join('')) + '</span>';
+        SECTIONS.map(function (s) { return '<span class="dot ' + s[2] + (info.has[s[0]] ? ' on' : '') + '" title="' + s[1] + (info.has[s[0]] ? '：有' : '：空') + '"></span>'; }).join(''));
+      var ment = dayMentions(ds);
+      if (ment.length) h += '<span class="tref" title="' + esc('日记提到：' + ment.map(function (t) { return t.id + ' ' + t.title; }).join('；')) + '">任务' + (ment.length > 1 ? '×' + ment.length : '') + '</span>';
+      h += '</span>';
       var sum = firstLine(info.parsed);
       if (sum) h += '<span class="csum">' + esc(sum) + '</span>';
       if (logCount[ds]) h += '<span class="logmark" title="任务流水 ' + logCount[ds] + ' 条">·' + logCount[ds] + '</span>';
@@ -1010,7 +1028,7 @@
     if (e) h += editorHtml(e);
     else if (!info.ready) h += '<div class="nodata">正在读取日记…</div>';
     else {
-      var verb = date > today ? '写计划' : '编辑';
+      var verb = date > today && !info.any ? '写计划' : '编辑';
       if (info.error) h += '<div class="msg error">读取日记失败：' + esc(info.error) + '</div>';
       if (info.stale) h += '<div class="msg info">这是缓存中的旧版本，GitHub 可能还在更新，稍后点「刷新」。</div>';
       if (loadDraft(date)) h += '<div class="msg info">这一天有未保存的草稿，点「' + verb + '」继续。</div>';
@@ -1314,7 +1332,7 @@
 
   var now = new Date(); state.month = new Date(now.getFullYear(), now.getMonth(), 1);
   window.__taskos = { parseIndex: parseIndex, parseCSV: parseCSV, parseDaily: parseDaily, serializeDaily: serializeDaily, utf8ToB64: utf8ToB64, b64ToUtf8: b64ToUtf8,
-    renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, relDayWord: relDayWord, firstLine: firstLine,
+    renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, relDayWord: relDayWord, firstLine: firstLine,
     excerpt: excerpt, addDays: addDays, metaText: metaText, API: API, state: state };
   load();
 })();
