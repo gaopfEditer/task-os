@@ -161,6 +161,26 @@
   .editor label { display: flex; align-items: center; gap: 6px; font-weight: 600; margin: 10px 0 4px; }
   .editor textarea { width: 100%; min-height: 84px; resize: vertical; line-height: 1.5; }
   .editor textarea::placeholder { color: #a0a8b0; }
+  .area-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
+  .area-bar .spacer { flex: 1; }
+  .area-chip { font-size: 12px; padding: 3px 10px; border-radius: 12px; }
+  .area-chip i { font-style: normal; color: var(--faint); margin-left: 4px; }
+  .areas-intro { color: var(--muted); font-size: 13px; margin: 0 0 10px; }
+  details.area { background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; }
+  details.area > summary { cursor: pointer; padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; list-style: none; }
+  details.area > summary::-webkit-details-marker { display: none; }
+  details.area > summary::before { content: '▸'; color: var(--faint); transition: transform .15s; }
+  details.area[open] > summary::before { transform: rotate(90deg); }
+  details.area > summary b { font-size: 16px; }
+  details.area .ameta { font-size: 12px; color: var(--muted); }
+  details.area .ameta.gap { color: var(--orange); }
+  details.area .abody { padding: 0 14px 10px 30px; }
+  .abody h5 { font-size: 13px; margin: 12px 0 4px; color: var(--muted); border-left: 3px solid var(--border); padding-left: 8px; }
+  .abody h5.gaps { border-color: var(--orange); color: var(--orange); }
+  .abody h5.time { border-color: var(--foc); }
+  .sugg { font-size: 11px; font-weight: 600; color: #fff; background: var(--orange); border-radius: 4px; padding: 0 5px; margin-right: 4px; }
+  .area-editor textarea { width: 100%; min-height: 60vh; resize: vertical; line-height: 1.55; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+  @media (max-width: 700px) { details.area .abody { padding: 0 10px 8px 14px; } .area-editor textarea { min-height: 55vh; } }
   .rcol { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
   .pnote + .pnote { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 10px; }
   .phd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -244,6 +264,7 @@
   <a href="#board" data-tab="board">看板</a>
   <a href="#calendar" data-tab="calendar">日历</a>
   <a href="#history" data-tab="history">历史</a>
+  <a href="#areas" data-tab="areas">领域</a>
 </nav>
 <main>
   <div id="msg"></div>
@@ -296,8 +317,12 @@
     <div id="history"></div>
   </section>
 
+  <section class="tab" id="tab-areas">
+    <div id="areas"><div class="nodata">加载中…</div></div>
+  </section>
+
   <footer>
-    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>。日志时间按 log.csv 原样显示（UTC+8）。
+    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>areas.md</code>。日志时间按 log.csv 原样显示（UTC+8）。
   </footer>
 </main>
 
@@ -1435,6 +1460,144 @@
     return loadMany(need, function () { state.histLoad.done++; redraw(); }).then(function () { if (state.tab === 'history') renderHistory(); });
   }
 
+
+  // ---------- 领域: areas.md (one "## " section per area), whole-file editor ----------
+  var AREAS_PATH = 'areas.md';
+  var AREAS_STARTER = '# 领域\n\n## 领域名\n\n### 目标\n\n### 正在做\n\n### 负责 bot / 工具\n\n### 缺口与待优化\n\n### 时间投入（周）\n\n待记录\n';
+  state.areas = { status: '', text: '', sha: null, error: '', edit: null, flash: null, closed: {} };
+  function parseAreas(text) {   // → { title, intro, areas: [{ name, body, time, gaps }] }
+    var lines = String(text || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').split('\n'), out = { title: '', intro: [], areas: [] }, cur = null, fence = false;
+    lines.forEach(function (line) {
+      if (/^\s*(```|~~~)/.test(line)) fence = !fence;
+      var m = !fence && /^(#{1,2})\s+(.*?)\s*#*\s*$/.exec(line);
+      if (m && m[1] === '#' && !out.title && !cur) { out.title = m[2]; return; }
+      if (m && m[1] === '##') { cur = { name: m[2], lines: [] }; out.areas.push(cur); return; }
+      (cur ? cur.lines : out.intro).push(line);
+    });
+    out.intro = out.intro.join('\n').trim();
+    out.areas.forEach(function (a) {
+      a.body = a.lines.join('\n').replace(/^\n+|\s+$/g, ''); delete a.lines;
+      var t = /(^|\n)###\s*时间投入[^\n]*\n+([^\n#][^\n]*)/.exec(a.body);
+      a.time = t ? plainText(t[2]) : '';
+      var g = /(^|\n)###\s*缺口[^\n]*\n([\s\S]*?)(?=\n###\s|$)/.exec(a.body);
+      a.gaps = g ? (g[2].match(/^\s*[-*+]\s+/gm) || []).length : 0;
+    });
+    return out;
+  }
+  function areasHtml(md) {
+    return renderMd(md).replace(/<strong>建议<\/strong>/g, '<span class="sugg">建议</span>')
+      .replace(/<h5>(缺口[^<]*)<\/h5>/g, '<h5 class="gaps">$1</h5>').replace(/<h5>(时间投入[^<]*)<\/h5>/g, '<h5 class="time">$1</h5>');
+  }
+  function loadAreas(force) {
+    var A = state.areas;
+    if (!force && (A.status === 'ok' || A.status === 'missing' || A.status === 'loading')) return Promise.resolve();
+    A.status = 'loading';
+    return loadFile(AREAS_PATH).then(function (res) { A.text = res.text; A.status = 'ok'; A.error = ''; }, function (e) {
+      if (e.status === 404) { A.text = ''; A.status = 'missing'; A.error = ''; } else { A.status = 'error'; A.error = e.message; }
+    }).then(function () { if (state.tab === 'areas' && !areasEditorActive()) renderAreas(); });
+  }
+  function areasEditorActive() { return !!(state.areas.edit && !state.areas.edit.loading && $('areaText')); }
+  function hasAreasDraft() { try { return localStorage.getItem(DRAFT_KEY + 'areas') != null; } catch (x) { return false; } }
+  function renderAreas() {
+    var A = state.areas, el = $('areas'), e = A.edit, h = '';
+    if (A.status === 'loading' || A.status === '') { el.innerHTML = '<div class="nodata">正在读取 areas.md…</div>'; return; }
+    var p = parseAreas(A.text);
+    h += '<div class="area-bar">';
+    if (!e) p.areas.forEach(function (a, i) { h += '<button type="button" class="area-chip" data-area="' + i + '">' + esc(a.name) + (a.time ? '<i>' + esc(a.time) + '</i>' : '') + '</button>'; });
+    h += '<span class="spacer"></span>';
+    if (!e) h += '<button type="button" class="primary" data-aact="edit">编辑</button>' + tokenHint();
+    if (A.status === 'ok' || A.edit) h += '<a href="' + esc(fileUrl(AREAS_PATH)) + '" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 areas.md</a>';
+    h += '</div>';
+    if (A.flash) h += '<div class="msg ' + A.flash.kind + '">' + A.flash.text + '</div>';
+    if (A.status === 'error') h += '<div class="msg error">读取 areas.md 失败：' + esc(A.error) + '</div>';
+    if (e) {
+      if (e.loading) h += '<div class="nodata">正在读取最新版本…</div>';
+      else {
+        h += '<div class="panel area-editor"><div class="hint">整个 areas.md 一起编辑：每个 <code>## </code> 是一个领域，下面用 <code>### 目标</code> / <code>### 正在做</code> / <code>### 负责 bot / 工具</code> / <code>### 缺口与待优化</code> / <code>### 时间投入（周）</code>。内容原样保存。</div>' +
+          '<textarea id="areaText" spellcheck="false">' + esc(e.value) + '</textarea>';
+        if (e.status) h += '<div class="msg ' + e.status.kind + '">' + e.status.text + '</div>';
+        if (e.remote != null) h += '<details class="remote" open><summary>远端最新内容（' + (e.remote ? '已存在' : '文件不存在') + '）</summary><pre>' + esc(e.remote || '（空）') + '</pre></details>';
+        h += '<div class="actions"><button type="button" class="primary" data-aact="save"' + (e.saving ? ' disabled' : '') + '>' + (e.saving ? '保存中…' : '保存') + '</button>' +
+          '<button type="button" data-aact="cancel"' + (e.saving ? ' disabled' : '') + '>取消</button>' + tokenHint() + '</div></div>';
+      }
+    } else if (A.status === 'missing') {
+      h += '<div class="nodata">仓库里还没有 areas.md。点「编辑」按模板新建：每个 <code>## </code> 一个领域。</div>';
+    } else if (A.status === 'ok') {
+      if (hasAreasDraft()) h += '<div class="msg info">有未保存的草稿，点「编辑」继续。</div>';
+      if (p.intro) h += '<div class="areas-intro md">' + areasHtml(p.intro) + '</div>';
+      if (!p.areas.length) h += '<div class="nodata">areas.md 里还没有 <code>## </code> 领域小节。</div>';
+      p.areas.forEach(function (a, i) {
+        var meta = (a.gaps ? '<span class="ameta gap">待优化 ' + a.gaps + '</span>' : '') + (a.time ? '<span class="ameta">时间投入：' + esc(a.time) + '</span>' : '');
+        h += '<details class="area" id="area-' + i + '"' + (A.closed[a.name] ? '' : ' open') + ' data-name="' + esc(a.name) + '"><summary><b>' + esc(a.name) + '</b>' + meta + '</summary>' +
+          '<div class="abody md">' + (a.body ? areasHtml(a.body) : '<div class="none">（空）</div>') + '</div></details>';
+      });
+    }
+    el.innerHTML = h;
+    if (e && !e.loading && $('areaText')) {
+      $('areaText').addEventListener('input', function (ev) { e.value = ev.target.value; try { if (e.value !== e.baseText) localStorage.setItem(DRAFT_KEY + 'areas', e.value); else localStorage.removeItem(DRAFT_KEY + 'areas'); } catch (x) {} });
+      if (e.focus) { e.focus = false; $('areaText').focus(); }
+    }
+  }
+  function fetchAreasLatest() {
+    return api('GET', repoPath + '/contents/' + AREAS_PATH + '?ref=' + BRANCH).then(function (res) {
+      if (res.status === 404) return { sha: null, text: '' };
+      if (!res.ok || !res.json) throw new Error(apiErrText(res));
+      return { sha: res.json.sha, text: b64ToUtf8(res.json.content) };
+    });
+  }
+  function startAreasEdit() {
+    var A = state.areas; A.flash = null; A.edit = { loading: true }; renderAreas();
+    fetchAreasLatest().then(function (latest) { return latest; }, function (err) {
+      // API unavailable (e.g. rate limit): edit the Pages copy; the save will report a conflict if it is stale
+      return { sha: undefined, text: A.text, warn: err.message };
+    }).then(function (latest) {
+      if (!A.edit || !A.edit.loading) return;
+      if (latest.sha !== undefined && latest.text !== A.text) { A.text = latest.text; A.status = latest.sha ? 'ok' : 'missing'; }
+      var base = latest.sha === null ? '' : latest.text, value = base || AREAS_STARTER, status = null, dr = null;
+      try { dr = localStorage.getItem(DRAFT_KEY + 'areas'); } catch (x) {}
+      if (dr != null && dr !== base) { value = dr; status = { kind: 'info', text: '已恢复未保存的草稿（还没提交到仓库）。' }; }
+      if (latest.warn) status = { kind: 'info', text: '暂时取不到 GitHub 上的最新版本（' + esc(latest.warn) + '），先按页面上的内容编辑。' };
+      A.edit = { value: value, baseText: base, sha: latest.sha === undefined ? null : latest.sha, unknownSha: latest.sha === undefined, status: status, remote: null, saving: false, focus: true };
+      renderAreas();
+    });
+  }
+  function saveAreas() {
+    var A = state.areas, e = A.edit; if (!e || e.loading || e.saving) return;
+    var ta = $('areaText'); if (ta) e.value = ta.value;
+    if (!getToken()) { state.pendingSave = 'areas'; openSettings('保存 areas.md 需要 GitHub 令牌，填好后会自动继续保存。'); return; }
+    if (e.value === e.baseText) { e.status = { kind: 'info', text: '没有改动。' }; return renderAreas(); }
+    var go = e.unknownSha ? fetchAreasLatest().then(function (l) { e.unknownSha = false; e.sha = l.sha; if (l.text !== e.baseText) { e.baseText = l.text; e.remote = l.text; throw { conflict: true }; } }) : Promise.resolve();
+    e.saving = true; e.status = null; renderAreas();
+    go.then(function () {
+      var body = { message: '领域：' + (e.sha ? '更新' : '新建') + ' areas.md', content: utf8ToB64(e.value), branch: BRANCH };
+      if (e.sha) body.sha = e.sha;
+      return api('PUT', repoPath + '/contents/' + AREAS_PATH, body).then(function (res) {
+        e.saving = false;
+        if (res.ok && res.json && res.json.content) {
+          var commit = res.json.commit && res.json.commit.sha ? res.json.commit.sha : '';
+          A.text = e.value; A.sha = res.json.content.sha; A.status = 'ok'; A.edit = null;
+          try { localStorage.removeItem(DRAFT_KEY + 'areas'); } catch (x) {}
+          A.flash = { kind: 'ok', text: '已保存' + (commit ? '（提交 <a target="_blank" rel="noopener" href="' + esc(REPO + '/commit/' + commit) + '">' + esc(commit.slice(0, 7)) + '</a>）' : '') + '。GitHub Pages 上的文件可能要 1–2 分钟才更新，这里已显示保存后的内容。' };
+          return renderAreas();
+        }
+        if (res.status === 409 || res.status === 422) {
+          return fetchAreasLatest().then(function (l) {
+            if (l.sha === e.sha) { e.status = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) }; return renderAreas(); }
+            e.sha = l.sha; e.baseText = l.text; e.remote = l.text; A.text = l.text;
+            e.status = { kind: 'error', text: '保存失败：areas.md 在别处被修改过（版本冲突）。已获取远端最新内容（见下方），你的输入仍保留在输入框里，请对照合并后再点「保存」。' };
+            renderAreas();
+          });
+        }
+        e.status = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) + (res.status === 401 ? ' <button type="button" class="link" data-act="settings">打开设置</button>' : '') };
+        renderAreas();
+      });
+    }).catch(function (err) {
+      e.saving = false;
+      e.status = { kind: 'error', text: err && err.conflict ? '保存前发现 areas.md 已在别处更新（见下方远端最新内容），你的输入仍保留，请对照合并后再点「保存」。' : '保存失败：' + esc(err && err.message || String(err)) };
+      renderAreas();
+    });
+  }
+
   // ---------- settings dialog ----------
   function tokenStatus() { var t = getToken(); $('tokenStatus').textContent = t ? '已保存令牌（…' + t.slice(-4) + '）' : '尚未保存令牌。'; }
   function openSettings(note) {
@@ -1445,7 +1608,7 @@
     if (d.showModal) { if (!d.open) d.showModal(); } else d.setAttribute('open', '');
   }
   function closeSettings() { var d = $('settings'); if (d.close) d.close(); else d.removeAttribute('open'); }
-  function refreshTokenHints() { if (state.tab === 'calendar') { renderDetail(); if (state.pedit && !state.pedit.loading) { readPInputs(state.pedit); renderPeriods(); } } }
+  function refreshTokenHints() { if (state.tab === 'areas') { var ae = state.areas.edit, at = $('areaText'); if (ae && at) ae.value = at.value; renderAreas(); } if (state.tab === 'calendar') { renderDetail(); if (state.pedit && !state.pedit.loading) { readPInputs(state.pedit); renderPeriods(); } } }
 
   // ---------- routing ----------
   function setTab(tab) {
@@ -1468,7 +1631,7 @@
   }
   function applyHash() {
     var h = decodeURIComponent(location.hash.replace(/^#/, '')), parts = h.split('/');
-    var tab = ['board', 'calendar', 'history'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
+    var tab = ['board', 'calendar', 'history', 'areas'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
     setTab(tab);
     if (tab === 'board') renderBoardTab();
     if (tab === 'calendar') selectDay(parseYmd(parts[1]) ? parts[1] : (state.selected || todayStr()), true);
@@ -1478,6 +1641,7 @@
       if (parseYmd(parts[1])) { var el = $('h-' + parts[1]); if (el) el.scrollIntoView({ block: 'center' }); }
       loadAllDaily(); loadAllNotes();
     }
+    if (tab === 'areas') { if (!areasEditorActive()) renderAreas(); loadAreas(); }
   }
   function shiftMonth(n) {
     state.month = new Date(state.month.getFullYear(), state.month.getMonth() + n, 1);
@@ -1491,6 +1655,7 @@
     if (state.edit && !state.edit.saving) state.edit = null;   // unsaved text survives as a local draft
     if (state.pedit && !state.pedit.saving) { if (!state.pedit.loading) { readPInputs(state.pedit); savePDraft(state.pedit); } state.pedit = null; }
     ['week', 'month'].forEach(function (k) { state.notes[k].cache = {}; state.notes[k].pending = {}; });
+    if (!(state.areas.edit && state.areas.edit.saving)) { state.areas.edit = null; state.areas.flash = null; state.areas.status = ''; }   // unsaved areas text stays as a draft
     var core = Promise.all([loadFile('index.md'), loadFile('log.csv')]);
     var daily = Promise.all([listDaily(), listNotes('week'), listNotes('month')]);
     return core.then(function (res) {
@@ -1559,6 +1724,16 @@
     var cell = document.querySelector('[data-date="' + state.selected + '"]'); if (cell) cell.focus({ preventScroll: true });
   });
   window.addEventListener('hashchange', applyHash);
+  $('areas').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-aact],[data-area],[data-act="settings"]'); if (!b) return;
+    if (b.hasAttribute('data-area')) { var d = $('area-' + b.getAttribute('data-area')); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
+    if (b.getAttribute('data-act') === 'settings') { state.pendingSave = false; openSettings(); return; }
+    var act = b.getAttribute('data-aact'), A = state.areas;
+    if (act === 'edit') startAreasEdit();
+    else if (act === 'save') saveAreas();
+    else if (act === 'cancel') { try { localStorage.removeItem(DRAFT_KEY + 'areas'); } catch (x) {} A.edit = null; renderAreas(); }
+  });
+  $('areas').addEventListener('toggle', function (ev) { var d = ev.target; if (d.classList && d.classList.contains('area')) state.areas.closed[d.getAttribute('data-name')] = !d.open; }, true);
   $('periods').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-pact]'); if (!b) return;
     var act = b.getAttribute('data-pact'), pe = state.pedit;
@@ -1576,7 +1751,7 @@
     var resume = state.pendingSave; state.pendingSave = false;
     closeSettings();
     listDaily().then(function () { if (state.tab === 'calendar') renderCalendar(); });
-    if (resume === 'period') savePeriod(); else if (resume) saveEdit(); else refreshTokenHints();
+    if (resume === 'period') savePeriod(); else if (resume === 'areas') saveAreas(); else if (resume) saveEdit(); else refreshTokenHints();
   });
   $('tokenClear').addEventListener('click', function () { setToken(''); $('tokenInput').value = ''; tokenStatus(); refreshTokenHints(); });
   $('tokenTest').addEventListener('click', function () {
@@ -1593,7 +1768,7 @@
 
   var now = new Date(); state.month = new Date(now.getFullYear(), now.getMonth(), 1);
   window.__taskos = { parseIndex: parseIndex, parseCSV: parseCSV, parseDaily: parseDaily, serializeDaily: serializeDaily, utf8ToB64: utf8ToB64, b64ToUtf8: b64ToUtf8,
-    renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, relDayWord: relDayWord, firstLine: firstLine,
+    renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, parseAreas: parseAreas, areasHtml: areasHtml, relDayWord: relDayWord, firstLine: firstLine,
     excerpt: excerpt, addDays: addDays, metaText: metaText, API: API, state: state };
   load();
 })();
