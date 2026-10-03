@@ -1,0 +1,457 @@
+SECURITIES AND EXCHANGE COMMISSION
+
+[Release No. 34-106577; File No. SR-CboeBZX-2026-065]
+
+Self-Regulatory Organizations; Cboe BZX Exchange, Inc.; Order Granting Approval of a
+
+Proposed Rule Change to List and Trade Shares of the 3x Gold ETF, 3x Silver ETF, 3x
+
+Bitcoin ETF, 3x Ether ETF, 3x Crude Oil ETF, and 3x Natural Gas ETF, Each a Series of
+
+the VS Trust, under BZX Rule 14.11(e)(4) (Commodity-Based Trust Shares)
+
+October 2, 2026.
+
+I.     INTRODUCTION
+
+       On August 10, 2026, Cboe BZX Exchange, Inc. (the “Exchange” or “BZX”) filed with the
+
+Securities and Exchange Commission (“Commission”), pursuant to Section 19(b)(1) of the
+
+Securities Exchange Act of 1934 (“Act”) 1 and Rule 19b-4 thereunder,2 a proposed rule change to
+
+list and trade shares (“Shares”) of the 3x Gold ETF, 3x Silver ETF, 3x Bitcoin ETF, 3x Ether
+
+ETF, 3x Crude Oil ETF, and 3x Natural Gas ETF (each, a “Fund” and collectively the “Funds”),
+
+each a series of the VS Trust (“Trust”), under BZX Rule 14.11(e)(4) (Commodity-Based Trust
+
+Shares).3 The proposed rule change (“Proposal”) was published for comment in the Federal
+
+Register on August 19, 2026.4 This order approves the Proposal.5
+
+
+
+1
+       15 U.S.C. 78s(b)(1).
+2
+       17 CFR 240.19b-4.
+3
+       Capitalized terms not defined herein are defined in the Exchange’s rules.
+4
+       See Securities Exchange Act Release No. 106137 (Aug. 14, 2026), 91 FR 53686 (“Notice”). The
+       Commission has received no comments on the Proposal.
+5
+       As used in this order, the term exchange-traded funds (“ETFs”) refers to open-end funds that register the
+       offer and sale of their shares under the Securities Act of 1933 (“Securities Act”) and are regulated as
+       investment companies under the Investment Company Act of 1940 (“1940 Act”). The term “ETPs” refers
+       to exchange traded products that register the offer and sale of their shares under the Securities Act but are
+       not regulated under the 1940 Act, such as Commodity-Based Trust Shares and exchange-traded notes
+       (“ETNs”). ETNs are unsecured debt obligations issued by financial institutions that pay a return based on
+       the performance of a reference asset or benchmark but do not own an underlying portfolio of assets. See
+       https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins/investor-
+II.    DESCRIPTION OF THE PROPOSAL
+
+       As described in more detail in the Notice,6 the Exchange proposes to list and trade the
+
+Shares of each of the Funds under BZX Rule 14.11(e)(4), which governs the listing and trading
+
+of Commodity-Based Trust Shares on the Exchange. According to the Exchange, each Fund
+
+seeks daily investment results, before fees and expenses, that correspond to three times (3x) the
+
+daily performance of each of the following: gold, silver, bitcoin, ether, light sweet crude oil, and
+
+natural gas (for each Fund, the “Reference Commodity”), as measured by the daily changes in
+
+the price of a specified portfolio of first- and second-month futures contracts on the Reference
+
+Commodity (for each Fund, a “Benchmark”). 7 Each Fund will pursue its investment objectives
+
+by investing in futures contracts that comprise its Benchmark (“Benchmark Futures Contracts”), 8
+
+together with cash and cash equivalents that will serve as collateral or margin for a Fund’s
+
+investments.9 To the extent that Benchmark Futures Contracts become unavailable for
+
+investment (for example, due to price limits, accountability levels, increased margin levels,
+
+exchange position limits, margin requirements, futures commission merchant (“FCM”)-imposed
+
+position limits, or FCM risk mitigation requirements), each Fund may invest in: (i) futures
+
+contracts on its Reference Commodity that settle beyond the second month; (ii) ETFs
+
+
+
+
+       bulletins-50. Although each Fund has “ETF” in its name, the Funds are Commodity-Based Trust Shares
+       and therefore ETPs.
+6
+       See Notice, supra note 4.
+7
+       See id. at 53686-8. Each Fund will operate as a series of the Trust. The sponsor of the Trust is Volatility
+       Shares LLC (“Sponsor”). The Sponsor manages the Trust and will manage the Funds. Wilmington Trust,
+       National Association, is the sole trustee of the Trust. U.S. Bank National Association serves as custodian
+       for the Trust. See id. at 53687; 53687 n.7, 9.
+8
+       The futures contracts in which each Fund will invest trade on an exchange that is a Designated Contract
+       Market (“DCM”) registered with the Commodity Futures Trading Commission and is an Intermarket
+       Surveillance Group (“ISG”) member. See id. at 53691.
+9
+       See id. at 53686. For a further description of the Benchmark and Benchmark Futures Contracts for each
+       Fund, see id. at 53687-89.
+
+                                                        2
+(“Benchmark-Linked ETFs”) that provide exposure to its Reference Commodity; (iii) ETPs
+
+(“Benchmark-Linked ETPs”) that provide exposure to its Reference Commodity; and (iv)
+
+exchange-listed options on its Benchmark-Linked ETFs, Benchmark-Linked ETPs, or
+
+Benchmark Futures Contracts.10
+
+       The Exchange states that it is submitting the Proposal because each Fund will seek daily
+
+results, before fees and expenses, equal to three times (3x) the daily performance of its
+
+Benchmark; however, the Funds and the Shares will meet all of the other requirements under the
+
+generic listing standards for Commodity-Based Trust Shares set forth in BZX Rule 14.11(e)(4).11
+
+III.   DISCUSSION AND COMMISSION FINDINGS
+
+       After careful review, the Commission finds that the Proposal is consistent with the Act
+
+and rules and regulations thereunder applicable to a national securities exchange. 12 In particular,
+
+the Commission finds that the Proposal is consistent with Section 6(b)(5) of the Act, 13 which
+
+requires, among other things, that the Exchange’s rules be designed to “prevent fraudulent and
+
+manipulative acts and practices” and, “in general, to protect investors and the public interest;”
+
+and with Section 11A(a)(1)(C)(iii) of the Act, 14 which sets forth Congress’ finding that it is in
+
+the public interest and appropriate for the protection of investors and the maintenance of fair and
+
+
+
+
+10
+       See id. at 53686.
+11
+       See id. at 53687. See also Securities Exchange Act Release Nos. 103995 (Sept. 17, 2025), 90 FR 45414
+       (Sept. 22, 2025) (SR-NASDAQ-2025-056; SR-CboeBZX-2025-104; SR-NYSEARCA-2025-54) (Order
+       Granting Accelerated Approval of Proposed Rule Changes, as Modified by Amendments Thereto, to Adopt
+       Generic Listing Standards for Commodity-Based Trust Shares) (“Generics Approval Order”); 106011 (July
+       29, 2026), 91 FR 48957 (Aug. 3, 2026) (SR-CboeBZX-2026-061) (Notice of Filing, and Order Granting
+       Accelerated Approval of, a Proposed Rule Change to Amend Rule 14.11(e)(4) (Commodity-Based Trust
+       Shares)) (“Generics Amendment Approval Order”).
+12
+       In approving the Proposal, the Commission has considered the Proposal’s impact on efficiency,
+       competition, and capital formation. See 15 U.S.C. 78c(f).
+13
+       15 U.S.C. 78f(b)(5).
+14
+       15 U.S.C. 78k-1(a)(1)(C)(iii).
+
+                                                      3
+orderly markets to assure the availability to brokers, dealers, and investors of information with
+
+respect to quotations for and transactions in securities.
+
+       A.       Exchange Act Section 6(b)(5)
+
+       The Commission finds that the Proposal is consistent with the Section 6(b)(5)
+
+requirement that the Exchange’s rules be designed to prevent fraudulent and manipulative acts
+
+and practices. The Exchange represents that the Funds will meet all the requirements set forth in
+
+BZX Rule 14.11(e)(4) except that each Fund will seek to provide daily investment returns that
+
+correspond to three times (3x) the daily performance of its Benchmark.15 The Commission has
+
+previously found that the requirements set forth in BZX Rule 14.11(e)(4) for the generic listing
+
+of Commodity-Based Trust Shares are consistent with the Act. 16 Here, the Reference
+
+Commodities that underlie the Funds’ holdings meet the eligibility criteria set forth in BZX Rule
+
+14.11(e)(4)(D).17 Furthermore, ETPs that are not Commodity-Based Trust Shares that provide
+
+leveraged exposure to each of the Reference Commodities currently list and trade on national
+
+
+
+15
+       See supra note 13 and accompanying text. BZX Rule 14.11(e)(4)(F) provides that Commodity-Based Trust
+       Shares eligible to list and trade pursuant to Rule 19b-4(e) (i.e., without a rule filing pursuant to Section
+       19(b) of the Act) “may not seek, directly or indirectly, to provide investment returns that correspond to the
+       performance of an index, benchmark, or reference value by a specified multiple, or to provide investment
+       returns that have an inverse or multiple inverse relationship to the performance of an index, benchmark, or
+       reference value, over a predetermined period of time.” Thus, BZX Rule 14.11(e)(4) precludes Commodity-
+       Based Trust Shares that seek leveraged or inverse exposure from being eligible for generic listing under the
+       rule.
+16
+       See Generics Approval Order; Generics Amendment Approval Order. Among other things, the
+       Commission found that the portfolio holding eligibility requirements help to ensure the availability of
+       information necessary to aid in the detection and deterrence of potential manipulations and other trading
+       abuses, thereby making the Commodity-Based Trust Shares less readily susceptible to fraud and
+       manipulation. See Generics Approval Order at 45418 and 45418 n.72 and Generics Amendment Approval
+       Order at 48958. In addition, the Commission found that the website disclosure requirements will facilitate
+       transparency with respect to the Commodity-Based Trust Shares and diminish the risk of manipulation or
+       unfair informational advantage, consistent with the maintenance of fair and orderly markets and investor
+       protection. See Generics Approval Order at 45420.
+17
+       Each of gold, silver, bitcoin, ether, crude oil, and natural gas underlies a futures contract that has been made
+       available to trade on a DCM for at least six months, and the Exchange has a comprehensive surveillance-
+       sharing agreement, directly or through common ISG membership, with such DCM. See Notice at 53690-
+       91. See also BZX Rule 14.11(e)(4)(D)(i)(b).
+
+                                                         4
+securities exchanges.18 As the Commission stated in the Generics Approval Order, consistently
+
+applying listing standards across products with economic exposures to the same underlying
+
+commodities levels the playing field between issuers, which should promote competition and
+
+would more readily afford investors greater investment options. 19
+
+       The Commission also finds that the Proposal is consistent with the Section 6(b)(5)
+
+requirement that the Exchange’s rules be designed to protect investors and the public interest
+
+because existing rules and standards of conduct would apply to recommending and advising
+
+investments in the Shares. When broker-dealers recommend ETPs to retail customers,
+
+
+
+
+18
+       See, e.g., ProShares Ultra Gold (UGL), seeks daily investment results that corresponds to two times (2x)
+       the daily performance of gold
+       (https://www.sec.gov/Archives/edgar/data/1415311/000119312526126553/d86378d424b3.htm);
+       MicroSectors Gold 3x Leveraged ETN (SHNY), seeks daily investment results that correspond to three
+       times (3x) the daily performance of gold
+       (https://www.sec.gov/Archives/edgar/data/927971/000121465923002804/r215231424b2.htm); ProShares
+       Ultra Silver (AGQ), seeks daily investment results that correspond to two times (2x) the daily performance
+       of the silver
+       (https://www.sec.gov/Archives/edgar/data/1415311/000119312526126553/d86378d424b3.htm); Volatility
+       Shares 2x Bitcoin ETF (BITX), seeks daily investment results that correspond to two times (2x) the daily
+       performance of bitcoin
+       https://www.sec.gov/ix?doc=/Archives/edgar/data/0001884021/000121390026072183/ea0295205-
+       01_485bpos.htm); Volatility Shares 2x Ether ETF (ETHU), seeks daily investment results that correspond
+       to two times (2x) the daily performance of ether
+       (https://www.sec.gov/ix?doc=/Archives/edgar/data/0001884021/000121390026072183/ea0295205-
+       01_485bpos.htm); ProShares Ultra Bloomberg Crude Oil (UCO), seeks daily investment results that
+       correspond to two times (2x) the daily performance of crude oil
+       (https://www.sec.gov/Archives/edgar/data/1415311/000119312526126553/d86378d424b3.htm); and
+       ProShares Ultra Bloomberg Natural Gas (BOIL), which seeks daily investment results that correspond to
+       two times (2x) the daily performance of natural gas
+       (https://www.sec.gov/Archives/edgar/data/1415311/000119312525065644/d841231d424b3.htm). See also
+       the following that were previously, but are no longer, listed and traded: VelocityShares 3x Long Silver
+       ETN (USLV), designed to correspond to three times (3x) the daily performance of silver
+       (sec.gov/Archives/edgar/data/1053092/000095010320012009/dp130575_424b2-vlsetn2a28.htm),
+       ProShares UltraPro 3x Crude Oil ETF (OILU), designed to correspond to three times (3x) the daily
+       performance of the crude oil
+       (https://www.sec.gov/Archives/edgar/data/1415311/000119312517093506/d309732d424b3.htm);
+       VelocityShares 3x Long Natural Gas ETN (UGAZ), designed to correspond to three times (3x) the daily
+       performance of natural gas
+       (sec.gov/Archives/edgar/data/1053092/000095010320012010/dp130569_424b2-vlsetn3a54.htm).
+19
+       See Generics Approval Order at 45419.
+
+                                                       5
+Regulation Best Interest (“Reg BI”) would apply. 20 Reg BI requires broker-dealers to, among
+
+other things, exercise reasonable diligence, care, and skill when making a recommendation to a
+
+retail customer to: (1) understand potential risks, rewards, and costs associated with the
+
+recommendation and have a reasonable basis to believe that the recommendation could be in the
+
+best interest of at least some retail customers; and (2) have a reasonable basis to believe the
+
+recommendation is in the best interest of a particular retail customer based on that retail
+
+customer’s investment profile.21 In addition, investment advisers have a fiduciary duty under the
+
+Investment Advisers Act of 1940 comprised of a duty of care and a duty of loyalty. These
+
+obligations require the adviser to act in the best interest of its client and not subordinate its
+
+client’s interest to its own.22 Moreover, FINRA requires increased sales practice and customer
+
+margin requirements for FINRA members applicable to inverse, leveraged, and inverse
+
+leveraged securities. 23 Exchange members that carry customer accounts are required to follow the
+
+FINRA guidance set forth in these notices. 24
+
+
+20
+        17 CFR 240.15l-1(a).
+21
+        17 CFR 240.15l-1(a)(2)(ii)(A) and (B). Separately, under Reg BI’s Conflict of Interest Obligation, broker-
+        dealers must establish, maintain, and enforce written policies and procedures reasonably designed to,
+        among other things, identify and disclose or eliminate all conflicts of interest associated with a
+        recommendation and mitigate conflicts of interest at the associated person level. See 17 CFR 240.15l-
+        1(a)(2)(iii)(A) and (B). To the extent that broker-dealers recommend ETPs to customers who are not retail
+        customers covered by Reg BI, Financial Industry Regulatory Authority (“FINRA”) Rule 2111 requires, in
+        part, that a member broker-dealer or associated person “have a reasonable basis to believe that a
+        recommended transaction or investment strategy involving a security or securities is suitable for the
+        customer, based on the information obtained through the reasonable diligence of the [broker-dealer] or
+        associated person to ascertain the customer’s investment profile.”
+22
+        See Commission Interpretation Regarding Standard of Conduct for Investment Advisers, Investment
+        Advisers Act Release No. IA-5248 (June 5, 2019), 84 FR 33669 (July 12, 2019), at 33671; Investment
+        Company Act Release No. IC-34084 (Nov. 2, 2020), 85 FR 83162 (Dec. 21, 2020), at 83217 (discussing
+        the best interest standard of conduct for broker-dealers and the fiduciary obligations of investment advisers
+        in the context of all ETPs).
+23
+        See e.g., FINRA Regulatory Notices 09-31 (June 2009), 09-53 (Aug. 2009), 12-03 (Jan. 2012), 17-32 (Oct.
+        2017), 22-08 (Mar. 2022).
+24
+        See id. The Exchange also has rules relating to suitability. In particular, BZX Rule 3.7 imposes suitability
+        obligations on Exchange members with respect to recommending transactions in the Shares to customers
+        and Interpretation and Policy .01 of BZX Rule 3.7 imposes a duty of due diligence on Exchange members
+
+                                                         6
+       B.       Exchange Act Section 11A(a)(1)(C)(iii)
+
+       The Proposal sets forth aspects of the Funds, including the availability of pricing
+
+information, transparency of portfolio holdings, and types of surveillance procedures, that are
+
+consistent with other ETPs that the Commission has approved. 25 This includes commitments
+
+regarding: for example, the availability on the Trust’s website of certain information related to
+
+the Funds, including each Fund’s net asset value per Share; the dissemination of information
+
+relating to the underlying Reference Commodities, indices, or the intraday indicative value,
+
+made widely available on at least a 15-second delayed basis; the Exchange’s surveillance
+
+procedures and ability to obtain information regarding trading in the Shares; the conditions under
+
+which the Exchange would implement trading halts and suspensions; and the requirements of
+
+registered market makers in the Shares.26
+
+       Apart from each Fund seeking daily results, before fees and expenses, equal to three
+
+times (3x) the daily performance of its Benchmark, the Shares must meet all the requirements for
+
+initial and continued listing under BZX Rule 14.11(e)(4). The Shares will be subject to the rules
+
+and procedures of the Exchange that currently govern the trading of equity securities on the
+
+Exchange.27 All statements and representations contained in the Proposal regarding, among
+
+others things, the description of the Benchmarks and the Funds’ holdings, limitations on the
+
+
+       to learn the essential facts relating to every customer prior to trading the Shares, and specifically provides
+       that “[n]o Member shall recommend to a customer a transaction in any such product unless the Member has
+       a reasonable basis for believing at the time of making the recommendation that the customer has such
+       knowledge and experience in financial matters that he may reasonably be expected to be capable of
+       evaluating the risks of the recommended transaction and is financially able to bear the risks of the
+       recommended position.”
+25
+       See, e.g., Securities Exchange Act Release No. 105582 (May 29, 2026), 91 FR 33252 (June 3, 2026) (SR-
+       NASDAQ-2025-085) (Order Granting Accelerated Approval of a Proposed Rule Change, as Modified by
+       Amendment No. 1 Thereto, to List and Trade Shares of the iShares Bitcoin Premium Income ETF under
+       Nasdaq Rule 5711(d) (Commodity-Based Trust Shares)).
+26
+       See BZX Rule 14.11(e)(4)(E), (I), (J), (L).
+27
+       See BZX Rule 14.11(e)(4)(B).
+
+                                                        7
+Benchmarks and the Funds’ holdings, and the applicability of the Exchange’s listing rules
+
+specified in the Proposal, will constitute continued listing requirements.28 Moreover, the Trust
+
+must notify the Exchange of any failure by a Fund to comply with the continued listing
+
+requirements.29 Pursuant to obligations under Section 19(g)(1) of the Act, 30 the Exchange will
+
+surveil for compliance with the continued listing requirements; and if a Fund is not in
+
+compliance with the applicable listing requirements, the Exchange will commence delisting
+
+procedures.31
+
+       The Commission therefore finds that the Proposal is reasonably designed to promote fair
+
+disclosure of information that may be necessary to price the Shares appropriately, to prevent
+
+trading when a reasonable degree of transparency cannot be assured, to safeguard material non-
+
+public information relating to each Fund’s portfolio, and to ensure fair and orderly markets for
+
+the Shares.
+
+IV.    CONCLUSION
+
+       This approval order is based on all of the Exchange’s representations and descriptions in
+
+the Proposal, which the Commission has evaluated as discussed above.32 For the reasons set forth
+
+above, the Commission finds, pursuant to Section 19(b)(2) of the Act, 33 that the Proposal is
+
+consistent with the requirements of the Act and the rules and regulations thereunder applicable to
+
+
+
+
+28
+       See BZX Rule 14.11(e)(4)(A).
+29
+       Id.
+30
+       15 U.S.C. 78s(g)(1).
+31
+       See BZX Rule 14.11(e)(4)(I).
+32
+       In addition, the Shares must comply with the requirements of BZX Rule 14.11(e)(4) to be listed and traded
+       on the Exchange on an initial and a continuing basis, except that each Fund will seek daily results, before
+       fees and expenses, equal to three times (3x) the daily performance of its Benchmark.
+33
+       15 U.S.C. 78s(b)(2).
+
+                                                       8
+a national securities exchange, and in particular, with Section 6(b)(5) and Section
+
+11A(a)(1)(C)(iii) of the Act.34
+
+       IT IS THEREFORE ORDERED, pursuant to Section 19(b)(2) of the Act, 35 that the
+
+proposed rule change (SR-CboeBZX-2026-065) be, and hereby is, approved.
+
+       For the Commission, by the Division of Trading and Markets, pursuant to delegated
+
+authority.36
+
+
+
+Sherry R. Haywood,
+
+Assistant Secretary.
+
+
+
+
+34
+       15 U.S.C. 78f(b)(5); 15 U.S.C. 78k-1(a)(1)(C)(iii).
+35
+       15 U.S.C. 78s(b)(2).
+36
+       17 CFR 200.30-3(a)(12).
+
+                                                        9
+

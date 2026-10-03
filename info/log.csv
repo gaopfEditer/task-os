@@ -19,3 +19,11 @@ time,content_id,action,from_status,to_status,summary,file
 2026-09-30T21:34:07+08:00,SYSTEM,create,,,新建 categories.md：用户提供的 14 个大类、79 个小类,categories.md
 2026-09-30T21:34:07+08:00,SYSTEM,edit,,,filter.md 增加「分类标注」规则；README 规则第 10 条加分类要求,filter.md;README.md
 2026-09-30T21:40:46+08:00,C-20260929-02,research,researching,researching,"试跑 2 按 categories.md 补标分类：93 条全部标主小类（副小类≤2），候选表加「主小类/副小类」两列；新增分类汇总（13 个大类有条目，14. 组合与策略为 0；未归类 6 条：F20、F35、F41、F62、F68、F79）；≥7 分 6 件事按大类分组（监管 2、市场结构 1、安全 1、人物机构 2）；分数和去向不变",topics/C-20260929-02-币圈日报/research.md
+2026-10-02T09:27:29+08:00,SYSTEM,create,,,新建 resources.md 资源收藏列表（A–D 共 10 组，空表待用户补充）,resources.md
+2026-10-02T09:29:36+08:00,SYSTEM,edit,,,resources.md「A. 项目库 - 情报 / 信息源」新增 19 条（用户提供）,resources.md
+2026-10-03T23:35:00+08:00,C-20261003-01,create,,inbox,"创建选题：SEC 批准 Cboe 上市 6 只 3 倍杠杆 ETP（线索来自交易观察员监控页 data.json，updated_utc8 2026-10-03 23:20:22；24h 短名单 5 条，本条 filter 8 分）",topics/C-20261003-01-SEC批准3倍杠杆加密ETP/brief.md
+2026-10-03T23:35:00+08:00,C-20261003-01,status,inbox,researching,"填写 brief（读者=X 中文币圈用户，形式=短讯/X 图文贴文，channel=X，截止=无（样稿），related_task 待定），开始核实",topics/C-20261003-01-SEC批准3倍杠杆加密ETP/brief.md
+2026-10-03T23:35:00+08:00,C-20261003-01,research,researching,researching,"research.md 写入短名单 5 条及打分、选题理由、素材 R-01–R-09（SEC 批准令原文已存档 sources/，S-1 与 EDGAR 截至 23:32 HKT 无生效记录）；事实/观点/待核实分开",topics/C-20261003-01-SEC批准3倍杠杆加密ETP/research.md
+2026-10-03T23:35:00+08:00,C-20261003-01,status,researching,drafting,"写入 X 样稿：主帖加权 278/280，可选跟帖 3 条，配图方案 2 张，自查清单；未发布",topics/C-20261003-01-SEC批准3倍杠杆加密ETP/draft.md
+2026-10-03T23:35:00+08:00,C-20261003-01,review,drafting,drafting,"review.md 填写发布前自查（对照 brief）；状态仍为 drafting",topics/C-20261003-01-SEC批准3倍杠杆加密ETP/review.md
+2026-10-03T23:35:00+08:00,SYSTEM,edit,,,index.md 新增 C-20261003-01 行,index.md
