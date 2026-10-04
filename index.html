@@ -181,6 +181,61 @@
   .sugg { font-size: 11px; font-weight: 600; color: #fff; background: var(--orange); border-radius: 4px; padding: 0 5px; margin-right: 4px; }
   .area-editor textarea { width: 100%; min-height: 60vh; resize: vertical; line-height: 1.55; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
   @media (max-width: 700px) { details.area .abody { padding: 0 10px 8px 14px; } .area-editor textarea { min-height: 55vh; } }
+  .bot-bar .area-chip i { color: var(--orange); }
+  details.bot { background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; }
+  details.bot > summary { cursor: pointer; padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: center; list-style: none; }
+  details.bot > summary::-webkit-details-marker { display: none; }
+  details.bot > summary::before { content: '▸'; color: var(--faint); transition: transform .15s; }
+  details.bot[open] > summary::before { transform: rotate(90deg); }
+  details.bot > summary b { font-size: 16px; margin-right: 2px; }
+  details.bot .ameta { font-size: 12px; color: var(--muted); }
+  details.bot .ameta.gap { color: var(--orange); }
+  details.bot .bbody { padding: 0 14px 10px 30px; }
+  .bbody h5 { font-size: 13px; margin: 12px 0 4px; color: var(--muted); border-left: 3px solid var(--border); padding-left: 8px; }
+  details.bot .bduty { flex-basis: 100%; font-size: 13px; color: var(--muted); padding-left: 16px; }
+  details.bot[open] .bduty { display: none; }
+  .bachip { font-size: 12px; line-height: 18px; padding: 0 8px; border-radius: 10px; border: 1px solid transparent; font-weight: 600; cursor: pointer; }
+  .bachip.sm { font-size: 11px; line-height: 16px; padding: 0 6px; cursor: default; font-weight: 500; }
+  .bachip.ac0 { background: #ddf4ff; color: #0550ae; border-color: #b6e3ff; }
+  .bachip.ac1 { background: #fbefff; color: #8250df; border-color: #eccbff; }
+  .bachip.ac2 { background: #dafbe1; color: #116329; border-color: #aceebb; }
+  .bachip.ac3 { background: #fff8c5; color: #7d4e00; border-color: #eac54f; }
+  .bachip.acx { background: #f6f8fa; color: var(--muted); border-color: var(--border); }
+  .bareas { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 4px; }
+  .bfields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 22px; }
+  .bfield { min-width: 0; overflow-wrap: anywhere; }
+  .bfield.wide { grid-column: 1 / -1; }
+  .bfield.f-duty .md { font-size: 15px; font-weight: 600; }
+  .bfield.f-status h5 { border-color: var(--orange); color: var(--orange); }
+  mark.todo { background: #fff1e5; color: var(--orange); border-radius: 4px; padding: 0 4px; font-size: 12px; font-weight: 600; }
+  .bflow { display: flex; align-items: stretch; gap: 6px; margin: 4px 0 6px; }
+  .bcolw { display: flex; flex-direction: column; min-width: 0; flex: 1 1 0; }
+  .bcolw.self { flex: 0 0 auto; }
+  .blbl { font-size: 11px; color: var(--faint); margin-bottom: 3px; }
+  .bcol { display: flex; flex-direction: column; gap: 4px; justify-content: center; flex: 1; }
+  .bnode { display: block; text-align: left; font-size: 12px; line-height: 1.45; padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px; background: #f6f8fa; overflow-wrap: anywhere; font-weight: normal; }
+  .bnode.bot { background: #fff; border-color: #54aeff; color: #0550ae; cursor: pointer; }
+  .bnode.bot:hover { background: #ddf4ff; }
+  .bnode.me { background: #24292f; color: #fff; border-color: #24292f; font-weight: 600; white-space: nowrap; }
+  .bnode.none { color: var(--faint); border-style: dashed; background: none; }
+  .barrow { flex: 0 0 18px; display: flex; align-items: center; justify-content: center; color: var(--faint); }
+  .barrow::before { content: '→'; font-size: 16px; }
+  details.bot-edges { background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; padding: 8px 14px; font-size: 13px; }
+  details.bot-edges > summary { cursor: pointer; font-weight: 600; color: var(--muted); }
+  details.bot-edges ul { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 18px; }
+  details.bot-edges li { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .earrow { color: var(--faint); }
+  .enote { color: var(--faint); font-size: 12px; }
+  @media (max-width: 700px) {
+    .bfields { grid-template-columns: minmax(0, 1fr); }
+    .bflow { flex-direction: column; }
+    .bcolw.self .blbl { display: none; }
+    .bcolw.self .bcol { align-items: flex-start; }
+    .barrow { flex-basis: 16px; justify-content: flex-start; padding-left: 14px; }
+    .barrow::before { content: '↓'; }
+    details.bot .bduty { padding-left: 14px; }
+    details.bot .bbody { padding: 0 10px 8px 14px; }
+  }
   .res-bar { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 8px; }
   .res-bar input { flex: 1 1 240px; min-width: 0; }
   .res-info { font-size: 12px; color: var(--muted); }
@@ -326,6 +381,7 @@
   <a href="#calendar" data-tab="calendar">日历</a>
   <a href="#areas" data-tab="areas">领域</a>
   <a href="#resources" data-tab="resources">资源</a>
+  <a href="#bots" data-tab="bots">Bot</a>
 </nav>
 <main>
   <div id="msg"></div>
@@ -386,8 +442,12 @@
     <div id="resources"><div class="nodata">加载中…</div></div>
   </section>
 
+  <section class="tab" id="tab-bots">
+    <div id="bots"><div class="nodata">加载中…</div></div>
+  </section>
+
   <footer>
-    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>areas.md</code>，以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
+    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>areas.md</code>、<code>bots.md</code>，以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
   </footer>
 </main>
 <div id="dayPop" class="daypop" role="dialog" hidden></div>
@@ -1657,7 +1717,7 @@
   // ---------- 领域: areas.md (one "## " section per area), whole-file editor ----------
   var AREAS_PATH = 'areas.md';
   var AREAS_STARTER = '# 领域\n\n## 领域名\n\n### 目标\n\n### 正在做\n\n### 负责 bot / 工具\n\n### 缺口与待优化\n\n### 时间投入（周）\n\n待记录\n';
-  state.areas = { status: '', text: '', sha: null, error: '', edit: null, flash: null, closed: {} };
+  state.areas = { status: '', text: '', sha: null, error: '', edit: null, flash: null, closed: {}, focus: '' };
   function parseAreas(text) {   // → { title, intro, areas: [{ name, body, time, gaps }] }
     var lines = String(text || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').split('\n'), out = { title: '', intro: [], areas: [] }, cur = null, fence = false;
     lines.forEach(function (line) {
@@ -1726,6 +1786,11 @@
       });
     }
     el.innerHTML = h;
+    if (A.focus && !e && A.status !== 'loading') {   // opened from a Bot card's area chip
+      var fd = null; el.querySelectorAll('details.area').forEach(function (d) { if (d.getAttribute('data-name') === A.focus) fd = d; });
+      A.focus = '';
+      if (fd) { fd.open = true; A.closed[fd.getAttribute('data-name')] = false; fd.scrollIntoView({ block: 'start' }); }
+    }
     if (e && !e.loading && $('areaText')) {
       $('areaText').addEventListener('input', function (ev) { e.value = ev.target.value; try { if (e.value !== e.baseText) localStorage.setItem(DRAFT_KEY + 'areas', e.value); else localStorage.removeItem(DRAFT_KEY + 'areas'); } catch (x) {} });
       if (e.focus) { e.focus = false; $('areaText').focus(); }
@@ -1788,6 +1853,238 @@
       e.saving = false;
       e.status = { kind: 'error', text: err && err.conflict ? '保存前发现 areas.md 已在别处更新（见下方远端最新内容），你的输入仍保留，请对照合并后再点「保存」。' : '保存失败：' + esc(err && err.message || String(err)) };
       renderAreas();
+    });
+  }
+
+  // ---------- Bot: bots.md (one "## " section per bot, "### 字段" subsections), whole-file editor ----------
+  var BOTS_PATH = 'bots.md';
+  var BOT_FIELDS = [   // display label + matcher for the "### " headings (first match wins, order matters)
+    { k: 'duty', label: '一句话职责', re: /职责/ },
+    { k: 'flow', label: '上下游', re: /上下游|上游|下游/ },
+    { k: 'proj', label: '负责项目 / 目录', re: /项目|目录/ },
+    { k: 'out', label: '主要产出', re: /产出/ },
+    { k: 'area', label: '所属领域', re: /领域/ },
+    { k: 'bound', label: '边界（不做什么）', re: /边界|不做/ },
+    { k: 'status', label: '状态 / 待补充', re: /状态|待补充/ }
+  ];
+  var BOT_AREAS = ['Web3 信号和单子', 'Web3 运营', '软件开发和海外需求', '成长'];
+  var BOTS_STARTER = '# Bot\n\n每个 `## ` 是一个 bot，下面固定七个小节。「所属领域」只写 areas.md 里的领域名；「上下游」写成「- 上游：…」「- 下游：…」两行，多个用顿号分隔；没核实的写「待补充」。\n\n' +
+    '## Bot 名\n\n### 一句话职责\n\n待补充\n\n### 负责项目 / 目录\n\n待补充\n\n### 主要产出\n\n待补充\n\n### 所属领域\n\n待补充\n\n### 上下游\n\n- 上游：待补充\n- 下游：待补充\n\n### 边界（不做什么）\n\n待补充\n\n### 状态 / 待补充\n\n待补充\n';
+  state.bots = { status: '', text: '', sha: null, error: '', edit: null, flash: null, closed: {} };
+  function botsSplit(s) {   // "A（x、y）、B，C" → ["A（x、y）", "B", "C"]: split on 、，,；; outside brackets
+    var out = [], cur = '', depth = 0;
+    String(s || '').split('').forEach(function (ch) {
+      if ('（(「【《“'.indexOf(ch) >= 0) depth++;
+      else if ('）)」】》”'.indexOf(ch) >= 0) depth = Math.max(0, depth - 1);
+      if (!depth && '、，,；;'.indexOf(ch) >= 0) { if (cur.trim()) out.push(cur.trim()); cur = ''; return; }
+      cur += ch;
+    });
+    if (cur.trim()) out.push(cur.trim());
+    return out;
+  }
+  function botBlank(t) { return /^\s*(待补充|待定|（空）|无)?\s*[。.]?\s*$/.test(String(t || '').replace(/^\s*[-*+]\s+/gm, '')); }
+  function parseBots(text, areaNames) {   // → { title, intro, bots: [{ name, lead, fields, duty, areas, up, down, other, todo, aliases }] }
+    var lines = String(text || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').split('\n'), out = { title: '', intro: [], bots: [] }, cur = null, fld = null, fence = false;
+    lines.forEach(function (line) {
+      if (/^\s*(```|~~~)/.test(line)) { fence = !fence; }
+      var m = !fence && /^(#{1,3})\s+(.*?)\s*#*\s*$/.exec(line);
+      if (m && m[1] === '#' && !out.title && !cur) { out.title = m[2]; return; }
+      if (m && m[1] === '##') { cur = { name: m[2], lead: [], fields: [] }; fld = null; out.bots.push(cur); return; }
+      if (m && m[1] === '###' && cur) { fld = { label: m[2], lines: [] }; cur.fields.push(fld); return; }
+      (fld ? fld.lines : cur ? cur.lead : out.intro).push(line);
+    });
+    out.intro = out.intro.join('\n').trim();
+    var names = (areaNames && areaNames.length ? areaNames : BOT_AREAS).slice().sort(function (a, b) { return b.length - a.length; });
+    out.bots.forEach(function (b) {
+      b.lead = b.lead.join('\n').trim();
+      b.byKey = {}; b.todo = [];
+      b.fields.forEach(function (f) {
+        f.text = f.lines.join('\n').replace(/^\n+|\s+$/g, ''); delete f.lines;
+        f.key = '';
+        for (var i = 0; i < BOT_FIELDS.length; i++) if (BOT_FIELDS[i].re.test(f.label)) { f.key = BOT_FIELDS[i].k; break; }
+        if (f.key && !b.byKey[f.key]) b.byKey[f.key] = f; else f.key = '';
+        f.blank = botBlank(f.text);
+        if (f.blank || /待补充/.test(f.text)) b.todo.push(f.label);
+      });
+      var d = b.byKey.duty ? b.byKey.duty.text.split('\n').filter(function (l) { return l.trim(); })[0] || '' : '';
+      b.duty = botBlank(d) ? '' : plainText(d.replace(/^\s*[-*+]\s+/, ''));
+      b.areas = [];
+      if (b.byKey.area) {   // area names in the order they appear in the field
+        var at = b.byKey.area.text, hits = [];
+        names.forEach(function (n) { var i = at.indexOf(n); if (i >= 0 && !hits.some(function (h) { return i >= h.i && i < h.i + h.n.length; })) hits.push({ n: n, i: i }); });
+        hits.sort(function (x, y) { return x.i - y.i; }); b.areas = hits.map(function (h) { return h.n; });
+      }
+      b.up = []; b.down = []; b.other = [];
+      if (b.byKey.flow) b.byKey.flow.text.split('\n').forEach(function (l) {
+        var fm = /^\s*(?:[-*+]\s+)?(?:\*\*)?(上游|下游)(?:\*\*)?\s*[：:]\s*(.*)$/.exec(l);
+        if (fm) { var items = botsSplit(fm[2]).filter(function (x) { return !botBlank(x); }); [].push.apply(fm[1] === '上游' ? b.up : b.down, items); }
+        else b.other.push(l);
+      });
+      b.other = b.other.join('\n').trim();
+      b.aliases = [];
+      var re = /原名\s*[「“"]?([^\s「」“”"，,。；;（()）]+)/g, am, whole = b.lead + '\n' + b.fields.map(function (f) { return f.text; }).join('\n');
+      while ((am = re.exec(whole))) if (am[1] !== b.name && b.aliases.indexOf(am[1]) < 0) b.aliases.push(am[1]);
+    });
+    return out;
+  }
+  function botMatch(item, bots) {   // the bot an 上下游 item refers to (name or 原名 at the start), else -1
+    var s = String(item || '').replace(/^[\s*_`]+/, ''), best = -1, len = 0;
+    bots.forEach(function (b, i) { [b.name].concat(b.aliases || []).forEach(function (n) { if (n && s.indexOf(n) === 0 && n.length > len) { best = i; len = n.length; } }); });
+    return best;
+  }
+  function botEdges(bots) {   // de-duplicated "A → B" links between bots, from both sides' 上下游
+    var seen = {}, out = [];
+    function add(a, b, note) { if (a === b) return; var k = a + '>' + b; if (seen[k]) { if (!seen[k].note && note) seen[k].note = note; return; } seen[k] = { from: a, to: b, note: note }; out.push(seen[k]); }
+    function note(item) { var m = /[（(]([^）)]*)[）)]\s*$/.exec(item); return m ? m[1].split(/[，,；;]/)[0].trim() : ''; }
+    bots.forEach(function (b, i) {
+      b.down.forEach(function (it) { var j = botMatch(it, bots); if (j >= 0) add(i, j, note(it)); });
+      b.up.forEach(function (it) { var j = botMatch(it, bots); if (j >= 0) add(j, i, note(it)); });
+    });
+    return out;
+  }
+  function botAreaNames() {
+    var A = state.areas, extra = [];
+    if (A.status === 'ok' && A.text) extra = parseAreas(A.text).areas.map(function (a) { return a.name; }).filter(function (n) { return !/分工/.test(n); });
+    return BOT_AREAS.concat(extra.filter(function (n) { return BOT_AREAS.indexOf(n) < 0; }));
+  }
+  function botTodoHtml(html) { return html.replace(/(^|>)([^<]+)/g, function (m, a, t) { return a + t.replace(/待补充/g, '<mark class="todo">待补充</mark>'); }); }
+  function botAreaChip(n) { var i = BOT_AREAS.indexOf(n); return '<button type="button" class="bachip ac' + (i < 0 ? 'x' : i) + '" data-goarea="' + esc(n) + '" title="去「领域」页看 ' + esc(n) + '">' + esc(n) + '</button>'; }
+  function botNode(item, bots, cls) {
+    var j = botMatch(item, bots);
+    return j >= 0 ? '<button type="button" class="bnode bot ' + cls + '" data-bot="' + j + '">' + esc(item) + '</button>' : '<span class="bnode ' + cls + '">' + esc(item) + '</span>';
+  }
+  function botFlowHtml(b, bots) {
+    function col(items, cls) { return '<div class="bcol ' + cls + '">' + (items.length ? items.map(function (x) { return botNode(x, bots, cls); }).join('') : '<span class="bnode none">待补充</span>') + '</div>'; }
+    return '<div class="bflow" aria-label="上下游">' + '<div class="bcolw"><div class="blbl">上游</div>' + col(b.up, 'up') + '</div><div class="barrow" aria-hidden="true"></div>' +
+      '<div class="bcolw self"><div class="blbl">&nbsp;</div><div class="bcol"><span class="bnode me">' + esc(b.name) + '</span></div></div><div class="barrow" aria-hidden="true"></div>' +
+      '<div class="bcolw"><div class="blbl">下游</div>' + col(b.down, 'down') + '</div></div>';
+  }
+  function botFieldHtml(f, bots, b) {
+    var body;
+    if (f.key === 'flow') body = botFlowHtml(b, bots) + (b.other ? '<div class="md">' + botTodoHtml(renderMd(b.other)) + '</div>' : '');
+    else if (f.key === 'area') body = (b.areas.length ? '<div class="bareas">' + b.areas.map(botAreaChip).join('') + '</div>' : '') +
+      (b.areas.length && f.text.replace(/^\s*[-*+]\s+/gm, '').split('\n').every(function (l) { return !l.trim() || b.areas.indexOf(l.trim()) >= 0; }) ? '' : (f.blank ? '<mark class="todo">待补充</mark>' : '<div class="md">' + botTodoHtml(renderMd(f.text)) + '</div>'));
+    else body = f.blank ? '<mark class="todo">待补充</mark>' : '<div class="md">' + botTodoHtml(renderMd(f.text)) + '</div>';
+    var wide = f.key === 'duty' || f.key === 'flow' || !f.key;
+    return '<div class="bfield f-' + (f.key || 'x') + (wide ? ' wide' : '') + (f.blank ? ' blank' : '') + '"><h5>' + esc(f.label) + '</h5>' + body + '</div>';
+  }
+  function loadBots(force) {
+    var B = state.bots;
+    if (!force && (B.status === 'ok' || B.status === 'missing' || B.status === 'loading')) return Promise.resolve();
+    B.status = 'loading';
+    return loadFile(BOTS_PATH).then(function (res) { B.text = res.text; B.status = 'ok'; B.error = ''; }, function (e) {
+      if (e.status === 404) { B.text = ''; B.status = 'missing'; B.error = ''; } else { B.status = 'error'; B.error = e.message; }
+    }).then(function () { if (state.tab === 'bots' && !botsEditorActive()) renderBots(); });
+  }
+  function botsEditorActive() { return !!(state.bots.edit && !state.bots.edit.loading && $('botText')); }
+  function hasBotsDraft() { try { return localStorage.getItem(DRAFT_KEY + 'bots') != null; } catch (x) { return false; } }
+  function renderBots() {
+    var B = state.bots, el = $('bots'), e = B.edit, h = '';
+    if (B.status === 'loading' || B.status === '') { el.innerHTML = '<div class="nodata">正在读取 bots.md…</div>'; return; }
+    var p = parseBots(B.text, botAreaNames());
+    h += '<div class="area-bar bot-bar">';
+    if (!e) p.bots.forEach(function (b, i) { h += '<button type="button" class="area-chip" data-bot="' + i + '">' + esc(b.name) + (b.todo.length ? '<i>待补充 ' + b.todo.length + '</i>' : '') + '</button>'; });
+    h += '<span class="spacer"></span>';
+    if (!e) h += '<button type="button" class="primary" data-bact="edit">编辑</button>' + tokenHint();
+    if (B.status === 'ok' || B.edit) h += '<a href="' + esc(fileUrl(BOTS_PATH)) + '" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 bots.md</a>';
+    h += '</div>';
+    if (B.flash) h += '<div class="msg ' + B.flash.kind + '">' + B.flash.text + '</div>';
+    if (B.status === 'error') h += '<div class="msg error">读取 bots.md 失败：' + esc(B.error) + '</div>';
+    if (e) {
+      if (e.loading) h += '<div class="nodata">正在读取最新版本…</div>';
+      else {
+        h += '<div class="panel area-editor bot-editor"><div class="hint">整个 bots.md 一起编辑：每个 <code>## </code> 是一个 bot，下面用 <code>### 一句话职责</code> / <code>### 负责项目 / 目录</code> / <code>### 主要产出</code> / <code>### 所属领域</code> / <code>### 上下游</code>（写「- 上游：…」「- 下游：…」）/ <code>### 边界（不做什么）</code> / <code>### 状态 / 待补充</code>。内容原样保存。</div>' +
+          '<textarea id="botText" spellcheck="false">' + esc(e.value) + '</textarea>';
+        if (e.status) h += '<div class="msg ' + e.status.kind + '">' + e.status.text + '</div>';
+        if (e.remote != null) h += '<details class="remote" open><summary>远端最新内容（' + (e.remote ? '已存在' : '文件不存在') + '）</summary><pre>' + esc(e.remote || '（空）') + '</pre></details>';
+        h += '<div class="actions"><button type="button" class="primary" data-bact="save"' + (e.saving ? ' disabled' : '') + '>' + (e.saving ? '保存中…' : '保存') + '</button>' +
+          '<button type="button" data-bact="cancel"' + (e.saving ? ' disabled' : '') + '>取消</button>' + tokenHint() + '</div></div>';
+      }
+    } else if (B.status === 'missing') {
+      h += '<div class="nodata">仓库里还没有 bots.md。点「编辑」按模板新建：每个 <code>## </code> 一个 bot，保存时创建文件。</div>';
+      if (hasBotsDraft()) h += '<div class="msg info">有未保存的草稿，点「编辑」继续。</div>';
+    } else if (B.status === 'ok') {
+      if (hasBotsDraft()) h += '<div class="msg info">有未保存的草稿，点「编辑」继续。</div>';
+      if (p.intro) h += '<div class="areas-intro md">' + renderMd(p.intro) + '</div>';
+      if (!p.bots.length) h += '<div class="nodata">bots.md 里还没有 <code>## </code> bot 小节。</div>';
+      var edges = botEdges(p.bots);
+      if (edges.length) h += '<details class="bot-edges"' + (B.closed['\u0000edges'] ? '' : ' open') + ' data-name="\u0000edges"><summary>协作关系（' + edges.length + '）</summary><ul>' + edges.map(function (x) {
+        return '<li><button type="button" class="link" data-bot="' + x.from + '">' + esc(p.bots[x.from].name) + '</button><span class="earrow">→</span><button type="button" class="link" data-bot="' + x.to + '">' + esc(p.bots[x.to].name) + '</button>' + (x.note ? '<span class="enote">' + esc(x.note) + '</span>' : '') + '</li>';
+      }).join('') + '</ul></details>';
+      p.bots.forEach(function (b, i) {
+        var meta = b.areas.map(function (n) { var k = BOT_AREAS.indexOf(n); return '<span class="bachip sm ac' + (k < 0 ? 'x' : k) + '">' + esc(n) + '</span>'; }).join('') +
+          (b.todo.length ? '<span class="ameta gap" title="' + esc(b.todo.join('、')) + '">待补充 ' + b.todo.length + '</span>' : '');
+        var order = ['duty', 'area', 'flow', 'proj', 'out', 'bound', 'status'], fs = [];
+        order.forEach(function (k) { if (b.byKey[k]) fs.push(b.byKey[k]); });
+        b.fields.forEach(function (f) { if (!f.key) fs.push(f); });
+        h += '<details class="bot" id="bot-' + i + '"' + (B.closed[b.name] ? '' : ' open') + ' data-name="' + esc(b.name) + '"><summary><b>' + esc(b.name) + '</b>' + meta +
+          (b.duty ? '<span class="bduty">' + esc(b.duty) + '</span>' : '') + '</summary><div class="bbody">' +
+          (b.lead ? '<div class="md">' + botTodoHtml(renderMd(b.lead)) + '</div>' : '') +
+          (fs.length ? '<div class="bfields">' + fs.map(function (f) { return botFieldHtml(f, p.bots, b); }).join('') + '</div>' : '<div class="none">（空）</div>') + '</div></details>';
+      });
+    }
+    el.innerHTML = h;
+    if (e && !e.loading && $('botText')) {
+      $('botText').addEventListener('input', function (ev) { e.value = ev.target.value; try { if (e.value !== e.baseText) localStorage.setItem(DRAFT_KEY + 'bots', e.value); else localStorage.removeItem(DRAFT_KEY + 'bots'); } catch (x) {} });
+      if (e.focus) { e.focus = false; $('botText').focus(); }
+    }
+  }
+  function fetchBotsLatest() {
+    return api('GET', repoPath + '/contents/' + BOTS_PATH + '?ref=' + BRANCH).then(function (res) {
+      if (res.status === 404) return { sha: null, text: '' };
+      if (!res.ok || !res.json) throw new Error(apiErrText(res));
+      return { sha: res.json.sha, text: b64ToUtf8(res.json.content) };
+    });
+  }
+  function startBotsEdit() {
+    var B = state.bots; B.flash = null; B.edit = { loading: true }; renderBots();
+    fetchBotsLatest().then(function (latest) { return latest; }, function (err) {
+      return { sha: undefined, text: B.text, warn: err.message };   // API unavailable: edit the Pages copy, a stale base is caught at save time
+    }).then(function (latest) {
+      if (!B.edit || !B.edit.loading) return;
+      if (latest.sha !== undefined && latest.text !== B.text) { B.text = latest.text; B.status = latest.sha ? 'ok' : 'missing'; }
+      var base = latest.sha === null ? '' : latest.text, value = base || BOTS_STARTER, status = null, dr = null;
+      try { dr = localStorage.getItem(DRAFT_KEY + 'bots'); } catch (x) {}
+      if (dr != null && dr !== base) { value = dr; status = { kind: 'info', text: '已恢复未保存的草稿（还没提交到仓库）。' }; }
+      if (latest.warn) status = { kind: 'info', text: '暂时取不到 GitHub 上的最新版本（' + esc(latest.warn) + '），先按页面上的内容编辑。' };
+      B.edit = { value: value, baseText: base, sha: latest.sha === undefined ? null : latest.sha, unknownSha: latest.sha === undefined, status: status, remote: null, saving: false, focus: true };
+      renderBots();
+    });
+  }
+  function saveBots() {
+    var B = state.bots, e = B.edit; if (!e || e.loading || e.saving) return;
+    var ta = $('botText'); if (ta) e.value = ta.value;
+    if (!getToken()) { state.pendingSave = 'bots'; openSettings('保存 bots.md 需要 GitHub 令牌，填好后会自动继续保存。'); return; }
+    if (e.value === e.baseText) { e.status = { kind: 'info', text: '没有改动。' }; return renderBots(); }
+    var go = e.unknownSha ? fetchBotsLatest().then(function (l) { e.unknownSha = false; e.sha = l.sha; if (l.text !== e.baseText) { e.baseText = l.text; e.remote = l.text; throw { conflict: true }; } }) : Promise.resolve();
+    e.saving = true; e.status = null; renderBots();
+    go.then(function () {
+      var body = { message: 'Bot：' + (e.sha ? '更新' : '新建') + ' bots.md', content: utf8ToB64(e.value), branch: BRANCH };
+      if (e.sha) body.sha = e.sha;
+      return api('PUT', repoPath + '/contents/' + BOTS_PATH, body).then(function (res) {
+        e.saving = false;
+        if (res.ok && res.json && res.json.content) {
+          var commit = res.json.commit && res.json.commit.sha ? res.json.commit.sha : '';
+          B.text = e.value; B.sha = res.json.content.sha; B.status = 'ok'; B.edit = null;
+          try { localStorage.removeItem(DRAFT_KEY + 'bots'); } catch (x) {}
+          B.flash = { kind: 'ok', text: '已保存' + (commit ? '（提交 <a target="_blank" rel="noopener" href="' + esc(REPO + '/commit/' + commit) + '">' + esc(commit.slice(0, 7)) + '</a>）' : '') + '。GitHub Pages 上的文件可能要 1–2 分钟才更新，这里已显示保存后的内容。' };
+          return renderBots();
+        }
+        if (res.status === 409 || res.status === 422) {
+          return fetchBotsLatest().then(function (l) {
+            if (l.sha === e.sha) { e.status = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) }; return renderBots(); }
+            e.sha = l.sha; e.baseText = l.text; e.remote = l.text; B.text = l.text;
+            e.status = { kind: 'error', text: '保存失败：bots.md 在别处被修改过（版本冲突）。已获取远端最新内容（见下方），你的输入仍保留在输入框里，请对照合并后再点「保存」。' };
+            renderBots();
+          });
+        }
+        e.status = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) + (res.status === 401 ? ' <button type="button" class="link" data-act="settings">打开设置</button>' : '') };
+        renderBots();
+      });
+    }).catch(function (err) {
+      e.saving = false;
+      e.status = { kind: 'error', text: err && err.conflict ? '保存前发现 bots.md 已在别处更新（见下方远端最新内容），你的输入仍保留，请对照合并后再点「保存」。' : '保存失败：' + esc(err && err.message || String(err)) };
+      renderBots();
     });
   }
 
@@ -2039,7 +2336,7 @@
     if (d.showModal) { if (!d.open) d.showModal(); } else d.setAttribute('open', '');
   }
   function closeSettings() { var d = $('settings'); if (d.close) d.close(); else d.removeAttribute('open'); }
-  function refreshTokenHints() { if (state.tab === 'areas') { var ae = state.areas.edit, at = $('areaText'); if (ae && at) ae.value = at.value; renderAreas(); } if (state.tab === 'calendar') { renderDetail(); if (state.pedit && !state.pedit.loading) { readPInputs(state.pedit); renderPeriods(); } } }
+  function refreshTokenHints() { if (state.tab === 'bots') { var be = state.bots.edit, bt = $('botText'); if (be && bt) be.value = bt.value; renderBots(); } if (state.tab === 'areas') { var ae = state.areas.edit, at = $('areaText'); if (ae && at) ae.value = at.value; renderAreas(); } if (state.tab === 'calendar') { renderDetail(); if (state.pedit && !state.pedit.loading) { readPInputs(state.pedit); renderPeriods(); } } }
 
   // ---------- routing ----------
   function setTab(tab) {
@@ -2067,12 +2364,13 @@
       parts = ['calendar', parseYmd(parts[1]) ? parts[1] : ''];
       history.replaceState(null, '', '#calendar' + (parts[1] ? '/' + parts[1] : ''));
     }
-    var tab = ['board', 'calendar', 'areas', 'resources'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
+    var tab = ['board', 'calendar', 'areas', 'resources', 'bots'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
     setTab(tab);
     if (tab === 'board') renderBoardTab();
     if (tab === 'calendar') selectDay(parseYmd(parts[1]) ? parts[1] : (state.selected || todayStr()), true);
     if (tab === 'areas') { if (!areasEditorActive()) renderAreas(); loadAreas(); }
     if (tab === 'resources') { renderResources(); loadResources(); }
+    if (tab === 'bots') { if (!botsEditorActive()) renderBots(); loadBots(); if (state.areas.status === '') loadAreas().then(function () { if (state.tab === 'bots' && !botsEditorActive()) renderBots(); }); }
   }
   function shiftMonth(n) {
     state.month = new Date(state.month.getFullYear(), state.month.getMonth() + n, 1);
@@ -2087,6 +2385,7 @@
     if (state.pedit && !state.pedit.saving) { if (!state.pedit.loading) { readPInputs(state.pedit); savePDraft(state.pedit); } state.pedit = null; }
     ['week', 'month'].forEach(function (k) { state.notes[k].cache = {}; state.notes[k].pending = {}; });
     if (!(state.areas.edit && state.areas.edit.saving)) { state.areas.edit = null; state.areas.flash = null; state.areas.status = ''; }   // unsaved areas text stays as a draft
+    if (!(state.bots.edit && state.bots.edit.saving)) { state.bots.edit = null; state.bots.flash = null; state.bots.status = ''; }   // unsaved bots text stays as a draft
     state.res.status = ''; state.res.parsed = null; state.res.gen++;   // re-read info/resources.md on 刷新
     var core = Promise.all([loadFile('index.md'), loadFile('log.csv')]);
     var daily = listAll();
@@ -2235,6 +2534,17 @@
     else if (act === 'cancel') { try { localStorage.removeItem(DRAFT_KEY + 'areas'); } catch (x) {} A.edit = null; renderAreas(); }
   });
   $('areas').addEventListener('toggle', function (ev) { var d = ev.target; if (d.classList && d.classList.contains('area')) state.areas.closed[d.getAttribute('data-name')] = !d.open; }, true);
+  $('bots').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-bact],[data-bot],[data-goarea],[data-act="settings"]'); if (!b) return;
+    if (b.hasAttribute('data-bot')) { var d = $('bot-' + b.getAttribute('data-bot')); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
+    if (b.hasAttribute('data-goarea')) { ev.preventDefault(); state.areas.focus = b.getAttribute('data-goarea'); location.hash = '#areas'; return; }
+    if (b.getAttribute('data-act') === 'settings') { state.pendingSave = false; openSettings(); return; }
+    var act = b.getAttribute('data-bact'), B = state.bots;
+    if (act === 'edit') startBotsEdit();
+    else if (act === 'save') saveBots();
+    else if (act === 'cancel') { try { localStorage.removeItem(DRAFT_KEY + 'bots'); } catch (x) {} B.edit = null; renderBots(); }
+  });
+  $('bots').addEventListener('toggle', function (ev) { var d = ev.target; if (d.classList && (d.classList.contains('bot') || d.classList.contains('bot-edges'))) state.bots.closed[d.getAttribute('data-name')] = !d.open; }, true);
   $('rq').addEventListener('input', function (ev) { state.res.q = ev.target.value; renderResources(); });
   $('tab-resources').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-rtag],[data-rclear],[data-rretry]'); if (!b) return;
@@ -2262,7 +2572,7 @@
     var resume = state.pendingSave; state.pendingSave = false;
     closeSettings();
     listDaily().then(function () { if (state.tab === 'calendar') renderCalendar(); });
-    if (resume === 'period') savePeriod(); else if (resume === 'areas') saveAreas(); else if (resume) saveEdit(); else refreshTokenHints();
+    if (resume === 'period') savePeriod(); else if (resume === 'areas') saveAreas(); else if (resume === 'bots') saveBots(); else if (resume) saveEdit(); else refreshTokenHints();
   });
   $('tokenClear').addEventListener('click', function () { setToken(''); $('tokenInput').value = ''; tokenStatus(); refreshTokenHints(); });
   $('tokenTest').addEventListener('click', function () {
@@ -2279,7 +2589,7 @@
 
   var now = new Date(); state.month = new Date(now.getFullYear(), now.getMonth(), 1);
   window.__taskos = { parseIndex: parseIndex, parseCSV: parseCSV, parseDaily: parseDaily, serializeDaily: serializeDaily, utf8ToB64: utf8ToB64, b64ToUtf8: b64ToUtf8,
-    renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, parseAreas: parseAreas, areasHtml: areasHtml, parseResources: parseResources, splitTags: splitTags, resUrl: resUrl, keyEvents: keyEvents, truncLines: truncLines, dayPopHtml: dayPopHtml, relDayWord: relDayWord, firstLine: firstLine,
+    renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, parseAreas: parseAreas, areasHtml: areasHtml, parseBots: parseBots, botsSplit: botsSplit, botEdges: botEdges, botMatch: botMatch, BOTS_STARTER: BOTS_STARTER, parseResources: parseResources, splitTags: splitTags, resUrl: resUrl, keyEvents: keyEvents, truncLines: truncLines, dayPopHtml: dayPopHtml, relDayWord: relDayWord, firstLine: firstLine,
     excerpt: excerpt, addDays: addDays, metaText: metaText, API: API, state: state };
   load();
 })();
