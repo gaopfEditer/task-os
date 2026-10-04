@@ -227,25 +227,54 @@
   .future { font-size: 11px; background: #ddf4ff; color: #0550ae; border-radius: 10px; padding: 0 6px; }
   .more { font-size: 12px; margin-top: 10px; color: var(--muted); }
 
-  /* ---------- history ---------- */
-  .hist-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; align-items: center; }
-  .hist-bar input { flex: 1 1 240px; }
-  .hday { background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; }
-  .hday .hd { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; padding: 8px 12px; cursor: pointer; }
-  .hday .tog { color: var(--faint); width: 12px; display: inline-block; transition: transform .15s; }
-  .hday.open .tog { transform: rotate(90deg); }
-  .hday .hd a { font-weight: 600; text-decoration: none; }
-  .hsum { font-size: 12px; color: var(--muted); }
-  .hsum .y { color: var(--text); font-weight: 600; } .hsum .n { color: var(--faint); }
-  .hbody { display: none; padding: 0 12px 10px 34px; }
-  .hday.open .hbody { display: block; }
-  .snip { font-size: 13px; margin: 4px 0; }
   .k { font-size: 11px; color: #fff; border-radius: 4px; padding: 0 5px; margin-right: 6px; }
   .k.plan { background: var(--plan); } .k.prac { background: var(--prac); } .k.rev { background: var(--rev); } .k.log { background: #6e7781; }
   mark { background: #fff8c5; padding: 0 1px; border-radius: 2px; }
   .mini { list-style: none; padding: 0; margin: 4px 0; }
   .mini li { padding: 3px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
   .mini li:last-child { border-bottom: none; }
+
+  /* ---------- v3.5: calendar search, key events, day preview ---------- */
+  .cal-tools { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin-bottom: 8px; }
+  .cal-tools input { flex: 1 1 220px; min-width: 0; }
+  #kevOnly { white-space: nowrap; }
+  #kevOnly.on, .hitchip.on { background: #24292f; color: #fff; border-color: #24292f; }
+  .hits-info { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .hits { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .hitchip { font-size: 12px; border: 1px solid var(--border); border-radius: 12px; padding: 1px 8px; background: var(--card); text-decoration: none; color: var(--text); }
+  .hitchip.note { border-color: var(--foc); }
+  .day.dim { opacity: .35; }
+  .day.hit { outline: 2px solid #d4a72c; outline-offset: -2px; background: #fffbe6; }
+  .day.kev::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: #f0b72f; }
+  .kstar { color: #d4a72c; font-size: 12px; line-height: 7px; font-weight: 700; }
+  .kstar i { font-style: normal; font-size: 10px; margin-left: 1px; }
+  .kevl { font-size: 11px; line-height: 15px; color: #7d4e00; font-weight: 600; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; flex: none; }
+  .day.kev .csum { -webkit-line-clamp: 2; }
+  .k.kev { background: #d4a72c; }
+  .kevbox, .pop-kev, .kevlist { background: #fff8e1; border: 1px solid #f0d58a; border-radius: 6px; padding: 6px 10px; margin: 8px 0; overflow-wrap: anywhere; }
+  .kevbox h4, .pop-kev h4, .kevlist h4 { margin: 0 0 4px; font-size: 13px; color: #9a6700; }
+  .kevbox ul, .pop-kev ul, .kevlist ul { margin: 0; padding-left: 18px; }
+  .kevlist li { font-size: 13px; margin: 2px 0; } .kevlist li > a:first-child { font-weight: 600; margin-right: 4px; }
+  .kdet { font-size: 12px; color: var(--muted); }
+  .editor label .kstar { margin-right: 4px; font-size: 13px; }
+  .editor label .opt { font-weight: normal; color: var(--faint); font-size: 12px; margin-left: 6px; }
+  #ed-events { min-height: 64px; }
+  details.dlogs { margin-top: 10px; font-size: 12px; color: var(--muted); }
+  details.dlogs summary { cursor: pointer; }
+  .daypop { position: fixed; z-index: 30; left: 0; top: 0; width: 360px; max-width: calc(100vw - 16px); max-height: min(70vh, 460px); overflow: auto; overscroll-behavior: contain;
+    background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 28px rgba(31,35,40,.2); padding: 0 12px 10px; font-size: 13px; overflow-wrap: anywhere; }
+  .daypop[hidden] { display: none; }
+  .daypop.sheet { left: 8px; right: 8px; top: auto; bottom: 8px; width: auto; max-width: none; max-height: 65vh; }
+  .pop-h { display: flex; align-items: center; gap: 8px; position: sticky; top: 0; background: var(--card); padding: 8px 0 6px; z-index: 1; }
+  .pop-h .pop-x { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+  .pop-close { border: none; background: none; font-size: 18px; line-height: 1; padding: 2px 4px; }
+  .daypop .dsec { margin-top: 8px; }
+  .daypop .none { color: var(--faint); margin: 6px 0; }
+  .daypop pre { max-height: 160px; overflow: auto; }
+  .pop-f { font-size: 11px; color: var(--faint); margin-top: 8px; }
+  .day { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+  .hint-touch { display: none; }
+  @media (hover: none) and (pointer: coarse) { .hint-touch { display: inline; } .hint-hover { display: none; } }
 
   footer { color: var(--muted); font-size: 12px; margin-top: 20px; }
   dialog { border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; max-width: 560px; width: calc(100% - 24px); }
@@ -279,7 +308,9 @@
     .dot { width: 6px; height: 6px; }
     .duebadge { top: 2px; right: 2px; min-width: 15px; height: 15px; line-height: 15px; font-size: 10px; padding: 0 3px; }
     .legend { flex-basis: 100%; order: 5; }
-    .hbody { padding-left: 12px; }
+    .kevl { display: none; }
+    .kstar { font-size: 10px; }
+    .day.kev::after { height: 2px; }
   }
 </style>
 </head>
@@ -293,7 +324,6 @@
 <nav class="tabs">
   <a href="#board" data-tab="board">看板</a>
   <a href="#calendar" data-tab="calendar">日历</a>
-  <a href="#history" data-tab="history">历史</a>
   <a href="#areas" data-tab="areas">领域</a>
   <a href="#resources" data-tab="resources">资源</a>
 </nav>
@@ -325,27 +355,25 @@
           <span class="month" id="calTitle"></span>
           <button type="button" id="calNext" aria-label="下个月">›</button>
           <button type="button" id="calToday">今天</button>
-          <span class="legend"><span><span class="dot plan on"></span>计划</span><span><span class="dot prac on"></span>实践</span><span><span class="dot rev on"></span>复盘</span><span><span class="duebadge" style="position:static;display:inline-block">n</span> 到期</span><span title="这周有周记"><span class="wkbar"></span>周记</span></span>
+          <span class="legend"><span><span class="dot plan on"></span>计划</span><span><span class="dot prac on"></span>实践</span><span><span class="dot rev on"></span>复盘</span><span><span class="duebadge" style="position:static;display:inline-block">n</span> 到期</span><span title="这周有周记"><span class="wkbar"></span>周记</span><span title="日记里有 ## 关键事件"><span class="kstar">★</span> 关键事件</span></span>
           <span class="spacer"></span>
           <span class="jump"><input type="date" id="jumpDate" aria-label="跳转到日期"><button type="button" id="jumpGo">跳转</button></span>
         </div>
+        <div class="cal-tools">
+          <input id="cq" type="search" placeholder="搜索日记、关键事件、周记 / 月记和流水，高亮匹配的日子" autocomplete="off" aria-label="在日历里搜索">
+          <button type="button" id="kevOnly" aria-pressed="false" title="只突出有关键事件的日子">★ 只看关键事件</button>
+        </div>
+        <div id="calHits"></div>
         <div class="cal" id="cal"></div>
+        <div id="kevList"></div>
         <div id="dailyNote"></div>
-        <div class="hint" style="margin-top:6px">键盘：← → 前后一天，↑ ↓ 前后一周</div>
+        <div class="hint" style="margin-top:6px"><span class="hint-hover">鼠标停在某天上可预览实践和复盘 · 键盘：← → 前后一天，↑ ↓ 前后一周</span><span class="hint-touch">长按某天可预览实践和复盘，点一下打开</span></div>
       </div>
       <div class="rcol">
         <div class="panel" id="detail"><div class="nodata">点击日历中的某一天查看详情</div></div>
         <div class="panel" id="periods"></div>
       </div>
     </div>
-  </section>
-
-  <section class="tab" id="tab-history">
-    <div class="hist-bar">
-      <input id="hq" type="search" placeholder="搜索日记、周记 / 月记和任务流水…">
-      <span class="hint" id="histInfo"></span>
-    </div>
-    <div id="history"></div>
   </section>
 
   <section class="tab" id="tab-areas">
@@ -362,6 +390,7 @@
     数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>areas.md</code>，以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
   </footer>
 </main>
+<div id="dayPop" class="daypop" role="dialog" hidden></div>
 
 <dialog id="settings">
   <h3>设置：GitHub 令牌</h3>
@@ -415,15 +444,16 @@
   var MOBILE_ORDER = ['in_progress', 'blocked', 'planned', 'inbox', 'done', 'reviewed'];
   var ACTION_LABEL = { create: '创建', plan: '计划', execute: '执行', status: '状态', review: '复盘', edit: '编辑' };
   var SECTIONS = [['plan', '计划', 'plan', '计'], ['practice', '实践', 'prac', '实'], ['review', '复盘', 'rev', '复']];
-  var PLACEHOLDER = { plan: '今天最重要的 1～3 件事', practice: '做了什么、卡在哪', review: '今晚复盘写一句就行' };
+  var EVSEC = ['events', '关键事件', 'kev', '★'], DSECS = SECTIONS.concat([EVSEC]);   // 关键事件 is optional: written only when used or already present
+  var PLACEHOLDER = { plan: '今天最重要的 1～3 件事', practice: '做了什么、卡在哪', review: '今晚复盘写一句就行', events: '可选。每行一条，如：- 资源页上线；有内容的日子在日历上标 ★' };
   var WEEK = ['日', '一', '二', '三', '四', '五', '六'];
-  var TL_COLLAPSED = 5, HIST_PAGE = 60;
+  var TL_COLLAPSED = 5;
 
   var state = {
     tasks: [], logs: [], loadedAt: null, src: '',
     daily: { list: {}, status: 'idle', error: '', cache: {}, pending: {}, tried: {} },
     tab: 'board', month: null, selected: null, edit: null, flash: null,
-    stat: '', mstatus: '', tlOpen: false, histOpen: {}, histLimit: HIST_PAGE, histLoad: null, pendingSave: false
+    stat: '', mstatus: '', tlOpen: false, cq: '', kevOnly: false, dload: null, pendingSave: false
   };
   var $ = function (id) { return document.getElementById(id); };
 
@@ -478,7 +508,7 @@
   function clearDraft(d) { try { localStorage.removeItem(DRAFT_KEY + d); } catch (e) {} }
   function saveDraft(e) {
     try {
-      var same = SECTIONS.every(function (s) { return String(e.values[s[0]] || '').trim() === String(e.base[s[0]] || '').trim(); });
+      var same = DSECS.every(function (s) { return String(e.values[s[0]] || '').trim() === String(e.base[s[0]] || '').trim(); });
       if (same) localStorage.removeItem(DRAFT_KEY + e.date); else localStorage.setItem(DRAFT_KEY + e.date, JSON.stringify(e.values));
     } catch (x) {}
   }
@@ -596,6 +626,7 @@
     if (/^计划/.test(h)) return 'plan';
     if (/^(实践|执行)/.test(h)) return 'practice';
     if (/^复盘/.test(h)) return 'review';
+    if (/^[★⭐☆\s]*(关键事件|大事记?|重要事件|里程碑)\s*([（(：:].*)?$/.test(h)) return 'events';
     return null;
   }
   function trimBlank(lines) {
@@ -604,7 +635,7 @@
     while (b > a && lines[b - 1].trim() === '') b--;
     return lines.slice(a, b).map(function (l) { return l.trim() === '' ? '' : l; }).join('\n');
   }
-  function parseDaily(text) { return parseDoc(text, SECTIONS, sectionKey); }
+  function parseDaily(text) { return parseDoc(text, DSECS, sectionKey); }
   function parseDoc(text, secDefs, keyOf) {
     var lines = String(text || '').replace(/^\uFEFF/, '').split(/\r?\n/);
     var title = '', pre = [], secs = [], cur = null, fence = false;
@@ -618,17 +649,24 @@
       }
       (cur ? cur.lines : pre).push(line);
     });
-    var out = { title: title, preamble: trimBlank(pre), others: [] };
+    var out = { title: title, preamble: trimBlank(pre), others: [], order: [] };
     secDefs.forEach(function (d) { out[d[0]] = ''; });
     secs.forEach(function (s) {
       var body = trimBlank(s.lines);
+      if (s.key && out.order.indexOf(s.key) < 0) out.order.push(s.key);
       if (s.key) out[s.key] = out[s.key] ? out[s.key] + (body ? '\n\n' + body : '') : body;
       else out.others.push({ heading: s.heading, body: body });
     });
     return out;
   }
   function sectionEmpty(s) { return String(s || '').replace(/<!--[\s\S]*?-->/g, '').trim() === ''; }
-  function serializeDaily(date, base, edits) { return serializeDoc(date, base, edits, SECTIONS); }
+  function serializeDaily(date, base, edits) {
+    var defs = SECTIONS.slice(), ord = (base && base.order) || [];
+    var isNew = !base || (!base.title && !base.preamble && !ord.length && !(base.others || []).length);
+    // 关键事件: kept where it was (top or after 复盘); new files follow templates/daily.md; old files only gain it when events are typed
+    if (!sectionEmpty(edits && edits.events) || ord.indexOf('events') >= 0 || isNew) { if (ord[0] === 'events') defs.unshift(EVSEC); else defs.push(EVSEC); }
+    return serializeDoc(date, base, edits, defs);
+  }
   function serializeDoc(title, base, edits, secDefs) {
     base = base || { preamble: '', others: [] };
     var parts = ['# ' + title, ''];
@@ -793,11 +831,61 @@
     var c = state.daily.cache[date], sha = state.daily.list[date];
     var info = { exists: !!(sha || (c && c.text)), loaded: !!c, parsed: c ? c.parsed : null, stale: c && c.stale, error: c && c.error, pending: !!state.daily.pending[date] };
     info.has = {};
-    SECTIONS.forEach(function (s) { info.has[s[0]] = !!(info.parsed && !sectionEmpty(info.parsed[s[0]])); });
-    info.any = info.has.plan || info.has.practice || info.has.review;
+    DSECS.forEach(function (s) { info.has[s[0]] = !!(info.parsed && !sectionEmpty(info.parsed[s[0]])); });
+    info.any = info.has.plan || info.has.practice || info.has.review || info.has.events;
+    info.events = info.parsed ? keyEvents(info.parsed.events) : [];
     var listed = state.daily.status === 'ok' || state.daily.status === 'missing';
     info.ready = info.exists ? info.loaded : (listed || !!state.daily.tried[date]) && !info.pending;
     return info;
+  }
+  // ---------- key events: optional "## 关键事件" section, one line (bullet) per event ----------
+  // Missing section → no marker. Indented lines belong to the event above (shown as detail, not counted).
+  function keyEvents(body) {
+    var out = [], fence = false;
+    String(body || '').replace(/<!--[\s\S]*?-->/g, '').replace(/\r\n?/g, '\n').split('\n').forEach(function (line) {
+      if (/^\s*(```|~~~)/.test(line)) { fence = !fence; return; }
+      if (fence || !line.trim()) return;
+      if (/^\s*#{1,6}\s/.test(line) || /^\s*([-*_])(\s*\1){2,}\s*$/.test(line)) return;   // stray heading / rule
+      var indent = /^[ \t]*/.exec(line)[0].replace(/\t/g, '    ').length;
+      var m = /^\s*(?:[-*+]\s+|[•·]\s*|\d+[.)、]\s+)(.*)$/.exec(line);
+      var text = (m ? m[1] : line.trim()).replace(/^\[[ xX]\]\s*/, '').replace(/^[★⭐☆]\s*/, '').trim();
+      if (!text) return;
+      if (indent >= 2 && out.length) out[out.length - 1].detail.push(text);
+      else out.push({ text: text, detail: [] });
+    });
+    return out;
+  }
+  function mdDate(ds) { var d = parseYmd(ds); return d ? (d.getFullYear() !== new Date().getFullYear() ? d.getFullYear() + '年' : '') + (d.getMonth() + 1) + '月' + d.getDate() + '日' : ds; }
+  function kevListHtml(evs) {
+    return '<ul>' + evs.map(function (e) { return '<li>' + inline(e.text) + (e.detail.length ? '<div class="kdet">' + e.detail.map(inline).join('<br>') + '</div>' : '') + '</li>'; }).join('') + '</ul>';
+  }
+
+  // One git-tree call lists daily/, weekly/ and monthly/ (instead of three contents listings);
+  // falls back to the per-directory listings if the tree call fails or is truncated.
+  function listAll() {
+    state.daily.status = 'loading'; state.notes.week.status = 'loading'; state.notes.month.status = 'loading';
+    function fallback() { return Promise.all([listDaily(), listNotes('week'), listNotes('month')]); }
+    var attempt = function (withToken) {
+      return api('GET', repoPath + '/git/trees/' + BRANCH + '?recursive=1', null, withToken).then(function (res) {
+        if (res.status === 401 && withToken && getToken()) return attempt(false);
+        if (!res.ok || !res.json || !Array.isArray(res.json.tree) || res.json.truncated) return fallback();
+        var dirs = {}, files = { daily: {}, weekly: {}, monthly: {} };
+        res.json.tree.forEach(function (f) {
+          if (f.type === 'tree') { dirs[f.path] = 1; return; }
+          var m = /^(daily|weekly|monthly)\/([^/]+)$/.exec(f.path || '');
+          if (m && f.type === 'blob') files[m[1]][m[2]] = f.sha;
+        });
+        var dl = {};
+        Object.keys(files.daily).forEach(function (n) { var m = /^(\d{4}-\d{2}-\d{2})\.md$/.exec(n); if (m) dl[m[1]] = files.daily[n]; });
+        state.daily.list = dl; state.daily.status = dirs[DAILY_DIR] ? 'ok' : 'missing'; state.daily.error = '';
+        ['week', 'month'].forEach(function (kind) {
+          var st = state.notes[kind], dir = PERIOD[kind].dir, list = {};
+          Object.keys(files[dir]).forEach(function (n) { var m = PERIOD[kind].re.exec(n); if (m) list[m[1]] = files[dir][n]; });
+          st.list = list; st.status = dirs[dir] ? 'ok' : 'missing'; st.error = '';
+        });
+      });
+    };
+    return attempt(true).catch(fallback);
   }
   function throttled(fn) { var raf = 0; return function () { if (raf) return; raf = requestAnimationFrame(function () { raf = 0; fn(); }); }; }
 
@@ -1001,8 +1089,10 @@
       var due = state.tasks.filter(function (t) { return normDate(t.due) === ds; });
       var off = d.getMonth() !== m.getMonth() ? (d < m ? '上月' : '下月') : '';
       var wkNote = d.getDay() === 1 && !!state.notes.week.list[isoWeek(ds).key];
-      var cls = 'day' + (off ? ' other' : '') + (ds === today ? ' today' : '') + (ds === state.selected ? ' sel' : '') + (d.getDay() === 0 || d.getDay() === 6 ? ' weekend' : '') + (wkNote ? ' wk-note' : '');
-      var h = '<button type="button" class="' + cls + '" data-date="' + ds + '" aria-label="' + esc(cnDate(ds, true)) + '"' + (wkNote ? ' title="' + esc(isoWeek(ds).key + ' 有周记') + '"' : '') + '>';
+      var evs = info.events, hit = state.cq ? historyMatch(ds, state.cq).any : true;
+      var dim = (state.cq && !hit) || (state.kevOnly && !evs.length);
+      var cls = 'day' + (off ? ' other' : '') + (evs.length ? ' kev' : '') + (dim ? ' dim' : state.cq && hit ? ' hit' : '') + (ds === today ? ' today' : '') + (ds === state.selected ? ' sel' : '') + (d.getDay() === 0 || d.getDay() === 6 ? ' weekend' : '') + (wkNote ? ' wk-note' : '');
+      var h = '<button type="button" class="' + cls + '" data-date="' + ds + '" aria-label="' + esc(cnDate(ds, true) + (evs.length ? '，关键事件 ' + evs.length + ' 个' : '')) + '"' + (wkNote ? ' title="' + esc(isoWeek(ds).key + ' 有周记') + '"' : '') + '>';
       h += '<span class="num"><b>' + d.getDate() + '</b>' + (off ? '<i>' + off + '</i>' : '') + '</span>';
       if (due.length) {
         var open = due.filter(function (t) { return !isClosed(t); });
@@ -1011,15 +1101,19 @@
       }
       h += '<span class="dots">' + (info.exists && !info.loaded ? '<span class="dot pending" title="加载中"></span>' :
         SECTIONS.map(function (s) { return '<span class="dot ' + s[2] + (info.has[s[0]] ? ' on' : '') + '" title="' + s[1] + (info.has[s[0]] ? '：有' : '：空') + '"></span>'; }).join(''));
+      if (evs.length) h += '<span class="kstar" title="' + esc('关键事件：' + evs.map(function (e) { return plainText(e.text); }).join('；')) + '">★' + (evs.length > 1 ? '<i>' + evs.length + '</i>' : '') + '</span>';
       var ment = dayMentions(ds);
       if (ment.length) h += '<span class="tref" title="' + esc('日记提到：' + ment.map(function (t) { return t.id + ' ' + t.title; }).join('；')) + '">任务' + (ment.length > 1 ? '×' + ment.length : '') + '</span>';
       h += '</span>';
+      if (evs.length) h += '<span class="kevl">' + esc(plainText(evs[0].text)) + '</span>';
       var sum = firstLine(info.parsed);
       if (sum) h += '<span class="csum">' + esc(sum) + '</span>';
       if (logCount[ds]) h += '<span class="logmark" title="任务流水 ' + logCount[ds] + ' 条">·' + logCount[ds] + '</span>';
       html += h + '</button>';
     });
     $('cal').innerHTML = html;
+    $('calHits').innerHTML = calHitsHtml();
+    $('kevList').innerHTML = kevMonthHtml();
     var note = '';
     if (state.daily.status === 'error') note = '<div class="msg error">无法列出 daily/ 目录：' + esc(state.daily.error) + ' 日历上的日记标记可能不完整，点开某一天仍会尝试读取。</div>';
     else if (state.daily.status === 'missing') note = '<div class="msg info">仓库里还没有 daily/ 目录，第一次保存日记时会自动创建。</div>';
@@ -1029,8 +1123,31 @@
   function editorActive() { return !!(state.edit && !state.edit.loading && state.edit.date === state.selected && $('ed-plan')); }
   var calRedraw = throttled(function () {
     if (state.tab === 'calendar') { renderCalendar(); if (!editorActive()) renderDetail(); if (!periodEditorActive()) renderPeriods(); }
-    if (state.tab === 'history') renderHistory();
+    refreshPop();
   });
+  function calHitsHtml() {
+    var q = state.cq; if (!q) return '';
+    var dates = historyDates().filter(function (ds) { return historyMatch(ds, q).any; }), notes = noteMatches(q), dl = state.dload;
+    var h = '<div class="hits-info">' + (dl && dl.done < dl.total ? '正在读取日记 ' + dl.done + '/' + dl.total + '… ' : '') + '匹配 ' + dates.length + ' 天' +
+      (notes.length ? ' · 周记 / 月记 ' + notes.length + ' 篇' : '') + ' · <button type="button" class="link" data-cq="clear">清除搜索</button></div>';
+    if (dates.length || notes.length) h += '<div class="hits">' + dates.slice(0, 80).map(function (ds) {
+      return '<a class="hitchip' + (ds === state.selected ? ' on' : '') + '" href="#calendar/' + ds + '">' + esc(mdDate(ds)) + '</a>';
+    }).join('') + (dates.length > 80 ? '<span class="hint">…另有 ' + (dates.length - 80) + ' 天</span>' : '') + notes.map(function (m) {
+      return '<a class="hitchip note" href="#calendar/' + periodStart(m.kind, m.key) + '">' + esc(m.title) + '</a>';
+    }).join('') + '</div>';
+    return h;
+  }
+  function kevMonthHtml() {
+    if (!state.kevOnly) return '';
+    var m = state.month, rows = gridDates().filter(function (d) { return d.getMonth() === m.getMonth(); }).map(ymd);
+    var pending = rows.some(function (ds) { var i = dayInfo(ds); return i.exists && !i.loaded; });
+    var h = '<div class="kevlist"><h4>★ ' + (m.getMonth() + 1) + '月的关键事件' + (pending ? '（读取中…）' : '') + '</h4>', n = 0;
+    rows.forEach(function (ds) {
+      var evs = dayInfo(ds).events; if (!evs.length) return; n++;
+      h += (n === 1 ? '<ul>' : '') + '<li><a href="#calendar/' + ds + '">' + esc(mdDate(ds)) + '</a>' + evs.map(function (e) { return inline(e.text); }).join('；') + '</li>';
+    });
+    return h + (n ? '</ul>' : '<div class="none">这个月还没有关键事件。在日记里加 <code>## 关键事件</code>（每行一条），或点某天「编辑」填写。</div>') + '</div>';
+  }
   function needsLoad(ds) { var c = state.daily.cache[ds], sha = state.daily.list[ds]; return !!sha && !(c && c.sha === sha); }
   function loadVisibleMonth() { return loadMany(gridDates().map(ymd).filter(needsLoad), calRedraw); }
 
@@ -1053,18 +1170,18 @@
   }
   function makeEdit(date, c, inline, focus) {
     var p = c && c.text ? c.parsed : parseDaily('');
-    var values = { plan: p.plan, practice: p.practice, review: p.review }, restored = false;
+    var values = { plan: p.plan, practice: p.practice, review: p.review, events: p.events }, restored = false;
     var dr = loadDraft(date);
-    if (dr && SECTIONS.some(function (s) { return String(dr[s[0]] || '').trim() !== String(values[s[0]] || '').trim(); })) {
-      values = { plan: dr.plan || '', practice: dr.practice || '', review: dr.review || '' }; restored = true;
+    if (dr && DSECS.some(function (s) { return String(dr[s[0]] || '').trim() !== String(values[s[0]] || '').trim(); })) {
+      values = { plan: dr.plan || '', practice: dr.practice || '', review: dr.review || '', events: dr.events || '' }; restored = true;
     }
     return { date: date, loading: false, inline: !!inline, focus: focus || null, focused: !!inline, base: p, baseText: c && c.text ? c.text : '', sha: c ? c.sha : null,
       values: values, remote: null, status: restored ? { kind: 'info', text: '已恢复这一天未保存的草稿（还没提交到仓库）。' } : null, saving: false };
   }
   function inProgressTasks() { return state.tasks.filter(function (t) { return t.status === 'in_progress'; }); }
-  function baseEmpty(e) { return !!e.base && !SECTIONS.some(function (s) { return !sectionEmpty(e.base[s[0]]); }); }
+  function baseEmpty(e) { return !!e.base && !DSECS.some(function (s) { return !sectionEmpty(e.base[s[0]]); }); }
   function showPrompt(e) { return e.date === todayStr() && baseEmpty(e) && inProgressTasks().length > 0 && sectionEmpty(e.values.plan); }
-  function isDirty(e) { return SECTIONS.some(function (s) { return String(e.values[s[0]] || '').trim() !== String(e.base[s[0]] || '').trim(); }); }
+  function isDirty(e) { return DSECS.some(function (s) { return String(e.values[s[0]] || '').trim() !== String(e.base[s[0]] || '').trim(); }); }
   function editorHtml(e) {
     if (e.loading) return '<div class="nodata">正在读取…</div>';
     var h = '<div class="editor">';
@@ -1073,8 +1190,8 @@
       h += '<div class="prompt" id="fillPrompt"' + (showPrompt(e) ? '' : ' style="display:none"') + '><span>计划还空。把' + titles + '写进今天的计划？</span>' +
         '<button type="button" class="primary" data-act="fill">一键写入计划</button></div>';
     } else if (e.inline) h += '<div class="hint">这一天还是空的，直接写，写完点「保存」。</div>';
-    SECTIONS.forEach(function (s) {
-      h += '<label for="ed-' + s[0] + '"><span class="dot ' + s[2] + ' on"></span>' + s[1] + '</label>' +
+    DSECS.forEach(function (s) {
+      h += '<label for="ed-' + s[0] + '">' + (s[0] === 'events' ? '<span class="kstar">★</span>' + s[1] + '<span class="opt">可选 · 每行一条，日历上会标 ★</span>' : '<span class="dot ' + s[2] + ' on"></span>' + s[1]) + '</label>' +
         '<textarea id="ed-' + s[0] + '" data-date="' + esc(e.date) + '" placeholder="' + esc(PLACEHOLDER[s[0]]) + '">' + esc(e.values[s[0]]) + '</textarea>';
     });
     h += '<div class="hint">支持 Markdown（列表、<code>- [ ]</code> 待办、**粗体**、链接、代码）。写 <code>T-YYYYMMDD-NN</code> 会链接到任务；任务状态仍按规则在 task.md / index.md / log.csv 里改。</div>';
@@ -1096,7 +1213,7 @@
     // keep typed text + caret across re-renders
     var act = document.activeElement, keepId = act && /^ed-/.test(act.id) ? act.id : null;
     var selA = keepId ? act.selectionStart : 0, selB = keepId ? act.selectionEnd : 0;
-    if (e && !e.loading) SECTIONS.forEach(function (s) { var old = $('ed-' + s[0]); if (old && old.getAttribute('data-date') === date) e.values[s[0]] = old.value; });
+    if (e && !e.loading) DSECS.forEach(function (s) { var old = $('ed-' + s[0]); if (old && old.getAttribute('data-date') === date) e.values[s[0]] = old.value; });
 
     var rel = date === today ? '<span class="todaytag">今天</span>' : date > today ? '<span class="future">未来</span>' : '';
     var h = '<h3>' + esc(cnDate(date)) + '</h3><div class="sub">' + rel + '<span>' + esc(date) + '</span>';
@@ -1115,6 +1232,7 @@
       if (!info.any) h += '<div class="nodata">还没有记录</div>' + primary;
       else {
         h += primary;
+        if (info.events.length) h += '<div class="kevbox"><h4>★ 关键事件</h4>' + kevListHtml(info.events) + '</div>';
         SECTIONS.forEach(function (s) {
           var body = info.parsed[s[0]];
           h += '<div class="dsec ' + s[2] + '"><h4>' + s[1] + '</h4>' + (sectionEmpty(body) ? '<div class="none">（空）</div>' : '<div class="md">' + renderMd(body) + '</div>') + '</div>';
@@ -1125,10 +1243,10 @@
       });
     }
     var n = logsOn(date).length;
-    if (n) h += '<div class="more">这天有 ' + n + ' 条任务流水 · <a href="#history/' + date + '">在历史中查看</a></div>';
+    if (n) h += '<details class="dlogs"><summary>这天有 ' + n + ' 条任务流水</summary><ul class="mini">' + logsOn(date).map(function (l) { return '<li><span class="t">' + esc(l.time.slice(11)) + '</span> ' + logLine(l, '') + '</li>'; }).join('') + '</ul></details>';
     el.innerHTML = h;
     if (e && !e.loading) {
-      SECTIONS.forEach(function (s) { $('ed-' + s[0]).addEventListener('input', function (ev) { e.values[s[0]] = ev.target.value; saveDraft(e); updatePrompt(); updateEditorButtons(); }); });
+      DSECS.forEach(function (s) { $('ed-' + s[0]).addEventListener('input', function (ev) { e.values[s[0]] = ev.target.value; saveDraft(e); updatePrompt(); updateEditorButtons(); }); });
       if (keepId && $(keepId)) { $(keepId).focus(); try { $(keepId).setSelectionRange(selA, selB); } catch (x) {} }
       else if (e.focus && !e.focused) { e.focused = true; var ta = $('ed-' + e.focus); if (ta) ta.focus(); }
       updateEditorButtons();
@@ -1165,11 +1283,11 @@
   function setEditStatus(kind, text) { if (state.edit) state.edit.status = { kind: kind, text: text }; renderDetail(); }
   function saveEdit() {
     var e = state.edit; if (!e || e.saving || e.loading) return;
-    SECTIONS.forEach(function (s) { var ta = $('ed-' + s[0]); if (ta && ta.getAttribute('data-date') === e.date) e.values[s[0]] = ta.value; });
+    DSECS.forEach(function (s) { var ta = $('ed-' + s[0]); if (ta && ta.getAttribute('data-date') === e.date) e.values[s[0]] = ta.value; });
     if (!getToken()) { state.pendingSave = true; openSettings('保存日记需要 GitHub 令牌，填好后会自动继续保存。'); return; }
     var text = serializeDaily(e.date, e.base, e.values);
     if ((e.baseText && text === e.baseText) || (!e.baseText && !isDirty(e))) return setEditStatus('info', '没有改动。');
-    var changed = SECTIONS.filter(function (s) { return String(e.values[s[0]] || '').trim() !== String(e.base[s[0]] || '').trim(); });
+    var changed = DSECS.filter(function (s) { return String(e.values[s[0]] || '').trim() !== String(e.base[s[0]] || '').trim(); });
     var labels = (changed.length ? changed : SECTIONS).map(function (s) { return s[1]; }).join('/');
     var body = { message: '日记 ' + e.date + '：' + (e.baseText ? '更新' : '新建') + labels, content: utf8ToB64(text), branch: BRANCH };
     if (e.sha) body.sha = e.sha;
@@ -1398,7 +1516,7 @@
       setPStatus(pe, 'error', '保存失败：' + esc(apiErrText(res)) + (res.status === 401 ? ' <button type="button" class="link" data-pact="settings">打开设置</button>' : ''));
     }).catch(function (err) { pe.saving = false; setPStatus(pe, 'error', '保存失败：' + esc(err.message)); });
   }
-  // history search over week / month notes
+  // calendar search over week / month notes
   function noteKeys(kind) {
     var st = state.notes[kind], set = {};
     Object.keys(st.list).forEach(function (k) { set[k] = 1; });
@@ -1422,11 +1540,10 @@
   function loadAllNotes() {
     var need = [];
     ['week', 'month'].forEach(function (kind) { Object.keys(state.notes[kind].list).forEach(function (k) { if (needsNote(kind, k)) need.push([kind, k]); }); });
-    var redraw = throttled(function () { if (state.tab === 'history') renderHistory(); });
-    return Promise.all(need.map(function (x) { return loadNote(x[0], x[1]).then(redraw); }));
+    return Promise.all(need.map(function (x) { return loadNote(x[0], x[1]).then(calRedraw); }));
   }
 
-  // ---------- history = 日历的检索 ----------
+  // ---------- calendar search (replaces the old 历史 tab) ----------
   function historyDates() {
     var set = {};
     Object.keys(state.daily.list).forEach(function (d) { set[d] = 1; });
@@ -1437,7 +1554,7 @@
   function historyMatch(ds, q) {
     var info = dayInfo(ds), p = info.parsed, hits = { secs: [], logs: [], date: ds.indexOf(q) >= 0 };
     if (p) {
-      SECTIONS.forEach(function (s) { var x = excerpt(p[s[0]], q); if (x) hits.secs.push({ cls: s[2], label: s[1], html: x }); });
+      DSECS.forEach(function (s) { var x = excerpt(p[s[0]], q); if (x) hits.secs.push({ cls: s[2], label: s[1], html: x }); });
       p.others.forEach(function (o) { var x = excerpt(o.heading + ' ' + o.body, q); if (x) hits.secs.push({ cls: 'log', label: o.heading, html: x }); });
       if (p.preamble) { var x = excerpt(p.preamble, q); if (x) hits.secs.push({ cls: 'log', label: '正文', html: x }); }
     }
@@ -1447,55 +1564,94 @@
     hits.any = hits.date || hits.secs.length > 0 || hits.logs.length > 0;
     return hits;
   }
-  function renderHistory() {
-    var q = $('hq').value.trim().toLowerCase(), today = todayStr();
-    var all = historyDates(), dates = q ? all : all.slice(0, state.histLimit), html = '', shown = 0;
-    dates.forEach(function (ds) {
-      var info = dayInfo(ds), logs = logsOn(ds), hits = q ? historyMatch(ds, q) : null;
-      if (hits && !hits.any) return;
-      shown++;
-      var open = q ? true : !!state.histOpen[ds];
-      var rel = ds === today ? '<span class="todaytag">今天</span>' : ds > today ? '<span class="future">计划中</span>' : '';
-      var yn = function (k, label) { return label + ' ' + (info.exists && !info.loaded ? '…' : info.has[k] ? '<span class="y">有</span>' : '<span class="n">无</span>'); };
-      html += '<div class="hday' + (open ? ' open' : '') + '" id="h-' + ds + '"><div class="hd" data-toggle="' + ds + '"><span class="tog">▸</span>' +
-        '<a href="#calendar/' + ds + '" title="在日历中打开">' + esc(cnDate(ds)) + '</a>' + rel +
-        '<span class="hsum">' + yn('plan', '计划') + ' · ' + yn('practice', '实践') + ' · ' + yn('review', '复盘') + ' · 任务变动 ' +
-        (logs.length ? '<span class="y">' + logs.length + '</span>' : '<span class="n">0</span>') + '</span></div>';
-      if (open) {
-        html += '<div class="hbody">';
-        if (hits) hits.secs.forEach(function (x) { html += '<div class="snip"><span class="k ' + x.cls + '">' + esc(x.label) + '</span>' + x.html + '</div>'; });
-        else {
-          SECTIONS.forEach(function (s) { if (info.has[s[0]]) html += '<div class="snip"><span class="k ' + s[2] + '">' + s[1] + '</span>' + esc(plainSnippet(info.parsed[s[0]], 160)) + '</div>'; });
-          if (info.exists && !info.loaded) html += '<div class="snip hint">日记加载中…</div>';
-          else if (!info.any) html += '<div class="snip hint">这天没有写日记。</div>';
-        }
-        var ls = hits ? hits.logs : logs;
-        if (ls.length) html += '<ul class="mini">' + ls.map(function (l) { return '<li><span class="t">' + esc(l.time.slice(11)) + '</span> ' + logLine(l, q) + '</li>'; }).join('') + '</ul>';
-        html += '<div class="more"><a href="#calendar/' + ds + '">在日历中打开这一天 →</a></div></div>';
-      }
-      html += '</div>';
-    });
-    var notes = q ? noteMatches(q) : [];
-    var nh = notes.map(function (m) {
-      return '<div class="hday open"><div class="hd"><span class="tog">▸</span><a href="#calendar/' + periodStart(m.kind, m.key) + '" title="在日历中打开">' + esc(m.title) + '</a></div><div class="hbody">' +
-        m.secs.map(function (x) { return '<div class="snip"><span class="k ' + x.cls + '">' + esc(x.label) + '</span>' + x.html + '</div>'; }).join('') +
-        '<div class="more"><a href="#calendar/' + periodStart(m.kind, m.key) + '">在日历中打开 →</a></div></div></div>';
-    }).join('');
-    if (!shown && !notes.length) html = '<div class="nodata">' + (q ? '没有匹配「' + esc(q) + '」的日记、周记 / 月记或流水' : '还没有记录') + '</div>';
-    else html = nh + html;
-    if (!q && all.length > dates.length) html += '<div style="text-align:center"><button type="button" id="histMore">加载更早的 ' + Math.min(HIST_PAGE, all.length - dates.length) + ' 天</button></div>';
-    $('history').innerHTML = html;
-    var hl = state.histLoad;
-    $('histInfo').textContent = hl && hl.done < hl.total ? '正在读取日记 ' + hl.done + '/' + hl.total + '…' : (q ? '找到 ' + shown + ' 天' + (notes.length ? ' · 周记 / 月记 ' + notes.length + ' 篇' : '') : '共 ' + all.length + ' 天');
-  }
-  // history search needs every daily file: reuse the listing, fetch the uncached ones 4 at a time
+  // calendar search needs every daily file: reuse the listing, fetch the uncached ones 4 at a time (Pages copies, no API calls)
   function loadAllDaily() {
+    if (state.dload && state.dload.done < state.dload.total) return Promise.resolve();
     var need = Object.keys(state.daily.list).filter(needsLoad).sort().reverse();
     if (!need.length) return Promise.resolve();
-    state.histLoad = { done: 0, total: need.length };
-    var redraw = throttled(function () { if (state.tab === 'history') renderHistory(); });
-    return loadMany(need, function () { state.histLoad.done++; redraw(); }).then(function () { if (state.tab === 'history') renderHistory(); });
+    state.dload = { done: 0, total: need.length };
+    return loadMany(need, function () { state.dload.done++; calRedraw(); }).then(calRedraw);
   }
+  // ---------- day preview: hover (mouse) / long-press (touch) shows 关键事件 + 实践 + 复盘 ----------
+  var pop = { date: null, mode: '', sig: '', showT: 0, hideT: 0, lpT: 0, lp: null, suppress: 0, suppressDate: null, lastTouch: 0 };
+  function truncLines(src, maxLines, maxChars) {
+    var lines = String(src || '').replace(/<!--[\s\S]*?-->/g, '').replace(/\r\n?/g, '\n').replace(/^\n+|\n+$/g, '').split('\n'), out = [], chars = 0;
+    for (var i = 0; i < lines.length; i++) {
+      if (out.length >= maxLines || (out.length && chars + lines[i].length > maxChars)) {
+        return { text: out.join('\n'), more: lines.slice(i).filter(function (l) { return l.trim(); }).length };
+      }
+      out.push(lines[i].length > maxChars ? lines[i].slice(0, maxChars) + '…' : lines[i]); chars += lines[i].length;
+    }
+    return { text: out.join('\n'), more: 0 };
+  }
+  function popSig(ds) { var c = state.daily.cache[ds], i = dayInfo(ds); return [i.ready, i.exists, i.loaded, c ? c.sha + ':' + c.text.length : '', i.error || ''].join('|'); }
+  function dayPopHtml(ds, mode) {
+    var info = dayInfo(ds), p = info.parsed, today = todayStr();
+    var h = '<div class="pop-h"><b>' + esc(cnDate(ds)) + '</b>' + (ds === today ? '<span class="todaytag">今天</span>' : '');
+    if (mode === 'sheet') h += '<span class="pop-x"><button type="button" class="link" data-pop="open">打开这一天</button><button type="button" class="pop-close" data-pop="close" aria-label="关闭预览">✕</button></span>';
+    h += '</div>';
+    if (!info.ready || (info.exists && !info.loaded)) return h + '<div class="nodata">正在读取日记…</div>';
+    if (info.error) h += '<div class="msg error">读取日记失败：' + esc(info.error) + '</div>';
+    if (info.events.length) h += '<div class="pop-kev"><h4>★ 关键事件</h4>' + kevListHtml(info.events) + '</div>';
+    function sec(k, label, cls, n, c, moreText) {
+      var t = truncLines(p[k], n, c);
+      return '<div class="dsec ' + cls + '"><h4>' + label + '</h4><div class="md">' + renderMd(t.text) + '</div>' + (t.more ? '<div class="more">…还有 ' + t.more + ' 行' + moreText + '</div>' : '') + '</div>';
+    }
+    var hasPr = p && !sectionEmpty(p.practice), hasRv = p && !sectionEmpty(p.review);
+    if (hasPr) h += sec('practice', '实践', 'prac', 18, 900, '，点开这一天看全部');
+    if (hasRv) h += sec('review', '复盘', 'rev', 14, 700, '，点开这一天看全部');
+    if (!hasPr && !hasRv) {
+      h += '<div class="none">' + (info.exists ? '实践、复盘还没写' : '这天还没有日记') + '</div>';
+      if (p && !sectionEmpty(p.plan)) h += sec('plan', '计划', 'plan', 8, 400, '');   // fall back to 计划 so the preview is not empty
+    }
+    if (mode !== 'sheet') h += '<div class="pop-f">点击打开这一天</div>';
+    return h;
+  }
+  function placePop() {
+    var el = $('dayPop');
+    if (pop.mode === 'sheet') { el.style.left = ''; el.style.top = ''; return; }
+    var cell = document.querySelector('#cal [data-date="' + pop.date + '"]');
+    if (!cell || !cell.offsetParent) { hidePop(); return; }
+    var r = cell.getBoundingClientRect(), W = el.offsetWidth, H = el.offsetHeight, vw = document.documentElement.clientWidth, vh = window.innerHeight, g = 8, left, top;
+    if (r.right + g + W <= vw - g) left = r.right + g;
+    else if (r.left - g - W >= g) left = r.left - g - W;
+    if (left != null) top = Math.max(g, Math.min(r.top, vh - H - g));
+    else {
+      left = Math.max(g, Math.min(r.left, vw - W - g));
+      top = r.bottom + g + H <= vh - g ? r.bottom + g : Math.max(g, r.top - g - H);
+    }
+    el.style.left = Math.round(left) + 'px'; el.style.top = Math.round(top) + 'px';
+  }
+  function showPop(ds, mode) {
+    var el = $('dayPop');
+    clearTimeout(pop.showT); clearTimeout(pop.hideT);
+    pop.date = ds; pop.mode = mode; pop.sig = popSig(ds);
+    el.className = 'daypop' + (mode === 'sheet' ? ' sheet' : '');
+    el.setAttribute('aria-label', cnDate(ds) + ' 预览');
+    el.innerHTML = dayPopHtml(ds, mode); el.hidden = false; el.scrollTop = 0;
+    placePop();
+    if (!dayInfo(ds).ready || needsLoad(ds)) loadDay(ds).then(function () { calRedraw(); });
+  }
+  function refreshPop() {
+    var el = $('dayPop');
+    if (!pop.date || el.hidden) return;
+    var sig = popSig(pop.date);
+    if (sig !== pop.sig) { var st = el.scrollTop; pop.sig = sig; el.innerHTML = dayPopHtml(pop.date, pop.mode); el.scrollTop = st; }
+    placePop();
+  }
+  function hidePop() {
+    clearTimeout(pop.showT); clearTimeout(pop.hideT);
+    pop.date = null; pop.mode = '';
+    var el = $('dayPop'); if (el && !el.hidden) { el.hidden = true; el.innerHTML = ''; }
+  }
+  function hoverWorthy(ds) {
+    var info = dayInfo(ds), listed = state.daily.status === 'ok' || state.daily.status === 'missing';
+    return info.exists || !listed;
+  }
+  function schedHide() { clearTimeout(pop.hideT); pop.hideT = setTimeout(function () { if (pop.mode === 'hover') hidePop(); }, 220); }
+  function isMouse(ev) { return ev.pointerType === 'mouse' || ev.pointerType === 'pen'; }
+  function cancelLp() { clearTimeout(pop.lpT); pop.lp = null; }
+
 
 
   // ---------- 领域: areas.md (one "## " section per area), whole-file editor ----------
@@ -1890,6 +2046,7 @@
     state.tab = tab;
     document.querySelectorAll('nav.tabs a').forEach(function (a) { a.classList.toggle('active', a.getAttribute('data-tab') === tab); });
     document.querySelectorAll('.tab').forEach(function (s) { s.classList.toggle('active', s.id === 'tab-' + tab); });
+    if (tab !== 'calendar') hidePop();
   }
   function selectDay(ds, fromHash) {
     if (!parseYmd(ds)) return;
@@ -1906,16 +2063,14 @@
   }
   function applyHash() {
     var h = decodeURIComponent(location.hash.replace(/^#/, '')), parts = h.split('/');
-    var tab = ['board', 'calendar', 'history', 'areas', 'resources'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
+    if (parts[0] === 'history') {   // the 历史 tab is gone: old links open the calendar (on that day if given)
+      parts = ['calendar', parseYmd(parts[1]) ? parts[1] : ''];
+      history.replaceState(null, '', '#calendar' + (parts[1] ? '/' + parts[1] : ''));
+    }
+    var tab = ['board', 'calendar', 'areas', 'resources'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
     setTab(tab);
     if (tab === 'board') renderBoardTab();
     if (tab === 'calendar') selectDay(parseYmd(parts[1]) ? parts[1] : (state.selected || todayStr()), true);
-    if (tab === 'history') {
-      if (parseYmd(parts[1])) state.histOpen[parts[1]] = true;
-      renderHistory();
-      if (parseYmd(parts[1])) { var el = $('h-' + parts[1]); if (el) el.scrollIntoView({ block: 'center' }); }
-      loadAllDaily(); loadAllNotes();
-    }
     if (tab === 'areas') { if (!areasEditorActive()) renderAreas(); loadAreas(); }
     if (tab === 'resources') { renderResources(); loadResources(); }
   }
@@ -1934,7 +2089,7 @@
     if (!(state.areas.edit && state.areas.edit.saving)) { state.areas.edit = null; state.areas.flash = null; state.areas.status = ''; }   // unsaved areas text stays as a draft
     state.res.status = ''; state.res.parsed = null; state.res.gen++;   // re-read info/resources.md on 刷新
     var core = Promise.all([loadFile('index.md'), loadFile('log.csv')]);
-    var daily = Promise.all([listDaily(), listNotes('week'), listNotes('month')]);
+    var daily = listAll();
     return core.then(function (res) {
       state.tasks = parseIndex(res[0].text);
       state.logs = parseCSV(res[1].text);
@@ -1960,12 +2115,76 @@
   });
   $('chips').addEventListener('click', function (ev) { var b = ev.target.closest('[data-ms]'); if (!b) return; state.mstatus = b.getAttribute('data-ms'); renderBoard(); });
   $('tlToggle').addEventListener('click', function () { state.tlOpen = !state.tlOpen; renderTimeline(); });
-  $('hq').addEventListener('input', renderHistory);
-  $('history').addEventListener('click', function (ev) {
-    if (ev.target.closest('a')) return;
-    if (ev.target.id === 'histMore') { state.histLimit += HIST_PAGE; renderHistory(); return; }
-    var b = ev.target.closest('[data-toggle]'); if (b) { var d = b.getAttribute('data-toggle'); state.histOpen[d] = !state.histOpen[d]; renderHistory(); }
+  $('cq').addEventListener('input', function (ev) {
+    state.cq = ev.target.value.trim().toLowerCase();
+    if (state.cq) { loadAllDaily(); loadAllNotes(); }
+    hidePop(); renderCalendar();
   });
+  $('kevOnly').addEventListener('click', function () {
+    state.kevOnly = !state.kevOnly;
+    $('kevOnly').classList.toggle('on', state.kevOnly); $('kevOnly').setAttribute('aria-pressed', String(state.kevOnly));
+    renderCalendar();
+  });
+  $('calHits').addEventListener('click', function (ev) {
+    if (!ev.target.closest('[data-cq="clear"]')) return;
+    $('cq').value = ''; state.cq = ''; renderCalendar();
+  });
+  // hover preview (mouse / pen)
+  $('cal').addEventListener('pointerover', function (ev) {
+    if (!isMouse(ev) || pop.mode === 'sheet') return;
+    var b = ev.target.closest('[data-date]'); if (!b) return;
+    clearTimeout(pop.hideT);
+    var ds = b.getAttribute('data-date');
+    if (pop.date === ds) return;
+    clearTimeout(pop.showT);
+    pop.showT = setTimeout(function () { if (hoverWorthy(ds)) showPop(ds, 'hover'); else hidePop(); }, pop.date ? 90 : 260);
+  });
+  $('cal').addEventListener('pointerout', function (ev) {
+    if (!isMouse(ev) || pop.mode === 'sheet') return;
+    var to = ev.relatedTarget;
+    if (to && to.closest && (to.closest('#dayPop') || to.closest('#cal [data-date]'))) return;
+    clearTimeout(pop.showT); schedHide();
+  });
+  $('dayPop').addEventListener('pointerenter', function (ev) { if (isMouse(ev)) { clearTimeout(pop.hideT); clearTimeout(pop.showT); } });
+  $('dayPop').addEventListener('pointerleave', function (ev) {
+    if (!isMouse(ev) || pop.mode !== 'hover') return;
+    var to = ev.relatedTarget, cell = to && to.closest && to.closest('#cal [data-date]');
+    if (cell && cell.getAttribute('data-date') === pop.date) return;
+    schedHide();
+  });
+  $('dayPop').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-pop]');
+    if (!b) { if (pop.mode === 'hover' && !ev.target.closest('a')) { var d = pop.date; hidePop(); selectDay(d); } return; }
+    if (b.getAttribute('data-pop') === 'open') { var ds = pop.date; hidePop(); selectDay(ds); var el = $('detail'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); }
+    else hidePop();
+  });
+  // touch: long-press a day for the same preview as a bottom sheet; a normal tap still opens the day
+  $('cal').addEventListener('pointerdown', function (ev) {
+    if (ev.pointerType !== 'touch') return;
+    pop.lastTouch = Date.now(); pop.suppressDate = null;   // a new touch gesture ends any pending click suppression
+    var b = ev.target.closest('[data-date]'); if (!b) return;
+    var ds = b.getAttribute('data-date');
+    cancelLp(); pop.lp = { x: ev.clientX, y: ev.clientY };
+    pop.lpT = setTimeout(function () {
+      pop.lp = null; pop.suppress = Date.now(); pop.suppressDate = ds;
+      try { if (navigator.vibrate) navigator.vibrate(10); } catch (x) {}
+      showPop(ds, 'sheet');
+    }, 450);
+  });
+  $('cal').addEventListener('pointermove', function (ev) { if (pop.lp && (Math.abs(ev.clientX - pop.lp.x) > 10 || Math.abs(ev.clientY - pop.lp.y) > 10)) cancelLp(); });
+  ['pointerup', 'pointercancel'].forEach(function (t) { $('cal').addEventListener(t, function () { if (pop.lp) cancelLp(); else if (pop.suppressDate) pop.suppress = Date.now(); }); });
+  $('cal').addEventListener('contextmenu', function (ev) { if (Date.now() - pop.lastTouch < 1500 && ev.target.closest('[data-date]')) ev.preventDefault(); });
+  document.addEventListener('pointerdown', function (ev) {
+    if (!pop.date || ev.target.closest('#dayPop')) return;
+    if (pop.mode === 'sheet' || !ev.target.closest('#cal')) hidePop();
+  }, true);
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && pop.date) hidePop(); });
+  window.addEventListener('scroll', function (ev) {
+    var t = ev.target;
+    if (pop.mode !== 'hover' || (t && t.nodeType === 1 && t.closest('#dayPop'))) return;
+    hidePop();
+  }, true);
+  window.addEventListener('resize', function () { if (pop.mode === 'hover') hidePop(); });
   $('refresh').addEventListener('click', load);
   $('openSettings').addEventListener('click', function () { state.pendingSave = false; openSettings(); });
   $('calPrev').addEventListener('click', function () { shiftMonth(-1); });
@@ -1973,7 +2192,12 @@
   $('calToday').addEventListener('click', function () { selectDay(todayStr()); });
   $('jumpGo').addEventListener('click', function () { selectDay($('jumpDate').value); });
   $('jumpDate').addEventListener('keydown', function (ev) { if (ev.key === 'Enter') selectDay($('jumpDate').value); });
-  $('cal').addEventListener('click', function (ev) { var b = ev.target.closest('[data-date]'); if (b) selectDay(b.getAttribute('data-date')); });
+  $('cal').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-date]'); if (!b) return;
+    var ds = b.getAttribute('data-date');
+    if (pop.suppressDate === ds && Date.now() - pop.suppress < 600) { pop.suppressDate = null; ev.preventDefault(); return; }   // the click ending a long-press only shows the preview
+    hidePop(); selectDay(ds);
+  });
   $('detail').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-act]'); if (!b) return;
     var act = b.getAttribute('data-act'), e = state.edit;
@@ -1984,8 +2208,8 @@
     else if (act === 'cancel' && e) {
       clearDraft(e.date);
       if (e.inline) {
-        e.values = { plan: e.base.plan, practice: e.base.practice, review: e.base.review }; e.status = null;
-        SECTIONS.forEach(function (s) { var ta = $('ed-' + s[0]); if (ta) ta.value = e.values[s[0]]; });
+        e.values = { plan: e.base.plan, practice: e.base.practice, review: e.base.review, events: e.base.events }; e.status = null;
+        DSECS.forEach(function (s) { var ta = $('ed-' + s[0]); if (ta) ta.value = e.values[s[0]]; });
         updatePrompt(); updateEditorButtons();
       } else { state.edit = null; renderDetail(); }
     }
@@ -2055,7 +2279,7 @@
 
   var now = new Date(); state.month = new Date(now.getFullYear(), now.getMonth(), 1);
   window.__taskos = { parseIndex: parseIndex, parseCSV: parseCSV, parseDaily: parseDaily, serializeDaily: serializeDaily, utf8ToB64: utf8ToB64, b64ToUtf8: b64ToUtf8,
-    renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, parseAreas: parseAreas, areasHtml: areasHtml, parseResources: parseResources, splitTags: splitTags, resUrl: resUrl, relDayWord: relDayWord, firstLine: firstLine,
+    renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, parseAreas: parseAreas, areasHtml: areasHtml, parseResources: parseResources, splitTags: splitTags, resUrl: resUrl, keyEvents: keyEvents, truncLines: truncLines, dayPopHtml: dayPopHtml, relDayWord: relDayWord, firstLine: firstLine,
     excerpt: excerpt, addDays: addDays, metaText: metaText, API: API, state: state };
   load();
 })();
