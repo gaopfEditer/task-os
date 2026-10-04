@@ -1,0 +1,26 @@
+{
+ "hyperliquid": {
+  "price_usd": 89.93,
+  "circulating_supply": 222445714.07414138,
+  "total_supply": 955307079.4341414,
+  "last_updated": "2026-10-04T14:38:50.000Z"
+ },
+ "ethena": {
+  "price_usd": 0.236139,
+  "circulating_supply": 10095312500.0,
+  "total_supply": 15000000000.0,
+  "last_updated": "2026-10-04T14:38:50.000Z"
+ },
+ "kgen": {
+  "price_usd": 0.160586,
+  "circulating_supply": 198677778.0,
+  "total_supply": 1000000000.0,
+  "last_updated": "2026-10-04T14:39:40.000Z"
+ },
+ "lagrange": {
+  "price_usd": 0.066837,
+  "circulating_supply": 193000000.0,
+  "total_supply": 1000000000.0,
+  "last_updated": "2026-10-04T14:39:40.000Z"
+ }
+}

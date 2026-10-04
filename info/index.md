@@ -5,6 +5,7 @@
 | C-20260929-01 | 过年把三代人串起来 | 专栏 | archived（初始化示例，非业务选题，非币圈方向） | 公众号 | T-20260928-02 | topics/C-20260929-01-过年把三代人串起来/ |
 | C-20260929-02 | 币圈日报 | 日报 | researching（research.md 已有试跑 1 和试跑 2：Foresight 24h 93 条，≥7 分 6 条；试跑 2 已按 categories.md 补标主/副小类，未归类 6 条；未成稿、未发布） | 待定 | 待定 | topics/C-20260929-02-币圈日报/ |
 | C-20261003-01 | SEC 批准 Cboe 上市 6 只 3 倍杠杆 ETP（含 BTC/ETH） | 短讯（X 图文贴文，样稿） | drafting（样稿供评审，未发布；主帖加权 278/280 + 可选跟帖 3 条 + 配图方案 2 张；线索来自交易观察员监控页，一手来源 SEC 批准令 34-106577 与 VS Trust S-1） | X | 待定 | topics/C-20261003-01-SEC批准3倍杠杆加密ETP/ |
+| C-20261004-01 | 本周代币解锁：ENA 投资人一次性解锁、HYPE 团队解锁口径不一、KGEN 首次团队/投资人 cliff | 短讯（X 图文贴文 ×3，样稿） | drafting（样稿供评审，未发布；ENA 278/280、HYPE 277/280、KGEN 260/280（备选）+ 可选跟帖 + 配图方案 3 张；线索来自交易观察员解锁页 events/unlock.json，核对 Ethena 官方博客、SEC 8-K、Tokenomist、DefiLlama、CoinGecko） | X | 待定 | topics/C-20261004-01-本周解锁ENA-HYPE-KGEN/ |
 
 ## 系统文件
 

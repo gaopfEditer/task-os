@@ -27,3 +27,9 @@ time,content_id,action,from_status,to_status,summary,file
 2026-10-03T23:35:00+08:00,C-20261003-01,status,researching,drafting,"写入 X 样稿：主帖加权 278/280，可选跟帖 3 条，配图方案 2 张，自查清单；未发布",topics/C-20261003-01-SEC批准3倍杠杆加密ETP/draft.md
 2026-10-03T23:35:00+08:00,C-20261003-01,review,drafting,drafting,"review.md 填写发布前自查（对照 brief）；状态仍为 drafting",topics/C-20261003-01-SEC批准3倍杠杆加密ETP/review.md
 2026-10-03T23:35:00+08:00,SYSTEM,edit,,,index.md 新增 C-20261003-01 行,index.md
+2026-10-04T22:57:26+08:00,C-20261004-01,create,,inbox,"创建选题：本周代币解锁 ENA/HYPE/KGEN（线索来自交易观察员解锁页 events/unlock.json，updated 2026-10-04 17:49:13 HKT；该页无分数字段，按占流通/美元值/cliff 排序后用 filter.md 打分，短名单 5 个代币）",topics/C-20261004-01-本周解锁ENA-HYPE-KGEN/brief.md
+2026-10-04T22:57:26+08:00,C-20261004-01,status,inbox,researching,"填写 brief（读者=X 中文币圈用户，形式=短讯/3 条独立 X 图文贴文，channel=X，截止=无（样稿），related_task 待定），开始核实",topics/C-20261004-01-本周解锁ENA-HYPE-KGEN/brief.md
+2026-10-04T22:57:26+08:00,C-20261004-01,research,researching,researching,"research.md 写入数据源与分数说明、短名单 5 个代币及打分（ENA 7/HYPE 6/KGEN 4/LA 4/RAIN 2）、解锁页数据质量问题 10 条、素材 R-01–R-18（官方博客、SEC 8-K、Tokenomist、DefiLlama、CoinGecko 快照已存档 sources/）；事实/观点/待核实分开",topics/C-20261004-01-本周解锁ENA-HYPE-KGEN/research.md
+2026-10-04T22:57:26+08:00,C-20261004-01,status,researching,drafting,"写入 X 样稿：ENA 主帖 278/280+跟帖 2 条，HYPE 主帖 277/280+跟帖 1 条，KGEN 主帖 260/280+跟帖 1 条（备选），配图方案 3 张，自查清单；未发布",topics/C-20261004-01-本周解锁ENA-HYPE-KGEN/draft.md
+2026-10-04T22:57:26+08:00,C-20261004-01,review,drafting,drafting,"review.md 填写发布前自查（对照 brief）；状态仍为 drafting",topics/C-20261004-01-本周解锁ENA-HYPE-KGEN/review.md
+2026-10-04T22:57:26+08:00,SYSTEM,edit,,,index.md 新增 C-20261004-01 行,index.md

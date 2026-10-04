@@ -1,0 +1,237 @@
+{
+ "hyperliquid": {
+  "variableMeasured": [
+   {
+    "@type": "PropertyValue",
+    "name": "Next Unlock Date",
+    "value": "2026-10-06T00:00:00Z",
+    "description": "The next scheduled token unlock date for Hyperliquid (HYPE)"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Next Unlock Amount",
+    "value": "9916666",
+    "unitText": "HYPE",
+    "description": "Number of HYPE tokens releasing in the next unlock event"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Next Unlock Value (USD)",
+    "value": "893392440",
+    "unitText": "USD",
+    "description": "USD value of the next HYPE unlock based on current price"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Next Unlock Allocation",
+    "value": "Core Contributors",
+    "description": "The stakeholder group receiving tokens in the next unlock"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Next Unlock Circulating Supply Impact",
+    "value": "2.09",
+    "unitText": "percent",
+    "description": "Percentage of current released supply represented by the next unlock"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Token Price (USD)",
+    "value": "90.09",
+    "unitText": "USD",
+    "description": "Current HYPE price in USD"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Circulating Supply Released",
+    "value": "474827814",
+    "unitText": "HYPE",
+    "description": "Total number of HYPE tokens currently released from vesting"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Total Supply",
+    "value": "1000000000",
+    "unitText": "HYPE",
+    "description": "Maximum total supply of HYPE tokens"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Released Percentage",
+    "value": "47.48",
+    "unitText": "percent",
+    "description": "Percentage of total HYPE supply that has been released"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Reported Market Cap",
+    "value": "20088586051",
+    "unitText": "USD",
+    "description": "Reported market capitalization of Hyperliquid"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Adjusted Market Cap",
+    "value": "38499773689",
+    "unitText": "USD",
+    "description": "Tokenomist-adjusted market cap accounting for actual released supply"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Fully Diluted Valuation (FDV)",
+    "value": "85812535926",
+    "unitText": "USD",
+    "description": "Fully diluted valuation of Hyperliquid if all 1,000,000,000 tokens were in circulation"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Vesting Type",
+    "value": "cliff",
+    "description": "Primary vesting mechanism for Hyperliquid"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Tokenomics Version",
+    "value": "0",
+    "description": "Current version of Hyperliquid tokenomics data on Tokenomist"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Token Symbol",
+    "value": "HYPE"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "CoinGecko Rank",
+    "value": "11"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Category",
+    "value": "DeFi, Layer 1, Blockchain, Infrastructure, DEX, Perpetuals, Application"
+   }
+  ],
+  "dateModified": "2025-12-29T09:29:31Z",
+  "description": "Institutional-grade tokenomics dataset for Hyperliquid (HYPE). Next unlock: 9,916,666 HYPE ($893,392,439.94) on October 6, 2026, allocated to Core Contributors. 474,827,814 of 1,000,000,000 total supply released (47.48%). Tokenomics version 0, last updated December 29, 2025. This is supply-side analysis for educational purposes, not financial advice.",
+  "faq_next_unlock": "next unlock for Hyperliquid is scheduled for October 6, 2026. Released to Core Contributors.",
+  "faq_unlocked": "As of today, approximately 222,445,714 Hyperliquid which is 22.24% of Hyperliquid&#x27;s total supply has been unlocked."
+ },
+ "ethena": {
+  "variableMeasured": [
+   {
+    "@type": "PropertyValue",
+    "name": "Next Unlock Date",
+    "value": "2026-10-05T07:00:00Z",
+    "description": "The next scheduled token unlock date for Ethena (ENA)"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Next Unlock Amount",
+    "value": "171875000",
+    "unitText": "ENA",
+    "description": "Number of ENA tokens releasing in the next unlock event"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Next Unlock Value (USD)",
+    "value": "40576938",
+    "unitText": "USD",
+    "description": "USD value of the next ENA unlock based on current price"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Next Unlock Allocation",
+    "value": "Foundation",
+    "description": "The stakeholder group receiving tokens in the next unlock"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Next Unlock Circulating Supply Impact",
+    "value": "1.88",
+    "unitText": "percent",
+    "description": "Percentage of current released supply represented by the next unlock"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Token Price (USD)",
+    "value": "0.24",
+    "unitText": "USD",
+    "description": "Current ENA price in USD"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Circulating Supply Released",
+    "value": "9151562500",
+    "unitText": "ENA",
+    "description": "Total number of ENA tokens currently released from vesting"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Total Supply",
+    "value": "15000000000",
+    "unitText": "ENA",
+    "description": "Maximum total supply of ENA tokens"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Released Percentage",
+    "value": "61.01",
+    "unitText": "percent",
+    "description": "Percentage of total ENA supply that has been released"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Reported Market Cap",
+    "value": "2401167761",
+    "unitText": "USD",
+    "description": "Reported market capitalization of Ethena"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Adjusted Market Cap",
+    "value": "2160537481",
+    "unitText": "USD",
+    "description": "Tokenomist-adjusted market cap accounting for actual released supply"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Fully Diluted Valuation (FDV)",
+    "value": "3541260000",
+    "unitText": "USD",
+    "description": "Fully diluted valuation of Ethena if all 15,000,000,000 tokens were in circulation"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Vesting Type",
+    "value": "cliff",
+    "description": "Primary vesting mechanism for Ethena"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Tokenomics Version",
+    "value": "0",
+    "description": "Current version of Ethena tokenomics data on Tokenomist"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Token Symbol",
+    "value": "ENA"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "CoinGecko Rank",
+    "value": "46"
+   },
+   {
+    "@type": "PropertyValue",
+    "name": "Category",
+    "value": "DeFi, Application, Liquid Staking"
+   }
+  ],
+  "dateModified": "2025-06-11T10:35:56Z",
+  "description": "Institutional-grade tokenomics dataset for Ethena (ENA). Next unlock: 171,875,000 ENA ($40,576,937.5) on October 5, 2026, allocated to Foundation. 9,151,562,500 of 15,000,000,000 total supply released (61.01%). Tokenomics version 0, last updated June 11, 2025. This is supply-side analysis for educational purposes, not financial advice.",
+  "faq_next_unlock": "next unlock for Ethena is scheduled for October 5, 2026. Released to Core Contributors.",
+  "faq_unlocked": "As of today, approximately 10,095,312,500 Ethena which is 67.30% of Ethena&#x27;s total supply has been unlocked."
+ },
+ "_fetched": "2026-10-04 22:4x HKT, curl https://tokenomist.ai/<slug>"
+}

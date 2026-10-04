@@ -1,0 +1,133 @@
+{
+ "source": "https://defillama-datasets.llama.fi/emissions/hyperliquid (page: https://defillama.com/unlocks/hyperliquid)",
+ "fetched": "2026-10-04 HKT",
+ "notes": [
+  "Most vesting schedules will complete between 2027–2028; some will continue after 2028. Here we have used an end date of end of 2027.",
+  "Although the full allocations for Hyper Foundation Budget and Community Grants were unlocked at TGE it is unclear what their spend rate is.",
+  "Validator Rewards are distributed based on staking yield, which may vary over time.",
+  "Total staked are fetched from ASXN API to calculate Validator Rewards distribution.",
+  "The Core Contributors allocation tracks HYPE tokens transferred from the HyperLabs address to contributors"
+ ],
+ "events": [
+  {
+   "time_hkt": "2024-11-29 08:00",
+   "category": "noncirculating",
+   "tokens": [
+    60000000
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from Hyper Foundation Budget on {timestamp}"
+  },
+  {
+   "time_hkt": "2024-11-29 08:00",
+   "category": "noncirculating",
+   "tokens": [
+    3000000
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from Community Grants on {timestamp}"
+  },
+  {
+   "time_hkt": "2024-11-29 08:00",
+   "category": "publicSale",
+   "tokens": [
+    120000
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from HIP-2 on {timestamp}"
+  },
+  {
+   "time_hkt": "2024-11-29 08:00",
+   "category": "airdrop",
+   "tokens": [
+    310000000
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from Genesis Distribution on {timestamp}"
+  },
+  {
+   "time_hkt": "2025-11-29 08:00",
+   "category": "Uncategorized",
+   "tokens": [
+    1225342
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from Core Contributors on {timestamp}"
+  },
+  {
+   "time_hkt": "2026-01-06 08:00",
+   "category": "Uncategorized",
+   "tokens": [
+    1125766
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from Core Contributors on {timestamp}"
+  },
+  {
+   "time_hkt": "2026-02-06 08:00",
+   "category": "Uncategorized",
+   "tokens": [
+    140333
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from Core Contributors on {timestamp}"
+  },
+  {
+   "time_hkt": "2026-03-07 08:00",
+   "category": "Uncategorized",
+   "tokens": [
+    173217
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from Core Contributors on {timestamp}"
+  },
+  {
+   "time_hkt": "2026-04-06 08:00",
+   "category": "Uncategorized",
+   "tokens": [
+    333335
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from Core Contributors on {timestamp}"
+  },
+  {
+   "time_hkt": "2026-05-06 08:00",
+   "category": "Uncategorized",
+   "tokens": [
+    421879
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from Core Contributors on {timestamp}"
+  },
+  {
+   "time_hkt": "2026-06-06 08:00",
+   "category": "Uncategorized",
+   "tokens": [
+    331757
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from Core Contributors on {timestamp}"
+  },
+  {
+   "time_hkt": "2026-06-07 08:00",
+   "category": "Uncategorized",
+   "tokens": [
+    201995
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from Core Contributors on {timestamp}"
+  },
+  {
+   "time_hkt": "2026-07-07 08:00",
+   "category": "Uncategorized",
+   "tokens": [
+    452000
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from Core Contributors on {timestamp}"
+  },
+  {
+   "time_hkt": "2026-08-06 08:00",
+   "category": "Uncategorized",
+   "tokens": [
+    433024
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from Core Contributors on {timestamp}"
+  },
+  {
+   "time_hkt": "2026-09-06 08:00",
+   "category": "Uncategorized",
+   "tokens": [
+    433419
+   ],
+   "desc": "A cliff of {tokens[0]} tokens was unlocked from Core Contributors on {timestamp}"
+  }
+ ]
+}
