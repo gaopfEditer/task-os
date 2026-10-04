@@ -20,11 +20,16 @@
 - 候选示例（未确认）：无（待用户提供）。
 
 ### MKT-01
-- 名称：待用户确认
-- 链接：待用户确认
-- 状态：待确认
-- 确认日期：
-- 用途：待用户确认
+- 名称：交易观察员已核事件表（trading-watch）
+- 链接：/workspace/trading-watch（本地目录；以 *_YYYY-MM-DD.csv 已核表、各 tracker 的 output 和 SOURCES.md 为准）
+- 类型：本地数据目录 / 交易观察员整理的已核事件表（二手汇总：解锁数据来自 PANews 转载的 Token Unlocks/Tokenomist、DefiLlama 等；价格来自 Binance 现货 1h K 线、CoinGecko 小时数据，出处见该目录 SOURCES.md）
+- 更新频率：不定期（按交易观察员出表；截至 2026-10-05 已核表只有 2026-10-01 一期：unlocks、delistings、perp_listings、burns 各 1 张及对应 pre7d_daily 表；固定频率待确认）
+- 状态：已确认
+- 确认日期：2026-10-05（经出海大师转达用户确认）
+- 用途：解锁、下架、永续上线、销毁事件的事后数据（前 7 天、事后、相对 BTC），作「事件定价」栏目的唯一数字来源
+- 可信度：中（人工核对的二手汇总，每行带 unlock_source / price_source；同一事件各平台口径可能不同，如 XPL 2026-09-25，写稿时须注明采用的口径）
+- 规则：只用表里已有的数字，不改价位，不补样本，不做推算；near_research 等没有已核表的原始 JSON 不算这个来源
+- 读取方式：只读本地文件，不修改 /workspace/trading-watch/ 下任何内容
 
 ### MKT-02
 - 名称：待用户确认

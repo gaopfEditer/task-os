@@ -33,3 +33,12 @@ time,content_id,action,from_status,to_status,summary,file
 2026-10-04T22:57:26+08:00,C-20261004-01,status,researching,drafting,"写入 X 样稿：ENA 主帖 278/280+跟帖 2 条，HYPE 主帖 277/280+跟帖 1 条，KGEN 主帖 260/280+跟帖 1 条（备选），配图方案 3 张，自查清单；未发布",topics/C-20261004-01-本周解锁ENA-HYPE-KGEN/draft.md
 2026-10-04T22:57:26+08:00,C-20261004-01,review,drafting,drafting,"review.md 填写发布前自查（对照 brief）；状态仍为 drafting",topics/C-20261004-01-本周解锁ENA-HYPE-KGEN/review.md
 2026-10-04T22:57:26+08:00,SYSTEM,edit,,,index.md 新增 C-20261004-01 行,index.md
+2026-10-05T05:59:51+08:00,SYSTEM,edit,,,"sources.md 登记 MKT-01 交易观察员已核事件表（trading-watch）为已确认（确认日期 2026-10-05，经出海大师转达用户确认）；原为空占位，未覆盖其他来源；字段按 REG-01 补齐类型、更新频率、可信度，另加规则、读取方式",sources.md
+2026-10-05T06:02:46+08:00,C-20261005-01,create,,inbox,"创建选题：事件定价周表 #1（解锁篇）（当天无已有 ID，用 01；数据 MKT-01 已核表 /workspace/trading-watch/unlocks_2026-10-01.csv，核对 14 行、24 列、时间列为 UTC+8）",topics/C-20261005-01-事件定价周表1-解锁篇/brief.md
+2026-10-05T06:02:46+08:00,C-20261005-01,status,inbox,researching,"填写 brief（栏目=事件定价，主小类 fundamental.unlock、副小类 calendar.unlock，形式=深度/长文，channel=X 长推+币安广场，related_task 待任务管家创建，截止待定）；CSV 快照存 sources/",topics/C-20261005-01-事件定价周表1-解锁篇/brief.md
+2026-10-05T06:04:06+08:00,C-20261005-01,research,researching,researching,"research.md 写入 trading-watch 清点、CSV 行列核对、主表、计数观察、与 C-20261004-01 重叠检查（正文币种无重合）、XPL 两种口径（Tokenomist 09-25 20:00/17.6 亿/63.2% vs DefiLlama 13:48/1.89B/41.79%）、素材 R-01–R-08、待核 6 条",topics/C-20261005-01-事件定价周表1-解锁篇/research.md
+2026-10-05T06:04:52+08:00,C-20261005-01,status,researching,drafting,"写入长推/币安广场长文（加权 2374，需 X Premium）+ ≤280 短版 274 与跟帖 251/151 + 配图方案 1 张（markdown 图源表）+ 不合并说明 + 自查清单；未发布",topics/C-20261005-01-事件定价周表1-解锁篇/draft.md
+2026-10-05T06:05:28+08:00,SYSTEM,create,,,"新建 templates/事件定价周表.md（深度/长文；X 长推 / 币安广场）与 templates/README.md 模板清单",templates/事件定价周表.md;templates/README.md
+2026-10-05T06:05:37+08:00,C-20261005-01,review,drafting,drafting,"review.md 填写发布前自查，新增空节「发布后 24 小时互动数据（基线）」待发布后填写；状态仍为 drafting",topics/C-20261005-01-事件定价周表1-解锁篇/review.md
+2026-10-05T06:05:37+08:00,SYSTEM,edit,,,"README.md 写作模板名单登记 templates/事件定价周表.md，目录结构加入该模板与 templates/README.md",README.md
+2026-10-05T06:05:47+08:00,SYSTEM,edit,,,"index.md 新增 C-20261005-01 行；系统文件表更新 sources.md（已确认 2 个）、README.md，新增 templates/README.md 行",index.md

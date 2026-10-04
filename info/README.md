@@ -22,6 +22,7 @@
 - 状态：**未提供**。`templates/` 下现有 brief / research / draft / review 为初始化空模板，仅作占位。
 - 提供后写入 `templates/`，并在此列出每个模板的文件名、适用形式（如短讯、深度、日报）和适用渠道。
 - 写稿只使用这里列出的模板，不擅自改结构。
+- 已登记（清单见 `templates/README.md`）：`templates/事件定价周表.md`——深度/长文，X 长推 / 币安广场，2026-10-05 经出海大师转达用户确认。
 
 一套放在 `/workspace/content-os/` 的轻量内容创作系统，由「资讯创作官」维护。研究笔记和成稿分文件存放，历史通过 index.md 和 log.csv 查询。
 
@@ -40,6 +41,8 @@
     research.md             # 研究笔记模板（只放事实与引用）
     draft.md                # 成稿模板（只放成稿）
     review.md               # 复盘模板
+    事件定价周表.md          # 「事件定价」周表模板（深度/长文；X 长推 / 币安广场）
+    README.md               # 模板清单（文件名、适用形式、适用渠道）
   inbox/                    # 线索池：一句话 + 链接 + 为什么有用
     .gitkeep
   topics/

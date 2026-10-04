@@ -6,14 +6,16 @@
 | C-20260929-02 | 币圈日报 | 日报 | researching（research.md 已有试跑 1 和试跑 2：Foresight 24h 93 条，≥7 分 6 条；试跑 2 已按 categories.md 补标主/副小类，未归类 6 条；未成稿、未发布） | 待定 | 待定 | topics/C-20260929-02-币圈日报/ |
 | C-20261003-01 | SEC 批准 Cboe 上市 6 只 3 倍杠杆 ETP（含 BTC/ETH） | 短讯（X 图文贴文，样稿） | drafting（样稿供评审，未发布；主帖加权 278/280 + 可选跟帖 3 条 + 配图方案 2 张；线索来自交易观察员监控页，一手来源 SEC 批准令 34-106577 与 VS Trust S-1） | X | 待定 | topics/C-20261003-01-SEC批准3倍杠杆加密ETP/ |
 | C-20261004-01 | 本周代币解锁：ENA 投资人一次性解锁、HYPE 团队解锁口径不一、KGEN 首次团队/投资人 cliff | 短讯（X 图文贴文 ×3，样稿） | drafting（样稿供评审，未发布；ENA 278/280、HYPE 277/280、KGEN 260/280（备选）+ 可选跟帖 + 配图方案 3 张；线索来自交易观察员解锁页 events/unlock.json，核对 Ethena 官方博客、SEC 8-K、Tokenomist、DefiLlama、CoinGecko） | X | 待定 | topics/C-20261004-01-本周解锁ENA-HYPE-KGEN/ |
+| C-20261005-01 | 事件定价周表 #1（解锁篇） | 深度（X 长推 + 币安广场长文，样稿） | drafting（样稿供评审，未发布；栏目「事件定价」，主小类 fundamental.unlock / 副小类 calendar.unlock；数据只用 MKT-01 已核表 unlocks_2026-10-01.csv 14 行；长推加权 2374（需 Premium），另备 ≤280 短版 274 + 跟帖 2 条；配图方案 1 张；XPL 两种口径并列） | X / 币安广场 | 待任务管家创建 | topics/C-20261005-01-事件定价周表1-解锁篇/ |
 
 ## 系统文件
 
 | 文件 | 说明 | 最后更新（HKT） |
 |---|---|---|
-| sources.md | 四类币圈来源位（各 3 个）；已确认 1 个：REG-01 Foresight News，其余待确认 | 2026-09-29T16:53:03+08:00 |
+| sources.md | 四类币圈来源位（各 3 个）；已确认 2 个：REG-01 Foresight News、MKT-01 交易观察员已核事件表（trading-watch），其余待确认 | 2026-10-05T05:59:51+08:00 |
 | filter.md | 三层漏斗、打分表、分类标注规则、每日 25 分钟流程 | 2026-09-30T21:34:07+08:00 |
-| README.md | 来源描述、目录结构、规则第 10 条已同步 filter.md 与 categories.md | 2026-09-30T21:34:07+08:00 |
+| README.md | 来源描述、目录结构、规则第 10 条已同步 filter.md 与 categories.md；写作模板名单登记 templates/事件定价周表.md | 2026-10-05T06:05:47+08:00 |
+| templates/README.md | 模板清单：4 个初始化模板 + 事件定价周表.md（深度/长文；X 长推 / 币安广场） | 2026-10-05T06:05:47+08:00 |
 | categories.md | 资讯分类：14 个大类、79 个小类（用户提供） | 2026-09-30T21:34:07+08:00 |
 | resources.md | 资源收藏列表：A 项目库 3 组、B 运营 3 组、C 平台与工具、D 博主名单 3 组；A-情报/信息源已收 19 条，其余待补充 | 2026-10-02T09:29:36+08:00 |
 | watchlist.md / thesis.md | 待用户提供（尚未创建） | — |
