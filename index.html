@@ -181,6 +181,36 @@
   .sugg { font-size: 11px; font-weight: 600; color: #fff; background: var(--orange); border-radius: 4px; padding: 0 5px; margin-right: 4px; }
   .area-editor textarea { width: 100%; min-height: 60vh; resize: vertical; line-height: 1.55; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
   @media (max-width: 700px) { details.area .abody { padding: 0 10px 8px 14px; } .area-editor textarea { min-height: 55vh; } }
+  .res-bar { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 8px; }
+  .res-bar input { flex: 1 1 240px; min-width: 0; }
+  .res-info { font-size: 12px; color: var(--muted); }
+  .res-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .rtag-f { font-size: 12px; padding: 2px 9px; border-radius: 12px; max-width: 100%; overflow-wrap: anywhere; }
+  .rtag-f i { font-style: normal; color: var(--faint); margin-left: 4px; }
+  .rtag-f.on, .rtag.on { background: #24292f; color: #fff; border-color: #24292f; }
+  .rtag-f.on i { color: #d0d7de; }
+  .rtag-f.zero { color: var(--faint); }
+  .rclear { font-size: 12px; }
+  .rsub { margin: 4px 0 8px; min-width: 0; }
+  .rsub h5 { font-size: 13px; margin: 10px 0 4px; color: var(--muted); border-left: 3px solid var(--border); padding-left: 8px; }
+  .rcount { font-weight: normal; color: var(--faint); margin-left: 6px; font-size: 12px; }
+  .rgnote { font-size: 12px; color: var(--muted); margin: 4px 0; }
+  .rgnote p { margin: 0; }
+  .rlist { list-style: none; margin: 0; padding: 0; }
+  .ritem { padding: 7px 0; border-top: 1px solid var(--line); min-width: 0; overflow-wrap: anywhere; }
+  .ritem:first-child { border-top: none; }
+  .rhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+  .rname { font-weight: 600; }
+  .rhost, .rdate { font-size: 12px; color: var(--faint); }
+  .rdesc { font-size: 13px; margin-top: 2px; }
+  .rbad { font-size: 12px; color: var(--red); margin-top: 2px; }
+  .rmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 4px; }
+  .rtag { font-size: 11px; background: #eef1f4; border: 1px solid transparent; border-radius: 4px; padding: 0 6px; color: #57606a; }
+  .rnote { font-size: 12px; color: var(--muted); }
+  .res-empty { text-align: center; color: var(--muted); background: var(--card); border: 1px dashed var(--border); border-radius: 8px; padding: 22px 14px; }
+  .res-empty b { color: var(--text); font-size: 15px; }
+  .res-empty p { margin: 6px 0 0; font-size: 13px; }
+  .res-empty .rerr { color: var(--red); font-size: 12px; overflow-wrap: anywhere; }
   .rcol { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
   .pnote + .pnote { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 10px; }
   .phd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -265,6 +295,7 @@
   <a href="#calendar" data-tab="calendar">日历</a>
   <a href="#history" data-tab="history">历史</a>
   <a href="#areas" data-tab="areas">领域</a>
+  <a href="#resources" data-tab="resources">资源</a>
 </nav>
 <main>
   <div id="msg"></div>
@@ -321,8 +352,14 @@
     <div id="areas"><div class="nodata">加载中…</div></div>
   </section>
 
+  <section class="tab" id="tab-resources">
+    <div class="res-bar"><input id="rq" type="search" placeholder="搜索名称 / 简述 / 标签 / 备注 / 域名" autocomplete="off" aria-label="搜索资源"><span id="resInfo" class="res-info"></span><a href="https://github.com/gaopfEditer/task-os/blob/main/info/resources.md" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 info/resources.md</a></div>
+    <div id="resTags" class="res-tags"></div>
+    <div id="resources"><div class="nodata">加载中…</div></div>
+  </section>
+
   <footer>
-    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>areas.md</code>。日志时间按 log.csv 原样显示（UTC+8）。
+    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>areas.md</code>，以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
   </footer>
 </main>
 
@@ -1598,6 +1635,244 @@
     });
   }
 
+  // ---------- 资源: info/resources.md (read-only; maintained by 资讯创作官, never written from this page) ----------
+  var RES_PATH = 'info/resources.md';
+  state.res = { status: '', text: '', parsed: null, error: '', src: '', gen: 0, q: '', tag: '', closed: {} };
+  function resSplitRow(t) {
+    t = t.trim().replace(/^\|/, '');
+    if (/[^\\]\|$/.test(t) || t === '|') t = t.slice(0, -1);
+    var cells = [], cur = '';
+    for (var i = 0; i < t.length; i++) {
+      var c = t.charAt(i);
+      if (c === '\\' && t.charAt(i + 1) === '|') { cur += '|'; i++; }
+      else if (c === '|') { cells.push(cur.trim()); cur = ''; }
+      else cur += c;
+    }
+    cells.push(cur.trim());
+    return cells;
+  }
+  var RES_COLS = [
+    ['name', /^(名称|名字|名|标题|资源|资源名|网站|name|title)$|名称/],
+    ['link', /链接|网址|地址|url|link|href|^网站链接$/],
+    ['desc', /简述|描述|说明|简介|介绍|desc|summary/],
+    ['tags', /标签|分类|类别|tags?$/],
+    ['date', /收藏日期|日期|时间|date|added/],
+    ['note', /备注|note|remark|comment/]
+  ];
+  function resMapCols(cells) {
+    var cols = { name: -1, link: -1, desc: -1, tags: -1, date: -1, note: -1 };
+    cells.forEach(function (c, i) {
+      var h = stripMd(c).replace(/\s+/g, '').toLowerCase();
+      if (!h) return;
+      for (var k = 0; k < RES_COLS.length; k++) {
+        var key = RES_COLS[k][0];
+        if (cols[key] < 0 && RES_COLS[k][1].test(h)) { cols[key] = i; return; }
+      }
+    });
+    return cols;
+  }
+  // Only http(s) links survive; anything else (javascript:, data:, relative junk) returns ''.
+  function resUrl(c) {
+    c = String(c || '').trim().replace(/^<|>$/g, '').replace(/[)\]）】.,;:!?。，；：、]+$/, '');
+    if (!c) return '';
+    if (!/^[a-z][a-z0-9+.\-]*:/i.test(c) && /^(www\.)?[a-z0-9\-]+(\.[a-z0-9\-]+)+(:\d+)?([\/?#]\S*)?$/i.test(c)) c = 'https://' + c;
+    try {
+      var u = new URL(c);
+      return (u.protocol === 'http:' || u.protocol === 'https:') && u.hostname ? u.href : '';
+    } catch (e) { return ''; }
+  }
+  function resLinkIn(s) {
+    s = String(s || '');
+    var m = /\[([^\]]*)\]\(\s*<?([^)\s>]+)>?(?:\s+["'][^"']*["'])?\s*\)/.exec(s);
+    if (m) return m[2];
+    m = /<([a-z][a-z0-9+.\-]*:[^>\s]+)>/i.exec(s);
+    if (m) return m[1];
+    m = /https?:\/\/[^\s<>|"'，。；、（）【】《》]+/i.exec(s);
+    if (m) return m[0];
+    return '';
+  }
+  // Tags: always split on , ， ; ； | # and line breaks / whitespace. 、 only splits when the cell holds
+  // dotted category ids (onchain.whale、cex.listing); between Chinese words it is part of one tag name,
+  // e.g. the real category 「解锁、销毁、代币经济」.
+  function splitTags(s) {
+    s = resStrip(String(s || '').replace(/<br\s*\/?>/gi, ','));
+    var out = [];
+    s.split(/[,，;；|#\n]+/).forEach(function (part) {
+      part = part.trim();
+      if (!part) return;
+      var re = /[a-z0-9_\-]+\.[a-z0-9_.\-]+/i.test(part) ? /[\s、]+/ : /\s+/;
+      part.split(re).forEach(function (t) {
+        t = t.replace(/^[#＃]+/, '').trim();
+        if (t && out.indexOf(t) < 0) out.push(t);
+      });
+    });
+    return out;
+  }
+  function resSubName(sub, group) {
+    var m = /^([A-Za-z])[.．、]\s*.+?\s[-–—]\s*(.+)$/.exec(sub);
+    if (m && group.charAt(0).toUpperCase() === m[1].toUpperCase()) return m[2].trim();
+    if (group && sub.indexOf(group) === 0) { var r = sub.slice(group.length).replace(/^\s*[-–—:：·|\/]\s*/, '').trim(); if (r) return r; }
+    return sub;
+  }
+  // Gentler than stripMd: only paired **x** / __x__ markup is removed, so names like a__b or URLs keep their underscores.
+  function resStrip(s) {
+    return String(s || '').replace(/<br\s*\/?>/gi, ' ').replace(/\[([^\]]*)\]\(([^)]*)\)/g, '$1').replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/(^|\s)__([^_\s][^_]*)__(?=\s|$)/g, '$1$2').replace(/^`+|`+$/g, '').trim();
+  }
+  function resItem(cells, cols) {
+    function get(k) { return cols[k] >= 0 ? String(cells[cols[k]] || '').trim() : ''; }
+    if (!cells.some(function (c) { return c.trim(); })) return null;
+    var rawName = get('name'), rawLink = get('link');
+    var cand = rawLink ? (resLinkIn(rawLink) || resStrip(rawLink)) : resLinkIn(rawName);
+    var url = resUrl(cand), host = '';
+    if (url) { try { host = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {} }
+    var name = resStrip(rawName) || host || resStrip(rawLink);
+    var it = { name: name, url: url, host: host, badLink: (!url && cand) ? cand : '', desc: resStrip(get('desc')), tags: splitTags(get('tags')), date: resStrip(get('date')), note: resStrip(get('note')) };
+    if (!it.name && !it.url && !it.desc && !it.note && !it.tags.length) return null;
+    return it;
+  }
+  function parseResources(text) {
+    var lines = String(text || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').split('\n');
+    var groups = [], g = null, s = null, tbl = null, fence = null, title = '';
+    function ensureGroup() { if (!g) { g = { name: '未分组', notes: [], subs: [] }; groups.push(g); } return g; }
+    lines.forEach(function (line) {
+      var t = line.trim(), fm = /^(`{3,}|~{3,})/.exec(t);
+      if (fence) { if (fm && fm[1].charAt(0) === fence.charAt(0) && fm[1].length >= fence.length) fence = null; return; }
+      if (fm) { fence = fm[1]; tbl = null; return; }
+      var h = /^(#{1,6})\s+(.*?)\s*#*\s*$/.exec(t);
+      if (h) {
+        tbl = null;
+        var lvl = h[1].length, name = stripMd(h[2]);
+        if (lvl === 1) { if (!title) title = name; g = null; s = null; }
+        else if (lvl === 2) { g = { name: name, notes: [], subs: [] }; groups.push(g); s = null; }
+        else if (lvl === 3) { ensureGroup(); s = { name: resSubName(name, g.name), full: name, notes: [], items: [], table: false }; g.subs.push(s); }
+        return;
+      }
+      if (t.charAt(0) === '|') {
+        var cells = resSplitRow(t);
+        if (!tbl) {
+          var cols = resMapCols(cells);
+          if (cols.name < 0 && cols.link < 0) { tbl = { skip: true }; return; }   // e.g. the 字段 | 说明 legend table
+          tbl = { skip: false, cols: cols };
+          ensureGroup();
+          if (!s) { s = { name: '', full: '', notes: [], items: [], table: false }; g.subs.push(s); }
+          s.table = true;
+          return;
+        }
+        if (tbl.skip) return;
+        if (cells.every(function (c) { return /^:?-*:?$/.test(c); })) return;   // separator / empty row
+        var it = resItem(cells, tbl.cols);
+        if (it) s.items.push(it);
+        return;
+      }
+      tbl = null;
+      if (t.charAt(0) === '>' && g) {
+        var note = t.replace(/^>\s?/, '').trim();
+        if (note) (s || g).notes.push(note);
+      }
+    });
+    var total = 0;
+    groups.forEach(function (gr) { gr.count = 0; gr.subs.forEach(function (sb) { gr.count += sb.items.length; }); total += gr.count; });
+    return { title: title, groups: groups, total: total };
+  }
+  function resMatch(it, words, tag) {
+    if (tag && it.tags.indexOf(tag) < 0) return false;
+    if (!words.length) return true;
+    var hay = [it.name, it.desc, it.tags.join(' '), it.note, it.host].join('\n').toLowerCase();
+    return words.every(function (w) { return hay.indexOf(w) >= 0; });
+  }
+  function fetchResources() {
+    function viaFile() { return loadFile(RES_PATH); }
+    function viaApi(useToken) {
+      var withToken = useToken !== false && !!getToken();
+      return api('GET', repoPath + '/contents/' + RES_PATH + '?ref=' + BRANCH, null, useToken).then(function (res) {
+        if (withToken && (res.status === 401 || res.status === 404)) return viaApi(false);
+        if (res.status === 404) { var e = new Error('main 上还没有 ' + RES_PATH); e.status = 404; throw e; }
+        if (!res.ok || !res.json || res.json.encoding !== 'base64' || typeof res.json.content !== 'string') return viaFile();   // rate limit, >1 MB, … → Pages / raw
+        return { text: b64ToUtf8(res.json.content), src: 'api' };
+      }, viaFile);
+    }
+    return viaApi();
+  }
+  function loadResources(force) {
+    var R = state.res;
+    if (!force && (R.status === 'ok' || R.status === 'missing' || R.status === 'loading')) return Promise.resolve();
+    var gen = ++R.gen;
+    R.status = 'loading';
+    if (state.tab === 'resources') renderResources();
+    return fetchResources().then(function (r) {
+      if (gen !== R.gen) return;
+      R.text = r.text; R.src = r.src; R.parsed = null; R.status = 'ok'; R.error = '';
+    }, function (e) {
+      if (gen !== R.gen) return;
+      R.text = ''; R.parsed = null;
+      if (e && e.status === 404) { R.status = 'missing'; R.error = ''; } else { R.status = 'error'; R.error = (e && e.message) || String(e); }
+    }).then(function () { if (gen === R.gen && state.tab === 'resources') renderResources(); });
+  }
+  function resItemHtml(it, hq, tag) {
+    var h = '<li class="ritem"><div class="rhead">';
+    h += it.url ? '<a class="rname" href="' + esc(it.url) + '" target="_blank" rel="noopener">' + markText(it.name, hq) + '</a>' : '<span class="rname">' + markText(it.name, hq) + '</span>';
+    if (it.host) h += '<span class="rhost">' + markText(it.host, hq) + '</span>';
+    if (it.date) h += '<span class="rdate">收藏 ' + esc(it.date) + '</span>';
+    h += '</div>';
+    if (it.desc) h += '<div class="rdesc">' + markText(it.desc, hq) + '</div>';
+    if (it.badLink) h += '<div class="rbad">链接不可用（只支持 http/https）：<code>' + esc(it.badLink) + '</code></div>';
+    if (it.tags.length || it.note) {
+      h += '<div class="rmeta">';
+      it.tags.forEach(function (t) { h += '<button type="button" class="rtag' + (t === tag ? ' on' : '') + '" data-rtag="' + esc(t) + '">' + markText(t, hq) + '</button>'; });
+      if (it.note) h += '<span class="rnote">备注：' + markText(it.note, hq) + '</span>';
+      h += '</div>';
+    }
+    return h + '</li>';
+  }
+  function renderResources() {
+    var R = state.res, el = $('resources'), info = $('resInfo'), tagsEl = $('resTags');
+    if (R.status === '' || R.status === 'loading') { el.innerHTML = '<div class="nodata">正在读取 info/resources.md…</div>'; tagsEl.innerHTML = ''; info.textContent = ''; return; }
+    if (R.status !== 'ok') {
+      tagsEl.innerHTML = ''; info.textContent = '只读 · 由资讯创作官维护';
+      el.innerHTML = '<div class="res-empty"><b>资源文件还没同步上来</b><p><code>info/resources.md</code> 由资讯创作官维护，合并到 main 后这里会自动出现，不用改页面。</p>' +
+        (R.status === 'error' ? '<p class="rerr">' + esc(R.error) + '</p><button type="button" data-rretry="1">重试</button>' : '') + '</div>';
+      return;
+    }
+    var p = R.parsed || (R.parsed = parseResources(R.text));
+    var q = R.q.trim().toLowerCase(), words = q ? q.split(/\s+/) : [], hq = words.length ? words.reduce(function (a, b) { return b.length > a.length ? b : a; }) : '';
+    var filtering = !!(words.length || R.tag), shown = 0, counts = {}, order = [];
+    p.groups.forEach(function (g) { g.subs.forEach(function (sb) { sb.items.forEach(function (it) {
+      if (!resMatch(it, words, '')) return;
+      it.tags.forEach(function (t) { if (!counts[t]) { counts[t] = 0; order.push(t); } counts[t]++; });
+    }); }); });
+    if (R.tag && !counts[R.tag]) { counts[R.tag] = 0; order.push(R.tag); }
+    order.sort(function (a, b) { return counts[b] - counts[a] || order.indexOf(a) - order.indexOf(b); });
+    var th = '';
+    order.forEach(function (t) { th += '<button type="button" class="rtag-f' + (t === R.tag ? ' on' : '') + (counts[t] ? '' : ' zero') + '" data-rtag="' + esc(t) + '" aria-pressed="' + (t === R.tag) + '">' + esc(t) + '<i>' + counts[t] + '</i></button>'; });
+    if (filtering) th += '<button type="button" class="link rclear" data-rclear="1">清除筛选</button>';
+    tagsEl.innerHTML = th;
+    var h = '';
+    if (!p.groups.length) h += '<div class="res-empty"><b>资源文件里还没有分组</b><p>等资讯创作官补充 <code>## </code> 分组和表格后会自动显示。</p></div>';
+    p.groups.forEach(function (g, gi) {
+      var subsHtml = '', gShown = 0;
+      g.subs.forEach(function (sb) {
+        var list = sb.items.filter(function (it) { return resMatch(it, words, R.tag); });
+        gShown += list.length;
+        if (filtering && !list.length) return;
+        var head = sb.name ? '<h5>' + esc(sb.name) + '<span class="rcount">' + (filtering ? list.length + ' / ' : '') + sb.items.length + '</span></h5>' : '';
+        subsHtml += '<div class="rsub">' + head;
+        if (!filtering) sb.notes.forEach(function (n) { subsHtml += '<div class="rgnote md">' + renderMd(n) + '</div>'; });
+        subsHtml += sb.items.length ? '<ul class="rlist">' + list.map(function (it) { return resItemHtml(it, hq, R.tag); }).join('') + '</ul>' : '<div class="none">待补充</div>';
+        subsHtml += '</div>';
+      });
+      shown += gShown;
+      if (filtering && !gShown) return;
+      var meta = filtering ? '<span class="ameta">匹配 ' + gShown + ' / ' + g.count + ' 条</span>' : (g.count ? '<span class="ameta">' + g.count + ' 条</span>' : '<span class="ameta">待补充</span>');
+      var notes = filtering ? '' : g.notes.map(function (n) { return '<div class="rgnote md">' + renderMd(n) + '</div>'; }).join('');
+      h += '<details class="area rgroup" id="res-' + gi + '"' + (!filtering && R.closed[g.name] ? '' : ' open') + ' data-rname="' + esc(g.name) + '"><summary><b>' + esc(g.name) + '</b>' + meta + '</summary>' +
+        '<div class="abody">' + notes + (subsHtml || '<div class="none">待补充</div>') + '</div></details>';
+    });
+    if (filtering && !shown) h += '<div class="nodata">没有匹配的资源。<button type="button" class="link" data-rclear="1">清除筛选</button></div>';
+    info.textContent = (filtering ? '匹配 ' + shown + ' / ' + p.total + ' 条' : '共 ' + p.total + ' 条') + ' · 只读，由资讯创作官维护';
+    el.innerHTML = h;
+  }
+
   // ---------- settings dialog ----------
   function tokenStatus() { var t = getToken(); $('tokenStatus').textContent = t ? '已保存令牌（…' + t.slice(-4) + '）' : '尚未保存令牌。'; }
   function openSettings(note) {
@@ -1631,7 +1906,7 @@
   }
   function applyHash() {
     var h = decodeURIComponent(location.hash.replace(/^#/, '')), parts = h.split('/');
-    var tab = ['board', 'calendar', 'history', 'areas'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
+    var tab = ['board', 'calendar', 'history', 'areas', 'resources'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
     setTab(tab);
     if (tab === 'board') renderBoardTab();
     if (tab === 'calendar') selectDay(parseYmd(parts[1]) ? parts[1] : (state.selected || todayStr()), true);
@@ -1642,6 +1917,7 @@
       loadAllDaily(); loadAllNotes();
     }
     if (tab === 'areas') { if (!areasEditorActive()) renderAreas(); loadAreas(); }
+    if (tab === 'resources') { renderResources(); loadResources(); }
   }
   function shiftMonth(n) {
     state.month = new Date(state.month.getFullYear(), state.month.getMonth() + n, 1);
@@ -1656,6 +1932,7 @@
     if (state.pedit && !state.pedit.saving) { if (!state.pedit.loading) { readPInputs(state.pedit); savePDraft(state.pedit); } state.pedit = null; }
     ['week', 'month'].forEach(function (k) { state.notes[k].cache = {}; state.notes[k].pending = {}; });
     if (!(state.areas.edit && state.areas.edit.saving)) { state.areas.edit = null; state.areas.flash = null; state.areas.status = ''; }   // unsaved areas text stays as a draft
+    state.res.status = ''; state.res.parsed = null; state.res.gen++;   // re-read info/resources.md on 刷新
     var core = Promise.all([loadFile('index.md'), loadFile('log.csv')]);
     var daily = Promise.all([listDaily(), listNotes('week'), listNotes('month')]);
     return core.then(function (res) {
@@ -1734,6 +2011,16 @@
     else if (act === 'cancel') { try { localStorage.removeItem(DRAFT_KEY + 'areas'); } catch (x) {} A.edit = null; renderAreas(); }
   });
   $('areas').addEventListener('toggle', function (ev) { var d = ev.target; if (d.classList && d.classList.contains('area')) state.areas.closed[d.getAttribute('data-name')] = !d.open; }, true);
+  $('rq').addEventListener('input', function (ev) { state.res.q = ev.target.value; renderResources(); });
+  $('tab-resources').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-rtag],[data-rclear],[data-rretry]'); if (!b) return;
+    var R = state.res;
+    if (b.hasAttribute('data-rtag')) { var t = b.getAttribute('data-rtag'); R.tag = R.tag === t ? '' : t; }
+    else if (b.hasAttribute('data-rclear')) { R.tag = ''; R.q = ''; $('rq').value = ''; }
+    else { loadResources(true); return; }
+    renderResources();
+  });
+  $('resources').addEventListener('toggle', function (ev) { var d = ev.target, R = state.res; if (d.classList && d.classList.contains('rgroup') && !R.q.trim() && !R.tag) R.closed[d.getAttribute('data-rname')] = !d.open; }, true);
   $('periods').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-pact]'); if (!b) return;
     var act = b.getAttribute('data-pact'), pe = state.pedit;
@@ -1768,7 +2055,7 @@
 
   var now = new Date(); state.month = new Date(now.getFullYear(), now.getMonth(), 1);
   window.__taskos = { parseIndex: parseIndex, parseCSV: parseCSV, parseDaily: parseDaily, serializeDaily: serializeDaily, utf8ToB64: utf8ToB64, b64ToUtf8: b64ToUtf8,
-    renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, parseAreas: parseAreas, areasHtml: areasHtml, relDayWord: relDayWord, firstLine: firstLine,
+    renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, parseAreas: parseAreas, areasHtml: areasHtml, parseResources: parseResources, splitTags: splitTags, resUrl: resUrl, relDayWord: relDayWord, firstLine: firstLine,
     excerpt: excerpt, addDays: addDays, metaText: metaText, API: API, state: state };
   load();
 })();
