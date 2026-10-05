@@ -42,3 +42,9 @@ time,content_id,action,from_status,to_status,summary,file
 2026-10-05T06:05:37+08:00,C-20261005-01,review,drafting,drafting,"review.md 填写发布前自查，新增空节「发布后 24 小时互动数据（基线）」待发布后填写；状态仍为 drafting",topics/C-20261005-01-事件定价周表1-解锁篇/review.md
 2026-10-05T06:05:37+08:00,SYSTEM,edit,,,"README.md 写作模板名单登记 templates/事件定价周表.md，目录结构加入该模板与 templates/README.md",README.md
 2026-10-05T06:05:47+08:00,SYSTEM,edit,,,"index.md 新增 C-20261005-01 行；系统文件表更新 sources.md（已确认 2 个）、README.md，新增 templates/README.md 行",index.md
+2026-10-05T11:41:08+08:00,SYSTEM,edit,,,"README.md 操作规则新增第 14 条单篇币种上限：任一资讯稿最多提及 7 个币种，默认只放最重要的 5 个（2026-10-05 用户新规）",README.md
+2026-10-05T11:41:08+08:00,SYSTEM,edit,,,"filter.md 第三层新增「打分后：币种上限」4 步，每日流程 15–20 分钟一行加入该步骤",filter.md
+2026-10-05T11:41:08+08:00,SYSTEM,edit,,,"templates/事件定价周表.md 写入币种上限：主表只放占流通前 5，样本行写「本周 N 个{事件}，按占流通取前 5」，观察只描述这 5 行，配图同主表；段落顺序和标题不变",templates/事件定价周表.md
+2026-10-05T11:41:08+08:00,C-20261005-01,edit,drafting,drafting,"按币种上限改稿（原文件原地修改）：主表/观察/短版/图源表只留占流通前 5（XPL 63.2、BIGTIME 13.34、CARDS 10.62、H 7.34、GUN 6.56，已对照 CSV），n=14 保留；观察重数为解锁后 3 涨 2 跌、前 7 天 3 涨 2 跌、相对 BTC 3 正 2 负；结论句、XPL 段、来源、脚注保留；加权重算：长推 2374→1910，短版 274→277，跟帖 251/151 不变",topics/C-20261005-01-事件定价周表1-解锁篇/draft.md
+2026-10-05T11:41:08+08:00,C-20261004-01,review,drafting,drafting,"按币种上限检查：3 条帖子正文只涉及 ENA、HYPE、KGEN 共 3 个币，符合规则，未改动",topics/C-20261004-01-本周解锁ENA-HYPE-KGEN/draft.md
+2026-10-05T11:41:08+08:00,SYSTEM,edit,,,"index.md 更新 C-20261005-01 状态说明；系统文件表更新 filter.md、README.md，新增 templates/事件定价周表.md 行",index.md

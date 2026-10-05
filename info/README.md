@@ -97,6 +97,7 @@ inbox → researching → drafting → reviewing → ready → published → arc
 11. **缺文件不标 ready**：brief.md / research.md / draft.md 任一缺失或仅为模板，不得标 ready。
 12. **ID 规则**：`C-YYYYMMDD-NN`，当天序号 NN 从 01 起递增，先查 index.md 当天已有最大序号。
 13. **不假装已发布**：未实际发布前，状态不得写 published，不得编造阅读量等数据。
+14. **单篇币种上限**（2026-10-05 用户新规）：任一资讯稿（短讯、日报、深度/长文，含短版、跟帖、配图）最多提及 7 个币种，默认只放最重要的 5 个。「最重要」按该稿的排序指标取前 5（解锁类按占流通 %），排序依据写进 draft.md 元信息；放第 6–7 个须在 brief.md 写明理由；超过 7 个不写。样本数 n 照写全表行数，并写明「按某指标取前 5」。筛选步骤见 `filter.md`「打分后：币种上限」。
 
 ## 第一周节奏
 
