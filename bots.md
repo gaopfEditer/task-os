@@ -15,7 +15,7 @@
 - 仓库 `gaopfEditer/task-os` 和看板 `index.html`（GitHub Pages：https://gaopfediter.github.io/task-os/）
 - `tasks/`、`index.md`、`log.csv`：任务建档和状态（目前有 T-20260928-01 建立任务系统、T-20260930-01 国庆十天计划）
 - `daily/`、`weekly/`、`monthly/`：每日计划 / 实践 / 复盘 / 关键事件，周 / 月总结
-- `areas.md`、`bots.md`、`templates/`、`notes/量价案例/`
+- `areas.md`、`insights.md`、`bots.md`、`templates/`、`notes/量价案例/`
 - 本机 `/workspace/task-os/`（content-os README 里约定的任务管家目录）
 - 本机 `/workspace/vpa/`（量价案例分析脚本和图）、`/workspace/pending/insights.md`（提交受阻时暂存的灵感）
 
@@ -23,7 +23,7 @@
 
 - 每日计划、实践、复盘（`daily/YYYY-MM-DD.md`），周 / 月总结（日 / 周 / 月）
 - 灵感、额外收获（追加到周 / 月文件的小节）
-- 看板各页：看板 / 日历 / 领域 / 资源 / Bot
+- 看板各页：看板 / 日历 / 领域 / 灵感 / 资源 / Bot
 - 任务文件与状态变更（task.md + index.md + log.csv 同步改）
 
 ### 所属领域
