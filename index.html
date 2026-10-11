@@ -2864,8 +2864,7 @@
     hidePop(); selectDay(ds);
   });
   $('detail').addEventListener('click', function (ev) {
-    var b = ev.target.closest('[data-act]'); if (!b) return;
-    var act = b.getAttribute('data-act'), e = state.edit;
+    var b = ev.target.closest('[data-act],[data-dxf],[data-dxf-all]'); if (!b) return;
     if (b.hasAttribute('data-dxf')) {
       var k = b.getAttribute('data-dxf');
       if (k) { state.dextraShow[k] = !dextraVisible(k); renderDetail(); }
@@ -2876,6 +2875,7 @@
       renderDetail();
       return;
     }
+    var act = b.getAttribute('data-act'), e = state.edit;
     if (act === 'edit') startEdit(state.selected, 'plan');
     else if (act === 'save') saveEdit();
     else if (act === 'fill') fillPlanFromTasks();
