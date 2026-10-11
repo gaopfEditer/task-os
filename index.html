@@ -144,6 +144,11 @@
   .why.diary { background: #ddf4ff; color: #0969da; }
   .dsec { border-left: 3px solid var(--border); padding: 2px 0 2px 10px; margin: 10px 0; }
   .dsec.plan { border-color: var(--plan); } .dsec.prac { border-color: var(--prac); } .dsec.rev { border-color: var(--rev); }
+  .dsec.ops { border-color: #bf8700; } .dsec.ord { border-color: #953800; } .dsec.ovs { border-color: #0550ae; } .dsec.idea { border-color: #8250df; }
+  .dextra-filters { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 8px 0 4px; font-size: 12px; color: var(--muted); }
+  .dxf { font-size: 12px; padding: 2px 9px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); cursor: pointer; }
+  .dxf.on { background: #24292f; color: #fff; border-color: #24292f; }
+  .dxf.off { opacity: .55; }
   .dsec h4 { margin: 0 0 4px; font-size: 14px; }
   .dsec .none { color: var(--faint); font-size: 12px; }
   .md { word-break: break-word; }
@@ -552,8 +557,15 @@
   var MOBILE_ORDER = ['in_progress', 'blocked', 'planned', 'inbox', 'done', 'reviewed'];
   var ACTION_LABEL = { create: '创建', plan: '计划', execute: '执行', status: '状态', review: '复盘', edit: '编辑' };
   var SECTIONS = [['plan', '计划', 'plan', '计'], ['practice', '实践', 'prac', '实'], ['review', '复盘', 'rev', '复']];
-  var EVSEC = ['events', '关键事件', 'kev', '★'], DSECS = SECTIONS.concat([EVSEC]);   // 关键事件 is optional: written only when used or already present
-  var PLACEHOLDER = { plan: '今天最重要的 1～3 件事', practice: '做了什么、卡在哪', review: '今晚复盘写一句就行', events: '可选。每行一条，如：- 资源页上线；有内容的日子在日历上标 ★' };
+  var EXTRA_SECTIONS = [['ops', '运营', 'ops', '运'], ['orders', '接单', 'ord', '单'], ['overseas', '海外需求', 'ovs', '海'], ['dayidea', '灵感', 'idea', '灵']];
+  var EVSEC = ['events', '关键事件', 'kev', '★'];
+  var DSECS = SECTIONS.concat(EXTRA_SECTIONS).concat([EVSEC]);   // 关键事件 + 四类附加小节可选写入 daily
+  var PLACEHOLDER = {
+    plan: '今天最重要的 1～3 件事', practice: '做了什么、卡在哪', review: '今晚复盘写一句就行',
+    ops: '运营：内容、渠道、数据、发布…', orders: '接单：投标、沟通、交付节点…', overseas: '海外需求：客户、外包、时区协作…',
+    dayidea: '今天的想法（与灵感看板 insights.md 各自独立，可日后手工汇总）',
+    events: '可选。每行一条，如：- 资源页上线；有内容的日子在日历上标 ★'
+  };
   var WEEK = ['日', '一', '二', '三', '四', '五', '六'];
   var TL_COLLAPSED = 5;
 
@@ -561,7 +573,8 @@
     tasks: [], logs: [], loadedAt: null, src: '',
     daily: { list: {}, status: 'idle', error: '', cache: {}, pending: {}, tried: {} },
     tab: 'board', month: null, selected: null, edit: null, flash: null,
-    stat: '', mstatus: '', tlOpen: false, cq: '', kevOnly: false, dload: null, pendingSave: false
+    stat: '', mstatus: '', tlOpen: false, cq: '', kevOnly: false, dload: null, pendingSave: false,
+    dextraShow: { ops: true, orders: true, overseas: true, dayidea: true }
   };
   var $ = function (id) { return document.getElementById(id); };
 
@@ -735,6 +748,10 @@
     if (/^(实践|执行)/.test(h)) return 'practice';
     if (/^复盘/.test(h)) return 'review';
     if (/^[★⭐☆\s]*(关键事件|大事记?|重要事件|里程碑)\s*([（(：:].*)?$/.test(h)) return 'events';
+    if (/^运营/.test(h)) return 'ops';
+    if (/^接单/.test(h)) return 'orders';
+    if (/^海外/.test(h)) return 'overseas';
+    if (/^灵感/.test(h)) return 'dayidea';
     return null;
   }
   function trimBlank(lines) {
@@ -771,9 +788,22 @@
   function serializeDaily(date, base, edits) {
     var defs = SECTIONS.slice(), ord = (base && base.order) || [];
     var isNew = !base || (!base.title && !base.preamble && !ord.length && !(base.others || []).length);
+    EXTRA_SECTIONS.forEach(function (s) {
+      if (!sectionEmpty(edits && edits[s[0]]) || ord.indexOf(s[0]) >= 0) defs.push(s);
+    });
     // 关键事件: kept where it was (top or after 复盘); new files follow templates/daily.md; old files only gain it when events are typed
     if (!sectionEmpty(edits && edits.events) || ord.indexOf('events') >= 0 || isNew) { if (ord[0] === 'events') defs.unshift(EVSEC); else defs.push(EVSEC); }
     return serializeDoc(date, base, edits, defs);
+  }
+  function dextraVisible(key) { return state.dextraShow[key] !== false; }
+  function dextraFiltersHtml() {
+    var h = '<div class="dextra-filters"><span>附加内容</span>';
+    EXTRA_SECTIONS.forEach(function (s) {
+      var on = dextraVisible(s[0]);
+      h += '<button type="button" class="dxf' + (on ? ' on' : ' off') + '" data-dxf="' + s[0] + '" aria-pressed="' + on + '">' + esc(s[1]) + '</button>';
+    });
+    h += '<button type="button" class="link" data-dxf-all="1">全选</button></div>';
+    return h;
   }
   function serializeDoc(title, base, edits, secDefs) {
     base = base || { preamble: '', others: [] };
@@ -940,7 +970,8 @@
     var info = { exists: !!(sha || (c && c.text)), loaded: !!c, parsed: c ? c.parsed : null, stale: c && c.stale, error: c && c.error, pending: !!state.daily.pending[date] };
     info.has = {};
     DSECS.forEach(function (s) { info.has[s[0]] = !!(info.parsed && !sectionEmpty(info.parsed[s[0]])); });
-    info.any = info.has.plan || info.has.practice || info.has.review || info.has.events;
+    info.any = info.has.plan || info.has.practice || info.has.review || info.has.events ||
+      EXTRA_SECTIONS.some(function (s) { return info.has[s[0]]; });
     info.events = info.parsed ? keyEvents(info.parsed.events) : [];
     var listed = state.daily.status === 'ok' || state.daily.status === 'missing';
     info.ready = info.exists ? info.loaded : (listed || !!state.daily.tried[date]) && !info.pending;
@@ -1278,10 +1309,13 @@
   }
   function makeEdit(date, c, inline, focus) {
     var p = c && c.text ? c.parsed : parseDaily('');
-    var values = { plan: p.plan, practice: p.practice, review: p.review, events: p.events }, restored = false;
+    var values = {};
+    DSECS.forEach(function (s) { values[s[0]] = p[s[0]] || ''; });
+    var restored = false;
     var dr = loadDraft(date);
     if (dr && DSECS.some(function (s) { return String(dr[s[0]] || '').trim() !== String(values[s[0]] || '').trim(); })) {
-      values = { plan: dr.plan || '', practice: dr.practice || '', review: dr.review || '', events: dr.events || '' }; restored = true;
+      DSECS.forEach(function (s) { values[s[0]] = dr[s[0]] || ''; });
+      restored = true;
     }
     return { date: date, loading: false, inline: !!inline, focus: focus || null, focused: !!inline, base: p, baseText: c && c.text ? c.text : '', sha: c ? c.sha : null,
       values: values, remote: null, status: restored ? { kind: 'info', text: '已恢复这一天未保存的草稿（还没提交到仓库）。' } : null, saving: false };
@@ -1298,10 +1332,17 @@
       h += '<div class="prompt" id="fillPrompt"' + (showPrompt(e) ? '' : ' style="display:none"') + '><span>计划还空。把' + titles + '写进今天的计划？</span>' +
         '<button type="button" class="primary" data-act="fill">一键写入计划</button></div>';
     } else if (e.inline) h += '<div class="hint">这一天还是空的，直接写，写完点「保存」。</div>';
-    DSECS.forEach(function (s) {
-      h += '<label for="ed-' + s[0] + '">' + (s[0] === 'events' ? '<span class="kstar">★</span>' + s[1] + '<span class="opt">可选 · 每行一条，日历上会标 ★</span>' : '<span class="dot ' + s[2] + ' on"></span>' + s[1]) + '</label>' +
+    SECTIONS.forEach(function (s) {
+      h += '<label for="ed-' + s[0] + '"><span class="dot ' + s[2] + ' on"></span>' + s[1] + '</label>' +
         '<textarea id="ed-' + s[0] + '" data-date="' + esc(e.date) + '" placeholder="' + esc(PLACEHOLDER[s[0]]) + '">' + esc(e.values[s[0]]) + '</textarea>';
     });
+    h += '<div class="hint" style="margin-top:10px">附加而重要（可选，可多选筛选展示）</div>';
+    EXTRA_SECTIONS.forEach(function (s) {
+      h += '<label for="ed-' + s[0] + '"><span class="dot ' + s[2] + ' on"></span>' + s[1] + '</label>' +
+        '<textarea id="ed-' + s[0] + '" data-date="' + esc(e.date) + '" placeholder="' + esc(PLACEHOLDER[s[0]]) + '">' + esc(e.values[s[0]]) + '</textarea>';
+    });
+    h += '<label for="ed-events"><span class="kstar">★</span>' + EVSEC[1] + '<span class="opt">可选 · 每行一条，日历上会标 ★</span></label>' +
+      '<textarea id="ed-events" data-date="' + esc(e.date) + '" placeholder="' + esc(PLACEHOLDER.events) + '">' + esc(e.values.events) + '</textarea>';
     h += '<div class="hint">支持 Markdown（列表、<code>- [ ]</code> 待办、**粗体**、链接、代码）。写 <code>T-YYYYMMDD-NN</code> 会链接到任务；任务状态仍按规则在 task.md / index.md / log.csv 里改。</div>';
     if (e.status) h += '<div class="msg ' + e.status.kind + '">' + e.status.text + '</div>';
     if (e.remote != null) h += '<details class="remote" open><summary>远端最新内容（' + (e.remote ? '已存在' : '文件不存在') + '）</summary><pre>' + esc(e.remote || '（空）') + '</pre></details>';
@@ -1339,9 +1380,14 @@
       var primary = '<div class="actions"><button type="button" class="primary" data-act="edit">' + verb + '</button>' + tokenHint() + '</div>';
       if (!info.any) h += '<div class="nodata">还没有记录</div>' + primary;
       else {
-        h += primary;
+        h += primary + dextraFiltersHtml();
         if (info.events.length) h += '<div class="kevbox"><h4>★ 关键事件</h4>' + kevListHtml(info.events) + '</div>';
         SECTIONS.forEach(function (s) {
+          var body = info.parsed[s[0]];
+          h += '<div class="dsec ' + s[2] + '"><h4>' + s[1] + '</h4>' + (sectionEmpty(body) ? '<div class="none">（空）</div>' : '<div class="md">' + renderMd(body) + '</div>') + '</div>';
+        });
+        EXTRA_SECTIONS.forEach(function (s) {
+          if (!dextraVisible(s[0])) return;
           var body = info.parsed[s[0]];
           h += '<div class="dsec ' + s[2] + '"><h4>' + s[1] + '</h4>' + (sectionEmpty(body) ? '<div class="none">（空）</div>' : '<div class="md">' + renderMd(body) + '</div>') + '</div>';
         });
@@ -1396,7 +1442,7 @@
     var text = serializeDaily(e.date, e.base, e.values);
     if ((e.baseText && text === e.baseText) || (!e.baseText && !isDirty(e))) return setEditStatus('info', '没有改动。');
     var changed = DSECS.filter(function (s) { return String(e.values[s[0]] || '').trim() !== String(e.base[s[0]] || '').trim(); });
-    var labels = (changed.length ? changed : SECTIONS).map(function (s) { return s[1]; }).join('/');
+    var labels = (changed.length ? changed : SECTIONS.concat(EXTRA_SECTIONS)).map(function (s) { return s[1]; }).join('/');
     var body = { message: '日记 ' + e.date + '：' + (e.baseText ? '更新' : '新建') + labels, content: utf8ToB64(text), branch: BRANCH };
     if (e.sha) body.sha = e.sha;
     e.saving = true; e.status = null; renderDetail();
@@ -2820,6 +2866,16 @@
   $('detail').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-act]'); if (!b) return;
     var act = b.getAttribute('data-act'), e = state.edit;
+    if (b.hasAttribute('data-dxf')) {
+      var k = b.getAttribute('data-dxf');
+      if (k) { state.dextraShow[k] = !dextraVisible(k); renderDetail(); }
+      return;
+    }
+    if (b.hasAttribute('data-dxf-all')) {
+      EXTRA_SECTIONS.forEach(function (s) { state.dextraShow[s[0]] = true; });
+      renderDetail();
+      return;
+    }
     if (act === 'edit') startEdit(state.selected, 'plan');
     else if (act === 'save') saveEdit();
     else if (act === 'fill') fillPlanFromTasks();
@@ -2827,7 +2883,7 @@
     else if (act === 'cancel' && e) {
       clearDraft(e.date);
       if (e.inline) {
-        e.values = { plan: e.base.plan, practice: e.base.practice, review: e.base.review, events: e.base.events }; e.status = null;
+        DSECS.forEach(function (s) { e.values[s[0]] = e.base[s[0]] || ''; }); e.status = null;
         DSECS.forEach(function (s) { var ta = $('ed-' + s[0]); if (ta) ta.value = e.values[s[0]]; });
         updatePrompt(); updateEditorButtons();
       } else { state.edit = null; renderDetail(); }
