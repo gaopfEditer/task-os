@@ -149,6 +149,17 @@
   .dxf { font-size: 12px; padding: 2px 9px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); cursor: pointer; }
   .dxf.on { background: #24292f; color: #fff; border-color: #24292f; }
   .dxf.off { opacity: .55; }
+  .pagetitle { font-size: 18px; margin: 0 0 10px; font-weight: 700; }
+  .det-bar { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 8px; }
+  .det-bar input[type="search"] { flex: 1 1 200px; min-width: 0; }
+  .det-range { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 10px; font-size: 13px; }
+  .det-range input[type="date"] { font: inherit; }
+  .det-day { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+  .det-day h3 { margin: 0 0 8px; font-size: 15px; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; }
+  .det-day h3 a { text-decoration: none; color: inherit; }
+  .det-day h3 a:hover { color: var(--accent); }
+  .det-day .sub { font-size: 12px; color: var(--faint); font-weight: normal; }
+  .det-src { font-size: 11px; color: var(--faint); font-weight: normal; margin-left: 6px; }
   .dsec h4 { margin: 0 0 4px; font-size: 14px; }
   .dsec .none { color: var(--faint); font-size: 12px; }
   .md { word-break: break-word; }
@@ -285,12 +296,6 @@
   details.ins-card .ins-body { padding: 0 12px 10px; border-top: 1px solid var(--line); font-size: 13px; }
   details.ins-card .ins-body h5 { font-size: 12px; color: var(--muted); margin: 8px 0 4px; }
   details.ins-card .ins-actions { display: flex; flex-wrap: wrap; gap: 6px 10px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
-  #insEditor { border: none; border-radius: 10px; padding: 16px 18px; max-width: 520px; width: calc(100% - 24px); box-shadow: 0 8px 32px rgba(0,0,0,.15); }
-  #insEditor::backdrop { background: rgba(0,0,0,.35); }
-  #insEditor label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
-  #insEditor input, #insEditor textarea { width: 100%; box-sizing: border-box; }
-  #insEditor textarea { min-height: 72px; resize: vertical; }
-  #insEditor .ins-form-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; align-items: center; }
   .rcol { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
   .pnote + .pnote { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 10px; }
   .phd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -404,8 +409,8 @@
 <nav class="tabs">
   <a href="#board" data-tab="board">看板</a>
   <a href="#calendar" data-tab="calendar">日历</a>
-  <a href="#areas" data-tab="areas">领域</a>
-  <a href="#insights" data-tab="insights">灵感</a>
+  <a href="#detail" data-tab="detail">明细扩展</a>
+  <a href="#areas" data-tab="areas">关注领域</a>
   <a href="#resources" data-tab="resources">资源</a>
   <a href="#bots" data-tab="bots">Bot</a>
 </nav>
@@ -458,14 +463,18 @@
     </div>
   </section>
 
-  <section class="tab" id="tab-areas">
-    <div id="areas"><div class="nodata">加载中…</div></div>
+  <section class="tab" id="tab-detail">
+    <h2 class="pagetitle">明细扩展</h2>
+    <p class="hint" style="margin:0 0 8px">汇总 <code>daily/</code> 里运营 / 接单 / 海外需求 / 灵感四类小节；勾选「灵感」时也会显示 <code>insights.md</code> 里同一天的长期灵感（只读）。编辑请在「日历」对应日或 GitHub 上改文件。</p>
+    <div class="det-bar"><input id="dq" type="search" placeholder="搜索正文…" autocomplete="off" aria-label="搜索明细"><span id="detInfo" class="ins-info"></span></div>
+    <div id="detTypes" class="dextra-filters"></div>
+    <div class="det-range"><span>时间</span><input type="date" id="detFrom" aria-label="开始日期"><span>至</span><input type="date" id="detTo" aria-label="结束日期"><button type="button" id="detMonth">近一个月</button><button type="button" class="primary" id="detApply">应用</button><a href="https://github.com/gaopfEditer/task-os/blob/main/insights.md" target="_blank" rel="noopener" style="font-size:12px;margin-left:auto">insights.md</a></div>
+    <div id="detailFeed"><div class="nodata">加载中…</div></div>
   </section>
 
-  <section class="tab" id="tab-insights">
-    <div class="ins-bar"><input id="iq" type="search" placeholder="搜索标题 / 问题 / 回答 / 标签" autocomplete="off" aria-label="搜索灵感"><span id="insInfo" class="ins-info"></span><button type="button" class="primary" id="insAdd">新增灵感</button><a href="https://github.com/gaopfEditer/task-os/blob/main/insights.md" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 insights.md</a></div>
-    <div id="insTags" class="ins-tags res-tags"></div>
-    <div id="insights"><div class="nodata">加载中…</div></div>
+  <section class="tab" id="tab-areas">
+    <h2 class="pagetitle">关注领域</h2>
+    <div id="areas"><div class="nodata">加载中…</div></div>
   </section>
 
   <section class="tab" id="tab-resources">
@@ -483,27 +492,6 @@
   </footer>
 </main>
 <div id="dayPop" class="daypop" role="dialog" hidden></div>
-
-<dialog id="insEditor">
-  <h3 id="insEditorTitle">灵感</h3>
-  <p class="note" style="font-size:13px;color:var(--muted);margin:0 0 8px">保存到仓库 <code>insights.md</code>（需要 GitHub 令牌）。</p>
-  <label for="insDate">日期</label>
-  <input id="insDate" type="date" required>
-  <label for="insTagsInput">标签（顿号或逗号分隔，如 交易、技术）</label>
-  <input id="insTagsInput" type="text" placeholder="交易、运营、出海、成长、技术">
-  <label for="insTitle">标题 / 问题摘要（卡片默认显示）</label>
-  <input id="insTitle" type="text" required>
-  <label for="insQuestion">问题（可选，展开后显示）</label>
-  <textarea id="insQuestion" rows="3"></textarea>
-  <label for="insAnswer">回答 / 详情</label>
-  <textarea id="insAnswer" rows="5"></textarea>
-  <div id="insEditorStatus" class="msg" style="margin-top:8px;display:none"></div>
-  <div class="ins-form-actions">
-    <button type="button" class="primary" id="insSave">保存</button>
-    <button type="button" id="insCancel">取消</button>
-    <span class="tokenhint" id="insTokenHint"></span>
-  </div>
-</dialog>
 
 <dialog id="settings">
   <h3>设置：GitHub 令牌</h3>
@@ -564,7 +552,7 @@
   var PLACEHOLDER = {
     plan: '今天最重要的 1～3 件事', practice: '做了什么、卡在哪', review: '今晚复盘写一句就行',
     ops: '运营：内容、渠道、数据、发布…', orders: '接单：投标、沟通、交付节点…', overseas: '海外需求：客户、外包、时区协作…',
-    dayidea: '今天的想法（与灵感看板 insights.md 各自独立，可日后手工汇总）',
+    dayidea: '今天的想法（与 insights.md 长期灵感可一起在「明细扩展」页查看）',
     events: '可选。每行一条，如：- 资源页上线；有内容的日子在日历上标 ★'
   };
   var WEEK = ['日', '一', '二', '三', '四', '五', '六'];
@@ -576,7 +564,9 @@
     tab: 'board', month: null, selected: null, edit: null, flash: null,
     stat: '', mstatus: '', tlOpen: false, cq: '', kevOnly: false, dload: null, pendingSave: false,
     dextraShow: { ops: true, orders: true, overseas: true, dayidea: true },
-    tokenStorageErr: '', tokenBanner: ''
+    tokenStorageErr: '', tokenBanner: '',
+    detail: { show: { ops: true, orders: true, overseas: true, dayidea: true }, from: '', to: '', q: '', loading: false, loadGen: 0 },
+    insights: { status: '', text: '', parsed: null, error: '' }
   };
   var $ = function (id) { return document.getElementById(id); };
 
@@ -689,8 +679,6 @@
     if (state.pedit && !state.pedit.loading) setPStatus(state.pedit, 'error', esc(text));
     if (state.areas.edit) { state.areas.edit.status = { kind: 'error', text: esc(text) }; renderAreas(); }
     if (state.bots.edit) { state.bots.edit.status = { kind: 'error', text: esc(text) }; renderBots(); }
-    var insSt = $('insEditorStatus');
-    if (insSt && $('insEditor') && $('insEditor').open) { insSt.className = 'msg error'; insSt.style.display = 'block'; insSt.textContent = text; }
   }
   function renderTokenBanner() {
     var el = $('msg');
@@ -707,8 +695,6 @@
     if (resume === 'period') savePeriod();
     else if (resume === 'areas') saveAreas();
     else if (resume === 'bots') saveBots();
-    else if (resume === 'insights') { state.insights.pendingSaveForm = true; saveInsightsFromForm(); }
-    else if (resume === 'insights-del') { var did = state.insights.pendingDelete; state.insights.pendingDelete = null; if (did) deleteInsight(did, true); }
     else if (resume) saveEdit();
     else refreshTokenHints();
   }
@@ -2277,11 +2263,8 @@
     });
   }
 
-  // ---------- 灵感: insights.md (one "## " per card; card UI + CRUD via Contents API) ----------
+  // ---------- 明细扩展: daily 四类小节 + insights.md（灵感来源，只读） ----------
   var INS_PATH = 'insights.md';
-  var INS_STARTER = '# 灵感\n\n每条灵感一个 `## ` 标题；下面写 `日期：`、`标签：`；`<!-- id:… -->` 由网页维护。正文用 `### 问题` / `### 回答`。\n\n';
-  var INS_TAG_PRESETS = ['交易', '运营', '出海', '成长', '技术'];
-  state.insights = { status: '', text: '', sha: null, error: '', parsed: null, q: '', tag: '', closed: {}, flash: null, saving: false, pendingItem: null, pendingDelete: null };
   function insSplitTags(s) {
     s = String(s || '').trim();
     if (!s) return [];
@@ -2344,211 +2327,143 @@
     });
     return out;
   }
-  function serializeInsights(p) {
-    var h = (p.title ? '# ' + p.title + '\n\n' : '# 灵感\n\n') + (p.intro ? p.intro.trim() + '\n\n' : '');
-    p.items.forEach(function (it) {
-      h += '## ' + (it.title || '（无标题）') + '\n\n';
-      h += '日期：' + (it.date || todayStr()) + '\n';
-      h += '标签：' + (it.tags.length ? it.tags.join('、') : '') + '\n';
-      h += '<!-- id:' + it.id + ' -->\n\n';
-      h += '### 问题\n\n' + (it.question || '') + '\n\n';
-      h += '### 回答\n\n' + (it.answer || '') + '\n\n';
-    });
-    return h.replace(/\n{3,}/g, '\n\n').replace(/\s+$/, '') + '\n';
-  }
-  function insightsSorted(items) {
-    return items.slice().sort(function (a, b) {
-      var da = a.date || '', db = b.date || '';
-      if (da !== db) return db < da ? -1 : 1;
-      return (b.title || '').localeCompare(a.title || '', 'zh');
-    });
-  }
-  function insMatch(it, words, tag) {
-    if (tag && it.tags.indexOf(tag) < 0) return false;
-    if (!words.length) return true;
-    var hay = [it.title, it.question, it.answer, it.tags.join(' ')].join('\n').toLowerCase();
-    return words.every(function (w) { return hay.indexOf(w) >= 0; });
-  }
   function loadInsights(force) {
     var I = state.insights;
     if (!force && (I.status === 'ok' || I.status === 'missing' || I.status === 'loading')) return Promise.resolve();
     I.status = 'loading'; I.parsed = null;
     return loadFile(INS_PATH).then(function (res) { I.text = res.text; I.status = 'ok'; I.error = ''; }, function (e) {
       if (e.status === 404) { I.text = ''; I.status = 'missing'; I.error = ''; } else { I.status = 'error'; I.error = e.message; }
-    }).then(function () { if (state.tab === 'insights') renderInsights(); });
+    }).then(function () { if (state.tab === 'detail') renderDetailFeed(); });
   }
-  function fetchInsightsLatest() {
-    return api('GET', repoPath + '/contents/' + INS_PATH + '?ref=' + BRANCH).then(function (res) {
-      if (res.status === 404) return { sha: null, text: '' };
-      if (!res.ok || !res.json) throw new Error(apiErrText(res));
-      return { sha: res.json.sha, text: b64ToUtf8(res.json.content) };
+  function defaultDetailRange() { return { from: addDays(todayStr(), -30), to: todayStr() }; }
+  function ensureDetailRange() {
+    var D = state.detail;
+    if (!D.from || !D.to || !parseYmd(D.from) || !parseYmd(D.to)) {
+      var r = defaultDetailRange(); D.from = r.from; D.to = r.to;
+    }
+    if (D.from > D.to) { var t = D.from; D.from = D.to; D.to = t; }
+  }
+  function datesInRange() {
+    ensureDetailRange();
+    var from = state.detail.from, to = state.detail.to, out = [];
+    for (var cur = from; cur <= to; cur = addDays(cur, 1)) out.push(cur);
+    return out.reverse();
+  }
+  function detailTypeOn(key) { return state.detail.show[key] !== false; }
+  function detailTypesHtml() {
+    var n = 0;
+    EXTRA_SECTIONS.forEach(function (s) { if (detailTypeOn(s[0])) n++; });
+    var h = '<span>类型</span>';
+    EXTRA_SECTIONS.forEach(function (s) {
+      var on = detailTypeOn(s[0]);
+      h += '<button type="button" class="dxf' + (on ? ' on' : ' off') + '" data-dtype="' + s[0] + '" aria-pressed="' + on + '">' + esc(s[1]) + '</button>';
     });
+    h += '<button type="button" class="link" data-dtype-all="1">全选</button>';
+    if (!n) h += '<span class="hint">请至少选一种类型</span>';
+    return h;
   }
-  function renderInsights() {
-    var I = state.insights, el = $('insights'), info = $('insInfo'), tagsEl = $('insTags');
-    if (I.status === '' || I.status === 'loading') { el.innerHTML = '<div class="nodata">正在读取 insights.md…</div>'; tagsEl.innerHTML = ''; info.textContent = ''; return; }
-    if (I.status === 'error') {
-      tagsEl.innerHTML = ''; info.textContent = '';
-      el.innerHTML = '<div class="msg error">读取 insights.md 失败：' + esc(I.error) + '</div><button type="button" data-insretry="1">重试</button>';
-      return;
-    }
-    var p = I.parsed || (I.parsed = parseInsights(I.text || ''));
-    var q = I.q.trim().toLowerCase(), words = q ? q.split(/\s+/) : [];
-    var counts = {}, order = [], preset = INS_TAG_PRESETS.slice();
-    preset.forEach(function (t) { counts[t] = 0; order.push(t); });
-    p.items.forEach(function (it) {
-      if (!insMatch(it, words, '')) return;
-      it.tags.forEach(function (t) {
-        if (!counts[t]) { counts[t] = 0; order.push(t); }
-        counts[t]++;
-      });
-    });
-    if (I.tag && counts[I.tag] === undefined) { counts[I.tag] = 0; order.push(I.tag); }
-    order.sort(function (a, b) {
-      var pa = preset.indexOf(a), pb = preset.indexOf(b);
-      if (pa >= 0 && pb >= 0) return pa - pb;
-      if (pa >= 0) return -1;
-      if (pb >= 0) return 1;
-      return (counts[b] || 0) - (counts[a] || 0) || a.localeCompare(b, 'zh');
-    });
-    var th = '';
-    order.forEach(function (t) {
-      if (!counts[t] && preset.indexOf(t) < 0 && !I.tag) return;
-      th += '<button type="button" class="rtag-f' + (t === I.tag ? ' on' : '') + (counts[t] ? '' : ' zero') + '" data-itag="' + esc(t) + '" aria-pressed="' + (t === I.tag) + '">' + esc(t) + '<i>' + (counts[t] || 0) + '</i></button>';
-    });
-    if (words.length || I.tag) th += '<button type="button" class="link rclear" data-iclear="1">清除筛选</button>';
-    tagsEl.innerHTML = th;
-    var list = insightsSorted(p.items.filter(function (it) { return insMatch(it, words, I.tag); }));
-    var h = '';
-    if (I.flash) h += '<div class="msg ' + esc(I.flash.kind) + '">' + I.flash.text + '</div>';
-    if (I.status === 'missing' && !p.items.length) h += '<div class="nodata">仓库里还没有 insights.md。点「新增灵感」创建第一条（需要令牌）。</div>';
-    else if (!list.length) h += '<div class="nodata">没有匹配的灵感。' + (words.length || I.tag ? '<button type="button" class="link" data-iclear="1">清除筛选</button>' : '') + '</div>';
-    else {
-      h += '<div class="ins-grid">';
-      list.forEach(function (it) {
-        var tags = it.tags.map(function (t) { return '<span class="rtag">' + esc(t) + '</span>'; }).join('');
-        var open = !I.closed[it.id];
-        h += '<details class="ins-card" data-iid="' + esc(it.id) + '"' + (open ? ' open' : '') + '><summary><b>' + esc(it.title || '（无标题）') + '</b>' +
-          (it.date ? '<span class="ins-date">' + esc(it.date) + '</span>' : '') + (tags ? '<span class="rmeta">' + tags + '</span>' : '') + '</summary><div class="ins-body">';
-        if (it.question && it.question !== it.title) { h += '<h5>问题</h5><div class="md">' + renderMd(it.question) + '</div>'; }
-        h += '<h5>回答 / 详情</h5><div class="md">' + (it.answer ? renderMd(it.answer) : '<span class="none">（空）</span>') + '</div>';
-        h += '<div class="ins-actions"><button type="button" class="link" data-insact="edit" data-iid="' + esc(it.id) + '">编辑</button><button type="button" class="link" data-insact="del" data-iid="' + esc(it.id) + '">删除</button></div></div></details>';
-      });
-      h += '</div>';
-    }
-    info.textContent = (words.length || I.tag ? '匹配 ' + list.length + ' / ' + p.items.length + ' 条' : '共 ' + p.items.length + ' 条') + (I.saving ? ' · 保存中…' : '') + tokenHint();
-    el.innerHTML = h;
+  function detailTextMatch(text, q) {
+    if (!q) return true;
+    var hay = String(text || '').toLowerCase();
+    return q.split(/\s+/).every(function (w) { return hay.indexOf(w) >= 0; });
   }
-  function openInsEditor(mode, item) {
-    var d = $('insEditor'), title = $('insEditorTitle');
-    $('insEditorStatus').style.display = 'none';
-    $('insTokenHint').innerHTML = tokenHint();
-    if (mode === 'new') {
-      title.textContent = '新增灵感';
-      $('insDate').value = todayStr();
-      $('insTagsInput').value = '';
-      $('insTitle').value = '';
-      $('insQuestion').value = '';
-      $('insAnswer').value = '';
-      state.insights.pendingItem = { mode: 'new', id: 'ins-' + todayStr() + '-' + Math.random().toString(36).slice(2, 7) };
-    } else {
-      title.textContent = '编辑灵感';
-      $('insDate').value = item.date || todayStr();
-      $('insTagsInput').value = item.tags.join('、');
-      $('insTitle').value = item.title || '';
-      $('insQuestion').value = item.question || '';
-      $('insAnswer').value = item.answer || '';
-      state.insights.pendingItem = { mode: 'edit', id: item.id };
-    }
-    if (d.showModal) { if (!d.open) d.showModal(); } else d.setAttribute('open', '');
-  }
-  function closeInsEditor() { var d = $('insEditor'); if (d.close) d.close(); else d.removeAttribute('open'); state.insights.pendingItem = null; }
-  function readInsForm() {
-    return {
-      id: state.insights.pendingItem && state.insights.pendingItem.id,
-      date: $('insDate').value.trim(),
-      tags: insSplitTags($('insTagsInput').value),
-      title: $('insTitle').value.trim(),
-      question: $('insQuestion').value.replace(/\r\n?/g, '\n').trim(),
-      answer: $('insAnswer').value.replace(/\r\n?/g, '\n').trim()
-    };
-  }
-  function saveInsightsFromForm() {
-    var I = state.insights, pend = I.pendingItem;
-    if (!pend || I.saving) return;
-    var it = readInsForm();
-    if (!it.title) { $('insEditorStatus').className = 'msg error'; $('insEditorStatus').style.display = 'block'; $('insEditorStatus').textContent = '请填写标题。'; return; }
-    if (!it.date || !parseYmd(it.date)) { $('insEditorStatus').className = 'msg error'; $('insEditorStatus').style.display = 'block'; $('insEditorStatus').textContent = '请填写有效日期。'; return; }
-    if (!requestTokenForSave('insights', '保存 insights.md 需要 GitHub 令牌，填好后会自动继续保存。')) {
-      I.pendingSaveForm = true;
-      return;
-    }
-    var p = parseInsights(I.text || (I.status === 'missing' ? '' : I.text));
-    if (!p.intro && I.status === 'missing') p.intro = INS_STARTER.replace(/^# 灵感\n\n/, '').trim();
-    if (pend.mode === 'new') p.items.push(it);
-    else {
-      var idx = -1;
-      p.items.forEach(function (x, i) { if (x.id === pend.id) idx = i; });
-      if (idx < 0) { $('insEditorStatus').className = 'msg error'; $('insEditorStatus').style.display = 'block'; $('insEditorStatus').textContent = '找不到要编辑的条目。'; return; }
-      it.id = pend.id;
-      p.items[idx] = it;
-    }
-    var newText = serializeInsights(p);
-    return putInsights(newText, pend.mode === 'new' ? '新增' : '更新').then(function () { closeInsEditor(); });
-  }
-  function deleteInsight(id, skipConfirm) {
+  function insightsForDate(ds) {
+    if (!detailTypeOn('dayidea')) return [];
     var I = state.insights;
-    if (I.saving) return;
-    if (!skipConfirm && !confirm('确定删除这条灵感？')) return;
-    I.pendingDelete = id;
-    if (!requestTokenForSave('insights-del', '删除灵感需要 GitHub 令牌。')) return;
-    var p = parseInsights(I.text);
-    p.items = p.items.filter(function (x) { return x.id !== id; });
-    var newText = serializeInsights(p);
-    return putInsights(newText, '删除');
+    if (I.status !== 'ok' && I.status !== 'missing') return [];
+    var p = I.parsed || (I.text ? parseInsights(I.text) : { items: [] });
+    return p.items.filter(function (it) { return it.date === ds; });
   }
-  function putInsights(newText, verb) {
-    var I = state.insights;
-    if (newText === I.text) { I.flash = { kind: 'info', text: '没有改动。' }; renderInsights(); return Promise.resolve(); }
-    I.saving = true; renderInsights();
-    return fetchInsightsLatest().then(function (latest) {
-      var sha = latest.sha;
-      if (latest.text && latest.text !== I.text && I.status === 'ok') {
-        I.text = latest.text; I.parsed = null; I.saving = false;
-        I.flash = { kind: 'error', text: 'insights.md 在别处被修改过，已加载远端最新内容，请重新编辑后再保存。' };
-        renderInsights();
-        throw new Error('conflict');
-      }
-      var body = { message: '灵感：' + verb + ' insights.md', content: utf8ToB64(newText), branch: BRANCH };
-      if (sha) body.sha = sha;
-      return api('PUT', repoPath + '/contents/' + INS_PATH, body);
-    }).then(function (res) {
-      I.saving = false;
-      if (res && res.ok && res.json && res.json.content) {
-        var commit = res.json.commit && res.json.commit.sha ? res.json.commit.sha : '';
-        I.text = newText; I.parsed = null; I.status = 'ok'; I.sha = res.json.content.sha;
-        I.flash = { kind: 'ok', text: '已保存' + (commit ? '（提交 <a target="_blank" rel="noopener" href="' + esc(REPO + '/commit/' + commit) + '">' + esc(commit.slice(0, 7)) + '</a>）' : '') + '。' };
-        renderInsights();
+  function dayDetailBlocks(ds, q) {
+    var blocks = [], c = state.daily.cache[ds], parsed = c && c.parsed;
+    EXTRA_SECTIONS.forEach(function (s) {
+      if (!detailTypeOn(s[0])) return;
+      if (s[0] === 'dayidea') {
+        var ins = insightsForDate(ds);
+        var body = parsed ? parsed.dayidea : '';
+        if (!sectionEmpty(body)) {
+          if (detailTextMatch(body, q)) blocks.push({ key: s[0], label: s[1], cls: s[2], src: 'daily', html: renderMd(body) });
+        }
+        ins.forEach(function (it) {
+          var chunk = [it.title, it.question, it.answer, it.tags.join(' ')].join('\n');
+          if (!detailTextMatch(chunk, q)) return;
+          var inner = '<p><b>' + esc(it.title || '（无标题）') + '</b>' + (it.tags.length ? ' ' + it.tags.map(function (t) { return '<span class="rtag">' + esc(t) + '</span>'; }).join('') : '') + '</p>';
+          if (it.question && it.question !== it.title) inner += '<div class="md">' + renderMd(it.question) + '</div>';
+          inner += '<div class="md">' + (it.answer ? renderMd(it.answer) : '<span class="none">（空）</span>') + '</div>';
+          blocks.push({ key: s[0], label: s[1], cls: s[2], src: 'insights.md', html: inner });
+        });
         return;
       }
-      if (res && (res.status === 409 || res.status === 422)) {
-        return fetchInsightsLatest().then(function (l) {
-          I.text = l.text; I.parsed = null; I.sha = l.sha;
-          I.flash = { kind: 'error', text: '保存失败：版本冲突，已刷新远端内容，请重试。' };
-          renderInsights();
-        });
-      }
-      if (res) {
-        I.flash = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) };
-        renderInsights();
-      }
-    }).catch(function (err) {
-      I.saving = false;
-      if (err && err.message !== 'conflict') {
-        I.flash = { kind: 'error', text: '保存失败：' + esc(err.message || String(err)) };
-        renderInsights();
-      }
+      var body = parsed ? parsed[s[0]] : '';
+      if (sectionEmpty(body) || !detailTextMatch(body, q)) return;
+      blocks.push({ key: s[0], label: s[1], cls: s[2], src: 'daily', html: renderMd(body) });
     });
+    return blocks;
+  }
+  function syncDetailRangeInputs() {
+    ensureDetailRange();
+    if ($('detFrom')) $('detFrom').value = state.detail.from;
+    if ($('detTo')) $('detTo').value = state.detail.to;
+  }
+  function renderDetailFeed() {
+    var D = state.detail, el = $('detailFeed'), info = $('detInfo'), typesEl = $('detTypes');
+    ensureDetailRange();
+    syncDetailRangeInputs();
+    if (typesEl) typesEl.innerHTML = detailTypesHtml();
+    var q = (D.q || '').trim().toLowerCase();
+    if (!EXTRA_SECTIONS.some(function (s) { return detailTypeOn(s[0]); })) {
+      el.innerHTML = '<div class="nodata">请至少选择一种类型。</div>';
+      info.textContent = '';
+      return;
+    }
+    if (D.loading) { el.innerHTML = '<div class="nodata">正在读取日记…</div>'; info.textContent = '加载中'; return; }
+    var dates = datesInRange(), shown = 0, h = '';
+    if (state.insights.status === 'error') h += '<div class="msg error">insights.md 读取失败：' + esc(state.insights.error) + '（仅影响「灵感」里的长期卡片）</div>';
+    dates.forEach(function (ds) {
+      var blocks = dayDetailBlocks(ds, q);
+      if (!blocks.length) return;
+      shown++;
+      h += '<article class="det-day"><h3><a href="#calendar/' + ds + '">' + esc(cnDate(ds, true)) + '</a><span class="sub">' + esc(ds) + '</span></h3>';
+      blocks.forEach(function (b) {
+        h += '<div class="dsec ' + b.cls + '"><h4>' + esc(b.label) + (b.src === 'insights.md' ? '<span class="det-src">insights.md</span>' : '') + '</h4><div class="md">' + b.html + '</div></div>';
+      });
+      h += '</article>';
+    });
+    if (!shown) h += '<div class="nodata">该时间范围内没有匹配内容。可扩大日期或调整类型筛选。</div>';
+    el.innerHTML = h;
+    info.textContent = '显示 ' + shown + ' 天 · ' + D.from + ' ～ ' + D.to + (q ? ' · 搜索「' + D.q + '」' : '');
+  }
+  function loadDetailFeed(force) {
+    var D = state.detail;
+    ensureDetailRange();
+    D.loadGen++;
+    var gen = D.loadGen;
+    D.loading = true;
+    renderDetailFeed();
+    var dates = datesInRange();
+    var needInsight = detailTypeOn('dayidea');
+    var pList = listDaily().then(function () {
+      var todo = dates.filter(function (ds) { return state.daily.list[ds] && needsLoad(ds); });
+      return loadMany(todo, function () { if (gen === D.loadGen && state.tab === 'detail') renderDetailFeed(); });
+    });
+    var pIns = needInsight ? loadInsights(force) : Promise.resolve();
+    return Promise.all([pList, pIns]).then(function () {
+      dates.forEach(function (ds) {
+        if (state.daily.list[ds] && !state.daily.cache[ds] && !state.daily.pending[ds]) loadDay(ds);
+      });
+      return loadMany(dates.filter(function (ds) { return state.daily.list[ds] && needsLoad(ds); }), function () {
+        if (gen === D.loadGen && state.tab === 'detail') renderDetailFeed();
+      });
+    }).then(function () {
+      D.loading = false;
+      if (gen === D.loadGen && state.tab === 'detail') renderDetailFeed();
+    });
+  }
+  function applyDetailRangeFromInputs() {
+    var f = $('detFrom').value, t = $('detTo').value;
+    if (!parseYmd(f) || !parseYmd(t)) { renderDetailFeed(); return; }
+    state.detail.from = f; state.detail.to = t;
+    loadDetailFeed(true);
   }
 
   // ---------- 资源: info/resources.md (read-only; maintained by 资讯创作官, never written from this page) ----------
@@ -2850,12 +2765,16 @@
       parts = ['calendar', parseYmd(parts[1]) ? parts[1] : ''];
       history.replaceState(null, '', '#calendar' + (parts[1] ? '/' + parts[1] : ''));
     }
-    var tab = ['board', 'calendar', 'areas', 'insights', 'resources', 'bots'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
+    if (parts[0] === 'insights') {   // 旧链接 #insights → 明细扩展
+      parts[0] = 'detail';
+      history.replaceState(null, '', '#detail');
+    }
+    var tab = ['board', 'calendar', 'detail', 'areas', 'resources', 'bots'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
     setTab(tab);
     if (tab === 'board') renderBoardTab();
     if (tab === 'calendar') selectDay(parseYmd(parts[1]) ? parts[1] : (state.selected || todayStr()), true);
     if (tab === 'areas') { if (!areasEditorActive()) renderAreas(); loadAreas(); }
-    if (tab === 'insights') { renderInsights(); loadInsights(); }
+    if (tab === 'detail') { renderDetailFeed(); loadDetailFeed(); }
     if (tab === 'resources') { renderResources(); loadResources(); }
     if (tab === 'bots') { if (!botsEditorActive()) renderBots(); loadBots(); if (state.areas.status === '') loadAreas().then(function () { if (state.tab === 'bots' && !botsEditorActive()) renderBots(); }); }
   }
@@ -2873,7 +2792,7 @@
     ['week', 'month'].forEach(function (k) { state.notes[k].cache = {}; state.notes[k].pending = {}; });
     if (!(state.areas.edit && state.areas.edit.saving)) { state.areas.edit = null; state.areas.flash = null; state.areas.status = ''; }   // unsaved areas text stays as a draft
     if (!(state.bots.edit && state.bots.edit.saving)) { state.bots.edit = null; state.bots.flash = null; state.bots.status = ''; }   // unsaved bots text stays as a draft
-    if (!state.insights.saving) { state.insights.status = ''; state.insights.parsed = null; state.insights.flash = null; }
+    state.insights.status = ''; state.insights.parsed = null;
     state.res.status = ''; state.res.parsed = null; state.res.gen++;   // re-read info/resources.md on 刷新
     var core = Promise.all([loadFile('index.md'), loadFile('log.csv')]);
     var daily = listAll();
@@ -3046,23 +2965,30 @@
     else if (act === 'cancel') { try { localStorage.removeItem(DRAFT_KEY + 'bots'); } catch (x) {} B.edit = null; renderBots(); }
   });
   $('bots').addEventListener('toggle', function (ev) { var d = ev.target; if (d.classList && (d.classList.contains('bot') || d.classList.contains('bot-edges'))) state.bots.closed[d.getAttribute('data-name')] = !d.open; }, true);
-  $('iq').addEventListener('input', function (ev) { state.insights.q = ev.target.value; renderInsights(); });
-  $('insAdd').addEventListener('click', function () { openInsEditor('new'); });
-  $('insSave').addEventListener('click', function () { saveInsightsFromForm(); });
-  $('insCancel').addEventListener('click', function () { closeInsEditor(); });
-  $('tab-insights').addEventListener('click', function (ev) {
-    var b = ev.target.closest('[data-itag],[data-iclear],[data-insretry],[data-insact]'); if (!b) return;
-    var I = state.insights;
-    if (b.hasAttribute('data-itag')) { var t = b.getAttribute('data-itag'); I.tag = I.tag === t ? '' : t; renderInsights(); }
-    else if (b.hasAttribute('data-iclear')) { I.tag = ''; I.q = ''; $('iq').value = ''; renderInsights(); }
-    else if (b.hasAttribute('data-insretry')) { loadInsights(true); }
-    else if (b.getAttribute('data-insact') === 'edit') {
-      var id = b.getAttribute('data-iid'), p = I.parsed || parseInsights(I.text);
-      var item = null; p.items.forEach(function (x) { if (x.id === id) item = x; });
-      if (item) openInsEditor('edit', item);
-    } else if (b.getAttribute('data-insact') === 'del') deleteInsight(b.getAttribute('data-iid'));
+  $('dq').addEventListener('input', function (ev) { state.detail.q = ev.target.value; renderDetailFeed(); });
+  $('detApply').addEventListener('click', applyDetailRangeFromInputs);
+  $('detMonth').addEventListener('click', function () {
+    var r = defaultDetailRange(); state.detail.from = r.from; state.detail.to = r.to;
+    syncDetailRangeInputs(); loadDetailFeed(true);
   });
-  $('insights').addEventListener('toggle', function (ev) { var d = ev.target; if (d.classList && d.classList.contains('ins-card')) state.insights.closed[d.getAttribute('data-iid')] = !d.open; }, true);
+  $('tab-detail').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-dtype],[data-dtype-all]'); if (!b) return;
+    var D = state.detail;
+    if (b.hasAttribute('data-dtype-all')) {
+      EXTRA_SECTIONS.forEach(function (s) { D.show[s[0]] = true; });
+      renderDetailFeed(); loadDetailFeed();
+      return;
+    }
+    var k = b.getAttribute('data-dtype');
+    if (!k) return;
+    var on = detailTypeOn(k);
+    var n = 0;
+    EXTRA_SECTIONS.forEach(function (s) { if (detailTypeOn(s[0])) n++; });
+    if (on && n <= 1) return;
+    D.show[k] = !on;
+    renderDetailFeed();
+    if (detailTypeOn('dayidea') && state.insights.status === '') loadInsights().then(function () { renderDetailFeed(); });
+  });
   $('rq').addEventListener('input', function (ev) { state.res.q = ev.target.value; renderResources(); });
   $('tab-resources').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-rtag],[data-rclear],[data-rretry]'); if (!b) return;
@@ -3130,7 +3056,7 @@
   (function () { var te = tokenStorageErrorText(); if (te) { state.tokenBanner = te; renderTokenBanner(); } })();
   window.__taskos = { parseIndex: parseIndex, parseCSV: parseCSV, parseDaily: parseDaily, serializeDaily: serializeDaily, utf8ToB64: utf8ToB64, b64ToUtf8: b64ToUtf8,
     getToken: getToken, setToken: setToken, probeTokenStorage: probeTokenStorage, TOKEN_KEY: TOKEN_KEY,
-    renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, parseAreas: parseAreas, areasHtml: areasHtml, parseBots: parseBots, botsSplit: botsSplit, botEdges: botEdges, botMatch: botMatch, BOTS_STARTER: BOTS_STARTER, parseInsights: parseInsights, serializeInsights: serializeInsights, parseResources: parseResources, splitTags: splitTags, resUrl: resUrl, keyEvents: keyEvents, truncLines: truncLines, dayPopHtml: dayPopHtml, relDayWord: relDayWord, firstLine: firstLine,
+    renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, parseAreas: parseAreas, areasHtml: areasHtml, parseBots: parseBots, botsSplit: botsSplit, botEdges: botEdges, botMatch: botMatch, BOTS_STARTER: BOTS_STARTER, parseInsights: parseInsights, parseResources: parseResources, renderDetailFeed: renderDetailFeed, datesInRange: datesInRange, splitTags: splitTags, resUrl: resUrl, keyEvents: keyEvents, truncLines: truncLines, dayPopHtml: dayPopHtml, relDayWord: relDayWord, firstLine: firstLine,
     excerpt: excerpt, addDays: addDays, metaText: metaText, API: API, state: state };
   load();
 })();
