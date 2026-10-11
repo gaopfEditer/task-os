@@ -518,7 +518,8 @@
     <input type="password" id="tokenInput" placeholder="github_pat_…" autocomplete="off" spellcheck="false">
     <button type="button" id="tokenShow">显示</button>
   </div>
-  <p class="note">令牌只保存在当前浏览器的 localStorage 中，只会发送给 GitHub API（api.github.com），不会写进仓库。在公用设备上用完请点「清除」。</p>
+  <p id="tokenCachedHint" class="note" style="margin:6px 0 0;font-size:13px"></p>
+  <p class="note">令牌只保存在当前浏览器的 localStorage（键名 <code>taskos.github_token</code>）中，只会发送给 GitHub API（api.github.com），不会写进仓库。在公用设备上用完请点「清除」。</p>
   <div id="tokenStatus" class="note"></div>
   <div class="btns">
     <button type="button" id="tokenClear">清除</button>
@@ -574,7 +575,8 @@
     daily: { list: {}, status: 'idle', error: '', cache: {}, pending: {}, tried: {} },
     tab: 'board', month: null, selected: null, edit: null, flash: null,
     stat: '', mstatus: '', tlOpen: false, cq: '', kevOnly: false, dload: null, pendingSave: false,
-    dextraShow: { ops: true, orders: true, overseas: true, dayidea: true }
+    dextraShow: { ops: true, orders: true, overseas: true, dayidea: true },
+    tokenStorageErr: '', tokenBanner: ''
   };
   var $ = function (id) { return document.getElementById(id); };
 
@@ -623,8 +625,101 @@
   }
 
   // ---------- local storage: token + drafts ----------
-  function getToken() { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } }
-  function setToken(t) { try { if (t) localStorage.setItem(TOKEN_KEY, t); else localStorage.removeItem(TOKEN_KEY); } catch (e) {} }
+  var lsProbeOk = null;
+  function probeTokenStorage() {
+    if (lsProbeOk === true) { state.tokenStorageErr = ''; return ''; }
+    if (lsProbeOk === false) return state.tokenStorageErr || 'unavailable';
+    try {
+      var k = '__taskos_ls_probe__';
+      localStorage.setItem(k, '1');
+      localStorage.removeItem(k);
+      lsProbeOk = true;
+      state.tokenStorageErr = '';
+      return '';
+    } catch (e) {
+      lsProbeOk = false;
+      state.tokenStorageErr = (e && e.message) ? e.message : String(e);
+      return state.tokenStorageErr;
+    }
+  }
+  function getToken() {
+    var err = probeTokenStorage();
+    if (err) return '';
+    try {
+      var t = localStorage.getItem(TOKEN_KEY);
+      if (t == null || t === '') return '';
+      t = String(t).trim();
+      return t;
+    } catch (e) {
+      state.tokenStorageErr = (e && e.message) ? e.message : String(e);
+      return '';
+    }
+  }
+  function setToken(t) {
+    var err = probeTokenStorage();
+    if (err) return false;
+    try {
+      t = String(t || '').trim();
+      if (t) localStorage.setItem(TOKEN_KEY, t);
+      else localStorage.removeItem(TOKEN_KEY);
+      return true;
+    } catch (e) {
+      state.tokenStorageErr = (e && e.message) ? e.message : String(e);
+      return false;
+    }
+  }
+  function tokenStorageErrorText() {
+    if (state.tokenStorageErr) return '无法读写浏览器本地存储（' + state.tokenStorageErr + '）。隐私/无痕模式、禁用 Cookie 或 iframe 嵌入时常见；请换普通窗口打开本站后再保存。';
+    if (probeTokenStorage()) return '无法读写浏览器本地存储（' + state.tokenStorageErr + '）。隐私/无痕模式、禁用 Cookie 或 iframe 嵌入时常见；请换普通窗口打开本站后再保存。';
+    try {
+      var raw = localStorage.getItem(TOKEN_KEY);
+      if (raw != null && !String(raw).trim()) return '本地已有键 taskos.github_token 但内容为空，请在「设置」里重新粘贴并点保存。';
+    } catch (e) {
+      state.tokenStorageErr = (e && e.message) ? e.message : String(e);
+      return '无法读取本地令牌（' + state.tokenStorageErr + '）。';
+    }
+    return '';
+  }
+  function showTokenStorageError(ctx) {
+    var text = tokenStorageErrorText() || ctx;
+    if (!text) return;
+    state.tokenBanner = text;
+    renderTokenBanner();
+    if (state.edit && state.edit.date === state.selected) setEditStatus('error', esc(text));
+    if (state.pedit && !state.pedit.loading) setPStatus(state.pedit, 'error', esc(text));
+    if (state.areas.edit) { state.areas.edit.status = { kind: 'error', text: esc(text) }; renderAreas(); }
+    if (state.bots.edit) { state.bots.edit.status = { kind: 'error', text: esc(text) }; renderBots(); }
+    var insSt = $('insEditorStatus');
+    if (insSt && $('insEditor') && $('insEditor').open) { insSt.className = 'msg error'; insSt.style.display = 'block'; insSt.textContent = text; }
+  }
+  function renderTokenBanner() {
+    var el = $('msg');
+    if (!el) return;
+    var rest = el.queryContent;
+    if (!state.tokenBanner) {
+      if (el.getAttribute('data-token-banner') === '1') { el.innerHTML = ''; el.removeAttribute('data-token-banner'); }
+      return;
+    }
+    el.setAttribute('data-token-banner', '1');
+    el.innerHTML = '<div class="msg error">' + esc(state.tokenBanner) + ' <button type="button" class="link" data-act="settings">打开设置</button></div>';
+  }
+  function resumePendingSave(resume) {
+    if (resume === 'period') savePeriod();
+    else if (resume === 'areas') saveAreas();
+    else if (resume === 'bots') saveBots();
+    else if (resume === 'insights') { state.insights.pendingSaveForm = true; saveInsightsFromForm(); }
+    else if (resume === 'insights-del') { var did = state.insights.pendingDelete; state.insights.pendingDelete = null; if (did) deleteInsight(did, true); }
+    else if (resume) saveEdit();
+    else refreshTokenHints();
+  }
+  function requestTokenForSave(pendingVal, note) {
+    if (getToken()) return true;
+    var storageMsg = tokenStorageErrorText();
+    if (storageMsg) { showTokenStorageError(storageMsg); return false; }
+    state.pendingSave = pendingVal;
+    openSettings(note, true);
+    return false;
+  }
   function loadDraft(d) { try { var v = JSON.parse(localStorage.getItem(DRAFT_KEY + d) || 'null'); return v && typeof v === 'object' ? v : null; } catch (e) { return null; } }
   function clearDraft(d) { try { localStorage.removeItem(DRAFT_KEY + d); } catch (e) {} }
   function saveDraft(e) {
@@ -1438,7 +1533,7 @@
   function saveEdit() {
     var e = state.edit; if (!e || e.saving || e.loading) return;
     DSECS.forEach(function (s) { var ta = $('ed-' + s[0]); if (ta && ta.getAttribute('data-date') === e.date) e.values[s[0]] = ta.value; });
-    if (!getToken()) { state.pendingSave = true; openSettings('保存日记需要 GitHub 令牌，填好后会自动继续保存。'); return; }
+    if (!requestTokenForSave(true, '保存日记需要 GitHub 令牌，填好后会自动继续保存。')) return;
     var text = serializeDaily(e.date, e.base, e.values);
     if ((e.baseText && text === e.baseText) || (!e.baseText && !isDirty(e))) return setEditStatus('info', '没有改动。');
     var changed = DSECS.filter(function (s) { return String(e.values[s[0]] || '').trim() !== String(e.base[s[0]] || '').trim(); });
@@ -1637,7 +1732,7 @@
     var pe = state.pedit; if (!pe || pe.saving || pe.loading) return;
     readPInputs(pe);
     var P = PERIOD[pe.kind], st = state.notes[pe.kind], path = periodPath(pe.kind, pe.key);
-    if (!getToken()) { state.pendingSave = 'period'; openSettings('保存' + P.noun + '需要 GitHub 令牌，填好后会自动继续保存。'); return; }
+    if (!requestTokenForSave('period', '保存' + P.noun + '需要 GitHub 令牌，填好后会自动继续保存。')) return;
     var text = serializeNote(pe.kind, pe.key, pe.base, pe.values);
     if (pe.baseText ? text === pe.baseText : !pIsDirty(pe)) return setPStatus(pe, 'info', '没有改动。');
     var changed = PSECTIONS.filter(function (s) { return String(pe.values[s[0]] || '').trim() !== String(pe.base[s[0]] || '').trim(); });
@@ -1916,7 +2011,7 @@
   function saveAreas() {
     var A = state.areas, e = A.edit; if (!e || e.loading || e.saving) return;
     var ta = $('areaText'); if (ta) e.value = ta.value;
-    if (!getToken()) { state.pendingSave = 'areas'; openSettings('保存 areas.md 需要 GitHub 令牌，填好后会自动继续保存。'); return; }
+    if (!requestTokenForSave('areas', '保存 areas.md 需要 GitHub 令牌，填好后会自动继续保存。')) return;
     if (e.value === e.baseText) { e.status = { kind: 'info', text: '没有改动。' }; return renderAreas(); }
     var go = e.unknownSha ? fetchAreasLatest().then(function (l) { e.unknownSha = false; e.sha = l.sha; if (l.text !== e.baseText) { e.baseText = l.text; e.remote = l.text; throw { conflict: true }; } }) : Promise.resolve();
     e.saving = true; e.status = null; renderAreas();
@@ -2148,7 +2243,7 @@
   function saveBots() {
     var B = state.bots, e = B.edit; if (!e || e.loading || e.saving) return;
     var ta = $('botText'); if (ta) e.value = ta.value;
-    if (!getToken()) { state.pendingSave = 'bots'; openSettings('保存 bots.md 需要 GitHub 令牌，填好后会自动继续保存。'); return; }
+    if (!requestTokenForSave('bots', '保存 bots.md 需要 GitHub 令牌，填好后会自动继续保存。')) return;
     if (e.value === e.baseText) { e.status = { kind: 'info', text: '没有改动。' }; return renderBots(); }
     var go = e.unknownSha ? fetchBotsLatest().then(function (l) { e.unknownSha = false; e.sha = l.sha; if (l.text !== e.baseText) { e.baseText = l.text; e.remote = l.text; throw { conflict: true }; } }) : Promise.resolve();
     e.saving = true; e.status = null; renderBots();
@@ -2384,7 +2479,10 @@
     var it = readInsForm();
     if (!it.title) { $('insEditorStatus').className = 'msg error'; $('insEditorStatus').style.display = 'block'; $('insEditorStatus').textContent = '请填写标题。'; return; }
     if (!it.date || !parseYmd(it.date)) { $('insEditorStatus').className = 'msg error'; $('insEditorStatus').style.display = 'block'; $('insEditorStatus').textContent = '请填写有效日期。'; return; }
-    if (!getToken()) { I.pendingSaveForm = true; state.pendingSave = 'insights'; openSettings('保存 insights.md 需要 GitHub 令牌，填好后会自动继续保存。'); return; }
+    if (!requestTokenForSave('insights', '保存 insights.md 需要 GitHub 令牌，填好后会自动继续保存。')) {
+      I.pendingSaveForm = true;
+      return;
+    }
     var p = parseInsights(I.text || (I.status === 'missing' ? '' : I.text));
     if (!p.intro && I.status === 'missing') p.intro = INS_STARTER.replace(/^# 灵感\n\n/, '').trim();
     if (pend.mode === 'new') p.items.push(it);
@@ -2402,7 +2500,8 @@
     var I = state.insights;
     if (I.saving) return;
     if (!skipConfirm && !confirm('确定删除这条灵感？')) return;
-    if (!getToken()) { I.pendingDelete = id; state.pendingSave = 'insights-del'; openSettings('删除灵感需要 GitHub 令牌。'); return; }
+    I.pendingDelete = id;
+    if (!requestTokenForSave('insights-del', '删除灵感需要 GitHub 令牌。')) return;
     var p = parseInsights(I.text);
     p.items = p.items.filter(function (x) { return x.id !== id; });
     var newText = serializeInsights(p);
@@ -2691,11 +2790,34 @@
   }
 
   // ---------- settings dialog ----------
-  function tokenStatus() { var t = getToken(); $('tokenStatus').textContent = t ? '已保存令牌（…' + t.slice(-4) + '）' : '尚未保存令牌。'; }
-  function openSettings(note) {
+  function updateTokenDialogUI(note) {
+    var t = getToken(), hint = $('tokenCachedHint'), input = $('tokenInput'), status = $('tokenStatus');
+    var storageMsg = tokenStorageErrorText();
+    if (t) {
+      hint.innerHTML = '已缓存令牌（…' + esc(t.slice(-4)) + '）：<b>不必再粘贴</b>，直接点「验证」或「关闭」即可继续；要更换再在左侧输入新令牌。';
+      if (input) input.placeholder = '留空则沿用已缓存令牌';
+      status.textContent = storageMsg || ('当前已缓存（…' + t.slice(-4) + '）。保存日记 / areas / bots / insights / 周记月记会直接使用，无需再点本页「保存」。');
+    } else {
+      hint.textContent = storageMsg ? storageMsg : '';
+      if (input) input.placeholder = 'github_pat_…';
+      status.textContent = storageMsg || '尚未保存令牌。粘贴后点下方「保存」。';
+    }
+    if (note) status.textContent = note + ' ' + status.textContent;
+  }
+  function tokenStatus() { updateTokenDialogUI(); }
+  function openSettings(note, forSave) {
+    if (forSave && getToken()) {
+      var resume = state.pendingSave;
+      state.pendingSave = false;
+      if (resume) resumePendingSave(resume);
+      return;
+    }
+    if (forSave) {
+      var storageMsg = tokenStorageErrorText();
+      if (storageMsg) { showTokenStorageError(storageMsg); state.pendingSave = false; return; }
+    }
     $('tokenInput').value = '';
-    tokenStatus();
-    if (note) $('tokenStatus').textContent = note + ' ' + $('tokenStatus').textContent;
+    updateTokenDialogUI(note);
     var d = $('settings');
     if (d.showModal) { if (!d.open) d.showModal(); } else d.setAttribute('open', '');
   }
@@ -2851,6 +2973,9 @@
   }, true);
   window.addEventListener('resize', function () { if (pop.mode === 'hover') hidePop(); });
   $('refresh').addEventListener('click', load);
+  $('msg').addEventListener('click', function (ev) {
+    if (ev.target.closest('[data-act="settings"]')) { openSettings(); }
+  });
   $('openSettings').addEventListener('click', function () { state.pendingSave = false; openSettings(); });
   $('calPrev').addEventListener('click', function () { shiftMonth(-1); });
   $('calNext').addEventListener('click', function () { shiftMonth(1); });
@@ -2960,28 +3085,51 @@
   $('tokenShow').addEventListener('click', function () { var i = $('tokenInput'); i.type = i.type === 'password' ? 'text' : 'password'; });
   $('tokenSave').addEventListener('click', function () {
     var v = $('tokenInput').value.trim();
-    if (!v) { $('tokenStatus').textContent = '请先粘贴令牌。'; return; }
-    setToken(v); tokenStatus();
+    if (v) {
+      if (!setToken(v)) { updateTokenDialogUI('保存失败：' + (tokenStorageErrorText() || state.tokenStorageErr)); return; }
+      state.tokenBanner = '';
+      renderTokenBanner();
+    } else if (!getToken()) {
+      updateTokenDialogUI('请先粘贴令牌，或确认浏览器允许本站使用 localStorage。');
+      return;
+    }
+    updateTokenDialogUI();
     var resume = state.pendingSave; state.pendingSave = false;
     closeSettings();
     listDaily().then(function () { if (state.tab === 'calendar') renderCalendar(); });
-    if (resume === 'period') savePeriod(); else if (resume === 'areas') saveAreas(); else if (resume === 'bots') saveBots(); else if (resume === 'insights') { state.insights.pendingSaveForm = true; saveInsightsFromForm(); } else if (resume === 'insights-del') { var did = state.insights.pendingDelete; state.insights.pendingDelete = null; if (did) deleteInsight(did, true); } else if (resume) saveEdit(); else refreshTokenHints();
+    if (resume) resumePendingSave(resume); else refreshTokenHints();
   });
-  $('tokenClear').addEventListener('click', function () { setToken(''); $('tokenInput').value = ''; tokenStatus(); refreshTokenHints(); });
+  $('tokenClear').addEventListener('click', function () {
+    if (!setToken('')) { updateTokenDialogUI('清除失败：' + (tokenStorageErrorText() || state.tokenStorageErr)); return; }
+    $('tokenInput').value = '';
+    state.tokenBanner = '';
+    renderTokenBanner();
+    updateTokenDialogUI();
+    refreshTokenHints();
+  });
   $('tokenTest').addEventListener('click', function () {
     var v = $('tokenInput').value.trim();
-    if (v) setToken(v);
-    if (!getToken()) { $('tokenStatus').textContent = '请先粘贴令牌。'; return; }
+    if (v) {
+      if (!setToken(v)) { updateTokenDialogUI('保存失败：' + (tokenStorageErrorText() || state.tokenStorageErr)); return; }
+    }
+    if (!getToken()) { updateTokenDialogUI('请先粘贴令牌，或确认已缓存的令牌可读。'); return; }
     $('tokenStatus').textContent = '验证中…';
     api('GET', repoPath).then(function (res) {
       $('tokenStatus').textContent = res.ok ? '令牌有效，可以访问 ' + OWNER + '/' + REPONAME + '（已保存）。写权限会在第一次保存时确认。' : '验证失败：' + apiErrText(res);
       refreshTokenHints();
     }, function (e) { $('tokenStatus').textContent = '验证失败：' + e.message; });
   });
-  $('settingsClose').addEventListener('click', function () { state.pendingSave = false; closeSettings(); });
+  $('settingsClose').addEventListener('click', function () {
+    var resume = state.pendingSave;
+    state.pendingSave = false;
+    closeSettings();
+    if (resume && getToken()) resumePendingSave(resume);
+  });
 
   var now = new Date(); state.month = new Date(now.getFullYear(), now.getMonth(), 1);
+  (function () { var te = tokenStorageErrorText(); if (te) { state.tokenBanner = te; renderTokenBanner(); } })();
   window.__taskos = { parseIndex: parseIndex, parseCSV: parseCSV, parseDaily: parseDaily, serializeDaily: serializeDaily, utf8ToB64: utf8ToB64, b64ToUtf8: b64ToUtf8,
+    getToken: getToken, setToken: setToken, probeTokenStorage: probeTokenStorage, TOKEN_KEY: TOKEN_KEY,
     renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, parseAreas: parseAreas, areasHtml: areasHtml, parseBots: parseBots, botsSplit: botsSplit, botEdges: botEdges, botMatch: botMatch, BOTS_STARTER: BOTS_STARTER, parseInsights: parseInsights, serializeInsights: serializeInsights, parseResources: parseResources, splitTags: splitTags, resUrl: resUrl, keyEvents: keyEvents, truncLines: truncLines, dayPopHtml: dayPopHtml, relDayWord: relDayWord, firstLine: firstLine,
     excerpt: excerpt, addDays: addDays, metaText: metaText, API: API, state: state };
   load();
