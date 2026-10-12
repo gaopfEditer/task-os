@@ -13,7 +13,7 @@
 ### 负责项目 / 目录
 
 - 仓库 `gaopfEditer/task-os` 和看板 `index.html`（GitHub Pages：https://gaopfediter.github.io/task-os/）
-- `tasks/`、`index.md`、`log.csv`：任务建档和状态（目前有 T-20260928-01 建立任务系统、T-20260930-01 国庆十天计划）
+- `tasks/`、`index.md`、`log.csv`：任务建档和状态（目前有 T-20260928-01 建立任务系统、T-20260930-01 国庆十天计划、T-20261012-01 文档变更→触达闭环内部验）
 - `daily/`、`weekly/`、`monthly/`：每日计划 / 实践 / 复盘 / 关键事件，周 / 月总结
 - `areas.md`、`insights.md`、`bots.md`、`templates/`、`notes/量价案例/`
 - 本机 `/workspace/task-os/`（content-os README 里约定的任务管家目录）
