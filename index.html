@@ -302,6 +302,12 @@
   .phd b { font-size: 15px; } .phd .pkey { color: var(--muted); font-size: 12px; } .phd a { font-size: 12px; }
   .phd button { margin-left: auto; font-size: 12px; padding: 2px 10px; }
   .pnote .none { color: var(--faint); font-size: 12px; margin-top: 6px; }
+  .month-main { margin-top: 14px; }
+  .month-main .mm-hd { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .month-main .mm-hd b { font-size: 15px; }
+  .month-main .mm-hd .mm-key { color: var(--muted); font-size: 12px; }
+  .month-main .mm-hd a { font-size: 12px; }
+  .month-main .mm-hd button { margin-left: auto; font-size: 12px; padding: 2px 10px; }
   .dsec.foc { border-color: var(--foc); } .dsec.idea { border-color: var(--idea); } .dsec.gain { border-color: var(--gain); }
   .k.foc { background: var(--foc); } .k.idea { background: var(--idea); } .k.gain { background: var(--gain); }
   .day.wk-note::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 2px 2px 0; background: var(--foc); }
@@ -455,6 +461,7 @@
         <div id="kevList"></div>
         <div id="dailyNote"></div>
         <div class="hint" style="margin-top:6px"><span class="hint-hover">鼠标停在某天上可预览实践和复盘 · 键盘：← → 前后一天，↑ ↓ 前后一周</span><span class="hint-touch">长按某天可预览实践和复盘，点一下打开</span></div>
+        <div class="panel month-main" id="monthMain" aria-label="本月目标、实施与复盘"></div>
       </div>
       <div class="rcol">
         <div class="panel" id="detail"><div class="nodata">点击日历中的某一天查看详情</div></div>
@@ -693,6 +700,7 @@
   }
   function resumePendingSave(resume) {
     if (resume === 'period') savePeriod();
+    else if (resume === 'monthMain') saveMonthMain();
     else if (resume === 'areas') saveAreas();
     else if (resume === 'bots') saveBots();
     else if (resume) saveEdit();
@@ -1342,7 +1350,12 @@
   // an editor with textareas on screen must never be re-rendered underneath the user (IME, caret)
   function editorActive() { return !!(state.edit && !state.edit.loading && state.edit.date === state.selected && $('ed-plan')); }
   var calRedraw = throttled(function () {
-    if (state.tab === 'calendar') { renderCalendar(); if (!editorActive()) renderDetail(); if (!periodEditorActive()) renderPeriods(); }
+    if (state.tab === 'calendar') {
+      renderCalendar();
+      if (!editorActive()) renderDetail();
+      if (!periodEditorActive()) renderPeriods();
+      if (!monthMainEditorActive()) renderMonthMain();
+    }
     refreshPop();
   });
   function calHitsHtml() {
@@ -1556,10 +1569,14 @@
 
   // ---------- week / month notes: weekly/YYYY-Www.md (ISO week, Monday start), monthly/YYYY-MM.md ----------
   var PSECTIONS = [['focus', '重点', 'foc'], ['idea', '灵感', 'idea'], ['gain', '额外收获', 'gain']];
+  var PMONTH_SIDEBAR = [['idea', '灵感', 'idea'], ['gain', '额外收获', 'gain']];
   var PPLACE = { focus: '最重要的 1～3 件事，可写任务 ID', idea: '想到就记一句', gain: '计划外的产出、收获（建议以日期开头，如 - 10-01 …）' };
   var PERIOD = { week: { dir: 'weekly', label: '本周', noun: '周记', re: /^(\d{4}-W\d{2})\.md$/ }, month: { dir: 'monthly', label: '本月', noun: '月记', re: /^(\d{4}-\d{2})\.md$/ } };
+  var MONTH_MAIN = [['mgoal', '本月目标', 'plan'], ['mpractice', '实施', 'prac'], ['mreview', '复盘', 'rev']];
+  var MPLACE = { mgoal: '这个月最重要的方向与 1～3 件事，可写任务 ID', mpractice: '月度推进：做了什么、进展与卡点（与日实践呼应）', mreview: '月底或过程中的复盘：得失与调整' };
   state.notes = { week: { list: {}, status: '', error: '', cache: {}, pending: {} }, month: { list: {}, status: '', error: '', cache: {}, pending: {} } };
   state.pedit = null; state.pflash = null;
+  state.medit = null; state.mflash = null;
   function isoWeek(ds) {   // → { key: '2026-W40', monday: '2026-09-28', sunday: '2026-10-04' }
     var d = parseYmd(ds); if (!d) return null;
     var mon = new Date(d.getFullYear(), d.getMonth(), d.getDate() - (d.getDay() + 6) % 7);
@@ -1585,7 +1602,66 @@
     return null;
   }
   function parseNote(text) { return parseDoc(text, PSECTIONS, psecKey); }
+  function monthMainKey(heading) {
+    var h = heading.replace(/^[\s\d.、）)]+/, '').replace(/^本月/, '');
+    if (/^目标/.test(h) || /^重点/.test(h)) return 'mgoal';
+    if (/^(实施|实践|执行)/.test(h)) return 'mpractice';
+    if (/^复盘/.test(h)) return 'mreview';
+    return null;
+  }
+  function parseMonthMain(text) {
+    var main = parseDoc(text, MONTH_MAIN, monthMainKey);
+    var note = parseNote(text);
+    if (sectionEmpty(main.mgoal) && !sectionEmpty(note.focus)) main.mgoal = note.focus;
+    return main;
+  }
+  function monthMainValues(text) {
+    var main = parseMonthMain(text), out = {};
+    MONTH_MAIN.forEach(function (s) { out[s[0]] = main[s[0]] || ''; });
+    return out;
+  }
+  function serializeMonthFile(key, noteBase, mainBase, mainEdits, periodEdits) {
+    var title = (mainBase && mainBase.title) || (noteBase && noteBase.title) || key;
+    var parts = ['# ' + title, ''];
+    var pre = (mainBase && mainBase.preamble) || (noteBase && noteBase.preamble) || '';
+    if (pre) parts.push(pre, '');
+    MONTH_MAIN.forEach(function (s) {
+      var body = trimBlank(String((mainEdits && mainEdits[s[0]]) || '').replace(/\r\n?/g, '\n').split('\n'));
+      parts.push('## ' + s[1], '');
+      if (body) parts.push(body, '');
+    });
+    PMONTH_SIDEBAR.forEach(function (s) {
+      var body = periodEdits ? periodEdits[s[0]] : (noteBase ? noteBase[s[0]] : '');
+      body = trimBlank(String(body || '').replace(/\r\n?/g, '\n').split('\n'));
+      parts.push('## ' + s[1], '');
+      if (body) parts.push(body, '');
+    });
+    var skip = {}, seen = {};
+    MONTH_MAIN.forEach(function (s) { skip[s[1]] = 1; });
+    PSECTIONS.forEach(function (s) { skip[s[1]] = 1; });
+    function addOther(o) {
+      if (!o || skip[o.heading] || seen[o.heading]) return;
+      seen[o.heading] = 1;
+      parts.push('## ' + o.heading, '');
+      if (o.body) parts.push(o.body, '');
+    }
+    if (mainBase && mainBase.others) mainBase.others.forEach(addOther);
+    if (noteBase && noteBase.others) noteBase.others.forEach(addOther);
+    return parts.join('\n').replace(/\n+$/, '') + '\n';
+  }
   function serializeNote(kind, key, base, edits) { return serializeDoc((base && base.title) || periodTitle(kind, key), base, edits, PSECTIONS); }
+  function monthFileParts(key, mainEdits, periodEdits) {
+    var c = state.notes.month.cache[key], text = c && c.text ? c.text : '';
+    var noteBase = parseNote(text), mainBase = parseMonthMain(text);
+    if (!periodEdits) {
+      periodEdits = {};
+      PMONTH_SIDEBAR.forEach(function (s) { periodEdits[s[0]] = noteBase[s[0]] || ''; });
+    }
+    if (!mainEdits) {
+      mainEdits = monthMainValues(text);
+    }
+    return { text: serializeMonthFile(key, noteBase, mainBase, mainEdits, periodEdits), noteBase: noteBase, mainBase: mainBase };
+  }
   function listNotes(kind) {
     var st = state.notes[kind]; st.status = 'loading';
     var attempt = function (withToken) {
@@ -1636,12 +1712,17 @@
     return info;
   }
   function periodKeys() { return { week: isoWeek(state.selected || todayStr()).key, month: ymd(state.month).slice(0, 7) }; }
-  function periodEditorActive() { var pe = state.pedit; return !!(pe && !pe.loading && $('pe-focus')); }
+  function periodSecs(kind) { return kind === 'month' ? PMONTH_SIDEBAR : PSECTIONS; }
+  function periodEditorActive() {
+    var pe = state.pedit;
+    if (!pe || pe.loading) return false;
+    return pe.kind === 'month' ? !!$('pe-idea') : !!$('pe-focus');
+  }
   function pdraftKey(kind, key) { return kind + ':' + key; }
   function hasPDraft(kind, key) { try { return !!localStorage.getItem(DRAFT_KEY + pdraftKey(kind, key)); } catch (x) { return false; } }
-  function pIsDirty(pe) { return PSECTIONS.some(function (s) { return String(pe.values[s[0]] || '').trim() !== String(pe.base[s[0]] || '').trim(); }); }
+  function pIsDirty(pe) { return periodSecs(pe.kind).some(function (s) { return String(pe.values[s[0]] || '').trim() !== String(pe.base[s[0]] || '').trim(); }); }
   function savePDraft(pe) { try { if (pIsDirty(pe)) localStorage.setItem(DRAFT_KEY + pdraftKey(pe.kind, pe.key), JSON.stringify(pe.values)); else localStorage.removeItem(DRAFT_KEY + pdraftKey(pe.kind, pe.key)); } catch (x) {} }
-  function readPInputs(pe) { PSECTIONS.forEach(function (s) { var ta = $('pe-' + s[0]); if (ta && ta.getAttribute('data-key') === pe.key) pe.values[s[0]] = ta.value; }); }
+  function readPInputs(pe) { periodSecs(pe.kind).forEach(function (s) { var ta = $('pe-' + s[0]); if (ta && ta.getAttribute('data-key') === pe.key) pe.values[s[0]] = ta.value; }); }
   // keep the panels in sync with the selected week / displayed month; drop an editor for another period (its text stays as a draft)
   function syncPeriods() {
     var keys = periodKeys(), pe = state.pedit;
@@ -1649,17 +1730,23 @@
     if (state.pflash && state.pflash.key !== keys[state.pflash.kind]) state.pflash = null;
     if (!periodEditorActive()) renderPeriods();
     ['week', 'month'].forEach(function (kind) {
-      if (needsNote(kind, keys[kind])) loadNote(kind, keys[kind]).then(function () { if (!periodEditorActive()) renderPeriods(); });
+      if (needsNote(kind, keys[kind])) loadNote(kind, keys[kind]).then(function () {
+        if (!periodEditorActive()) renderPeriods();
+        if (!monthMainEditorActive()) renderMonthMain();
+      });
     });
+    syncMonthMain();
   }
   function renderPeriods() {
     var el = $('periods'); if (!el) return;
     var keys = periodKeys(), h = '';
     ['week', 'month'].forEach(function (kind) {
-      var key = keys[kind], P = PERIOD[kind], info = noteInfo(kind, key);
+      var key = keys[kind], P = PERIOD[kind], info = noteInfo(kind, key), secs = periodSecs(kind);
       var pe = state.pedit && state.pedit.kind === kind && state.pedit.key === key ? state.pedit : null;
-      h += '<div class="pnote" id="pn-' + kind + '"><div class="phd"><b>' + P.label + '</b><span class="pkey">' + esc(periodTitle(kind, key)) + '</span>';
-      if (info.exists) h += '<a href="' + esc(fileUrl(periodPath(kind, key))) + '" target="_blank" rel="noopener">GitHub 上的 ' + esc(periodPath(kind, key)) + '</a>';
+      var label = kind === 'month' ? '灵感 / 收获' : P.label;
+      h += '<div class="pnote" id="pn-' + kind + '"><div class="phd"><b>' + label + '</b><span class="pkey">' + esc(periodTitle(kind, key)) + '</span>';
+      if (kind === 'month') h += '<span class="hint" style="font-size:12px">目标 / 实施 / 复盘在左侧日历下方</span>';
+      if (info.exists && kind === 'week') h += '<a href="' + esc(fileUrl(periodPath(kind, key))) + '" target="_blank" rel="noopener">GitHub 上的 ' + esc(periodPath(kind, key)) + '</a>';
       if (!pe) h += '<button type="button" data-pact="edit" data-kind="' + kind + '">编辑</button>';
       h += '</div>';
       if (state.pflash && state.pflash.kind === kind && state.pflash.key === key) h += '<div class="msg ' + state.pflash.cls + '">' + state.pflash.text + '</div>';
@@ -1669,26 +1756,35 @@
         if (info.error) h += '<div class="msg error">读取' + P.noun + '失败：' + esc(info.error) + '</div>';
         if (info.stale) h += '<div class="msg info">这是缓存中的旧版本，GitHub 可能还在更新，稍后点「刷新」。</div>';
         if (hasPDraft(kind, key)) h += '<div class="msg info">有未保存的草稿，点「编辑」继续。</div>';
-        if (!info.any) h += '<div class="none">还没有' + P.noun + '：重点 / 灵感 / 额外收获，随时记一句。</div>';
+        var anySide = secs.some(function (s) { return info.has[s[0]]; });
+        var emptyHint = kind === 'month' ? '灵感 / 额外收获' : '重点 / 灵感 / 额外收获';
+        if (!anySide && kind === 'month') h += '<div class="none">还没有' + emptyHint + '，随时记一句。</div>';
+        else if (!info.any && kind === 'week') h += '<div class="none">还没有' + P.noun + '：' + emptyHint + '，随时记一句。</div>';
         else {
-          PSECTIONS.forEach(function (s) { if (info.has[s[0]]) h += '<div class="dsec ' + s[2] + '"><h4>' + s[1] + '</h4><div class="md">' + renderMd(info.parsed[s[0]]) + '</div></div>'; });
-          var empty = PSECTIONS.filter(function (s) { return !info.has[s[0]]; }).map(function (s) { return s[1]; });
-          if (empty.length) h += '<div class="none">' + empty.join('、') + '：空</div>';
+          secs.forEach(function (s) { if (info.has[s[0]]) h += '<div class="dsec ' + s[2] + '"><h4>' + s[1] + '</h4><div class="md">' + renderMd(info.parsed[s[0]]) + '</div></div>'; });
+          var empty = secs.filter(function (s) { return !info.has[s[0]]; }).map(function (s) { return s[1]; });
+          if (empty.length && anySide) h += '<div class="none">' + empty.join('、') + '：空</div>';
+          if (kind === 'week') {
+            PSECTIONS.forEach(function (s) { if (info.has[s[0]] && secs.indexOf(s) < 0) h += '<div class="dsec ' + s[2] + '"><h4>' + s[1] + '</h4><div class="md">' + renderMd(info.parsed[s[0]]) + '</div></div>'; });
+          }
         }
-        if (info.parsed) info.parsed.others.forEach(function (o) { h += '<div class="dsec"><h4>' + esc(o.heading) + '</h4><div class="md">' + renderMd(o.body) + '</div></div>'; });
+        if (info.parsed && kind === 'week') info.parsed.others.forEach(function (o) { h += '<div class="dsec"><h4>' + esc(o.heading) + '</h4><div class="md">' + renderMd(o.body) + '</div></div>'; });
       }
       h += '</div>';
     });
     el.innerHTML = h;
     var pe = state.pedit;
-    if (pe && !pe.loading && $('pe-focus')) {
-      PSECTIONS.forEach(function (s) { $('pe-' + s[0]).addEventListener('input', function (ev) { pe.values[s[0]] = ev.target.value; savePDraft(pe); }); });
-      if (pe.focus) { var ta = $('pe-' + pe.focus); pe.focus = null; if (ta) ta.focus(); }
+    if (pe && !pe.loading) {
+      var firstId = pe.kind === 'month' ? 'pe-idea' : 'pe-focus';
+      if ($(firstId)) {
+        periodSecs(pe.kind).forEach(function (s) { $('pe-' + s[0]).addEventListener('input', function (ev) { pe.values[s[0]] = ev.target.value; savePDraft(pe); }); });
+        if (pe.focus) { var ta = $('pe-' + pe.focus); pe.focus = null; if (ta) ta.focus(); }
+      }
     }
   }
   function periodEditorHtml(pe) {
     var h = '<div class="editor">';
-    PSECTIONS.forEach(function (s) {
+    periodSecs(pe.kind).forEach(function (s) {
       h += '<label for="pe-' + s[0] + '"><span class="wkbar" style="background:var(--' + s[2] + ')"></span>' + s[1] + '</label>' +
         '<textarea id="pe-' + s[0] + '" data-key="' + esc(pe.key) + '" placeholder="' + esc(PPLACE[s[0]]) + '">' + esc(pe.values[s[0]]) + '</textarea>';
     });
@@ -1706,10 +1802,14 @@
     loadNote(kind, key).then(function () {
       if (!state.pedit || state.pedit.kind !== kind || state.pedit.key !== key) return;
       var c = state.notes[kind].cache[key], base = c && c.text ? c.parsed : parseNote('');
-      var values = { focus: base.focus, idea: base.idea, gain: base.gain }, status = null, dr = null;
+      var values = {}, status = null, dr = null;
+      periodSecs(kind).forEach(function (s) { values[s[0]] = base[s[0]] || ''; });
       try { dr = JSON.parse(localStorage.getItem(DRAFT_KEY + pdraftKey(kind, key)) || 'null'); } catch (x) {}
-      if (dr && typeof dr === 'object') { values = { focus: dr.focus || '', idea: dr.idea || '', gain: dr.gain || '' }; status = { kind: 'info', text: '已恢复未保存的草稿（还没提交到仓库）。' }; }
-      state.pedit = { kind: kind, key: key, base: base, baseText: c && c.text ? c.text : '', sha: c ? c.sha : null, values: values, status: status, remote: null, saving: false, focus: 'gain' };
+      if (dr && typeof dr === 'object') {
+        periodSecs(kind).forEach(function (s) { if (dr[s[0]] != null) values[s[0]] = dr[s[0]]; });
+        status = { kind: 'info', text: '已恢复未保存的草稿（还没提交到仓库）。' };
+      }
+      state.pedit = { kind: kind, key: key, base: base, baseText: c && c.text ? c.text : '', sha: c ? c.sha : null, values: values, status: status, remote: null, saving: false, focus: kind === 'month' ? 'idea' : 'gain' };
       renderPeriods();
     });
   }
@@ -1719,10 +1819,12 @@
     readPInputs(pe);
     var P = PERIOD[pe.kind], st = state.notes[pe.kind], path = periodPath(pe.kind, pe.key);
     if (!requestTokenForSave('period', '保存' + P.noun + '需要 GitHub 令牌，填好后会自动继续保存。')) return;
-    var text = serializeNote(pe.kind, pe.key, pe.base, pe.values);
+    var text = pe.kind === 'month'
+      ? monthFileParts(pe.key, null, { idea: pe.values.idea || '', gain: pe.values.gain || '' }).text
+      : serializeNote(pe.kind, pe.key, pe.base, pe.values);
     if (pe.baseText ? text === pe.baseText : !pIsDirty(pe)) return setPStatus(pe, 'info', '没有改动。');
-    var changed = PSECTIONS.filter(function (s) { return String(pe.values[s[0]] || '').trim() !== String(pe.base[s[0]] || '').trim(); });
-    var body = { message: P.noun + ' ' + pe.key + '：' + (pe.baseText ? '更新' : '新建') + (changed.length ? changed : PSECTIONS).map(function (s) { return s[1]; }).join('/'), content: utf8ToB64(text), branch: BRANCH };
+    var changed = periodSecs(pe.kind).filter(function (s) { return String(pe.values[s[0]] || '').trim() !== String(pe.base[s[0]] || '').trim(); });
+    var body = { message: P.noun + ' ' + pe.key + '：' + (pe.baseText ? '更新' : '新建') + (changed.length ? changed : periodSecs(pe.kind)).map(function (s) { return s[1]; }).join('/'), content: utf8ToB64(text), branch: BRANCH };
     if (pe.sha) body.sha = pe.sha;
     pe.saving = true; pe.status = null; renderPeriods();
     api('PUT', repoPath + '/contents/' + path, body).then(function (res) {
@@ -1734,7 +1836,7 @@
         try { localStorage.removeItem(DRAFT_KEY + pdraftKey(pe.kind, pe.key)); } catch (x) {}
         if (state.pedit === pe) state.pedit = null;
         state.pflash = { kind: pe.kind, key: pe.key, cls: 'ok', text: '已保存' + (commit ? '（提交 <a target="_blank" rel="noopener" href="' + esc(REPO + '/commit/' + commit) + '">' + esc(commit.slice(0, 7)) + '</a>）' : '') + '。' };
-        renderCalendar(); renderPeriods();
+        renderCalendar(); renderPeriods(); if (!monthMainEditorActive()) renderMonthMain();
         return;
       }
       if (res.status === 409 || res.status === 422) {
@@ -1744,13 +1846,144 @@
           if (latest.sha === pe.sha) return setPStatus(pe, 'error', '保存失败：' + esc(apiErrText(res)));
           pe.sha = latest.sha; pe.baseText = latest.text; pe.base = parseNote(latest.text); pe.remote = latest.text;
           if (latest.sha) { st.cache[pe.key] = { sha: latest.sha, text: latest.text, parsed: pe.base }; st.list[pe.key] = latest.sha; } else { delete st.cache[pe.key]; delete st.list[pe.key]; }
-          renderCalendar();
+          renderCalendar(); if (!monthMainEditorActive()) renderMonthMain();
           setPStatus(pe, 'error', '保存失败：这个文件在别处被修改过（版本冲突）。已获取远端最新内容（见下方），你的输入仍保留在输入框里，请对照合并后再点「保存」。');
         });
       }
       setPStatus(pe, 'error', '保存失败：' + esc(apiErrText(res)) + (res.status === 401 ? ' <button type="button" class="link" data-pact="settings">打开设置</button>' : ''));
     }).catch(function (err) { pe.saving = false; setPStatus(pe, 'error', '保存失败：' + esc(err.message)); });
   }
+
+  function monthKey() { return ymd(state.month).slice(0, 7); }
+  function monthMainEditorActive() { var me = state.medit; return !!(me && !me.loading && $('me-mgoal')); }
+  function mdraftKey(key) { return 'monthMain:' + key; }
+  function hasMDraft(key) { try { return !!localStorage.getItem(DRAFT_KEY + mdraftKey(key)); } catch (x) { return false; } }
+  function mIsDirty(me) { return MONTH_MAIN.some(function (s) { return String(me.values[s[0]] || '').trim() !== String(me.base[s[0]] || '').trim(); }); }
+  function saveMDraft(me) { try { if (mIsDirty(me)) localStorage.setItem(DRAFT_KEY + mdraftKey(me.key), JSON.stringify(me.values)); else localStorage.removeItem(DRAFT_KEY + mdraftKey(me.key)); } catch (x) {} }
+  function readMInputs(me) { MONTH_MAIN.forEach(function (s) { var ta = $('me-' + s[0]); if (ta && ta.getAttribute('data-key') === me.key) me.values[s[0]] = ta.value; }); }
+  function monthMainInfo(key) {
+    var st = state.notes.month, c = st.cache[key], sha = st.list[key];
+    var text = c && c.text ? c.text : '';
+    var parsed = text ? parseMonthMain(text) : null;
+    var info = { exists: !!(sha || text), loaded: !!c, parsed: parsed, stale: c && c.stale, error: c && c.error };
+    info.ready = info.exists ? info.loaded : (noteListed(st) || !!c || st.status === 'error') && !st.pending[key];
+    info.has = {};
+    MONTH_MAIN.forEach(function (s) { info.has[s[0]] = !!(parsed && !sectionEmpty(parsed[s[0]])); });
+    info.any = info.has.mgoal || info.has.mpractice || info.has.mreview;
+    return info;
+  }
+  function syncMonthMain() {
+    var key = monthKey(), me = state.medit;
+    if (me && !me.saving && me.key !== key) { if (!me.loading) { readMInputs(me); saveMDraft(me); } state.medit = null; }
+    if (state.mflash && state.mflash.key !== key) state.mflash = null;
+    if (!monthMainEditorActive()) renderMonthMain();
+    if (needsNote('month', key)) loadNote('month', key).then(function () { if (!monthMainEditorActive()) renderMonthMain(); });
+  }
+  function renderMonthMain() {
+    var el = $('monthMain'); if (!el) return;
+    var key = monthKey(), path = periodPath('month', key), info = monthMainInfo(key);
+    var me = state.medit && state.medit.key === key ? state.medit : null;
+    var h = '<div class="mm-hd"><b>本月</b><span class="mm-key">' + esc(key) + '</span>';
+    if (info.exists) h += '<a href="' + esc(fileUrl(path)) + '" target="_blank" rel="noopener">GitHub 上的 ' + esc(path) + '</a>';
+    if (!me) h += '<button type="button" data-mact="edit">编辑</button>';
+    h += '</div>';
+    if (state.mflash && state.mflash.key === key) h += '<div class="msg ' + state.mflash.cls + '">' + state.mflash.text + '</div>';
+    if (me) h += me.loading ? '<div class="none">正在读取月记…</div>' : monthEditorHtml(me);
+    else if (!info.ready) h += '<div class="none">正在读取本月目标 / 实施 / 复盘…</div>';
+    else {
+      if (info.error) h += '<div class="msg error">读取月记失败：' + esc(info.error) + '</div>';
+      if (info.stale) h += '<div class="msg info">这是缓存中的旧版本，GitHub 可能还在更新，稍后点「刷新」。</div>';
+      if (hasMDraft(key)) h += '<div class="msg info">有未保存的草稿，点「编辑」继续。</div>';
+      if (!info.any) h += '<div class="none">还没有本月目标 / 实施 / 复盘，点「编辑」开始写（保存到 <code>' + esc(path) + '</code>）。</div>';
+      MONTH_MAIN.forEach(function (s) {
+        h += '<div class="dsec ' + s[2] + '"><h4>' + s[1] + '</h4>';
+        if (info.has[s[0]]) h += '<div class="md">' + renderMd(info.parsed[s[0]]) + '</div>';
+        else h += '<div class="none">空</div>';
+        h += '</div>';
+      });
+    }
+    el.innerHTML = h;
+    me = state.medit;
+    if (me && !me.loading && $('me-mgoal')) {
+      MONTH_MAIN.forEach(function (s) { $('me-' + s[0]).addEventListener('input', function (ev) { me.values[s[0]] = ev.target.value; saveMDraft(me); }); });
+      if (me.focus) { var ta = $('me-' + me.focus); me.focus = null; if (ta) ta.focus(); }
+    }
+  }
+  function monthEditorHtml(me) {
+    var h = '<div class="editor">';
+    MONTH_MAIN.forEach(function (s) {
+      h += '<label for="me-' + s[0] + '"><span class="dot ' + s[2] + ' on"></span>' + s[1] + '</label>' +
+        '<textarea id="me-' + s[0] + '" data-key="' + esc(me.key) + '" placeholder="' + esc(MPLACE[s[0]]) + '">' + esc(me.values[s[0]]) + '</textarea>';
+    });
+    if (me.status) h += '<div class="msg ' + me.status.kind + '">' + me.status.text + '</div>';
+    if (me.remote != null) h += '<details class="remote" open><summary>远端最新内容（' + (me.remote ? '已存在' : '文件不存在') + '）</summary><pre>' + esc(me.remote || '（空）') + '</pre></details>';
+    h += '<div class="actions"><button type="button" class="primary" data-mact="save"' + (me.saving ? ' disabled' : '') + '>' + (me.saving ? '保存中…' : '保存月记') + '</button>' +
+      '<button type="button" data-mact="cancel"' + (me.saving ? ' disabled' : '') + '>取消</button>' + tokenHint() + '</div></div>';
+    return h;
+  }
+  function startMonthEdit() {
+    var key = monthKey();
+    state.mflash = null;
+    state.medit = { key: key, loading: true };
+    renderMonthMain();
+    loadNote('month', key).then(function () {
+      if (!state.medit || state.medit.key !== key) return;
+      var c = state.notes.month.cache[key], vals = monthMainValues(c && c.text ? c.text : '');
+      var base = {}, status = null, dr = null;
+      MONTH_MAIN.forEach(function (s) { base[s[0]] = vals[s[0]]; });
+      try { dr = JSON.parse(localStorage.getItem(DRAFT_KEY + mdraftKey(key)) || 'null'); } catch (x) {}
+      if (dr && typeof dr === 'object') {
+        MONTH_MAIN.forEach(function (s) { if (dr[s[0]] != null) vals[s[0]] = dr[s[0]]; });
+        status = { kind: 'info', text: '已恢复未保存的草稿（还没提交到仓库）。' };
+      }
+      state.medit = { key: key, base: base, baseText: c && c.text ? c.text : '', sha: c ? c.sha : null, values: vals, status: status, remote: null, saving: false, focus: 'mgoal' };
+      renderMonthMain();
+    });
+  }
+  function setMStatus(me, kind, text) { me.status = { kind: kind, text: text }; if (state.medit === me) renderMonthMain(); }
+  function saveMonthMain() {
+    var me = state.medit; if (!me || me.saving || me.loading) return;
+    readMInputs(me);
+    var st = state.notes.month, path = periodPath('month', me.key);
+    if (!requestTokenForSave('monthMain', '保存月记需要 GitHub 令牌，填好后会自动继续保存。')) return;
+    var mainEdits = {};
+    MONTH_MAIN.forEach(function (s) { mainEdits[s[0]] = me.values[s[0]] || ''; });
+    var text = monthFileParts(me.key, mainEdits, null).text;
+    if (me.baseText ? text === me.baseText : !mIsDirty(me)) return setMStatus(me, 'info', '没有改动。');
+    var changed = MONTH_MAIN.filter(function (s) { return String(me.values[s[0]] || '').trim() !== String(me.base[s[0]] || '').trim(); });
+    var body = { message: '月记 ' + me.key + '：' + (me.baseText ? '更新' : '新建') + (changed.length ? changed : MONTH_MAIN).map(function (s) { return s[1]; }).join('/'), content: utf8ToB64(text), branch: BRANCH };
+    if (me.sha) body.sha = me.sha;
+    me.saving = true; me.status = null; renderMonthMain();
+    api('PUT', repoPath + '/contents/' + path, body).then(function (res) {
+      me.saving = false;
+      if (res.ok && res.json && res.json.content) {
+        var sha = res.json.content.sha, commit = res.json.commit && res.json.commit.sha ? res.json.commit.sha : '';
+        st.cache[me.key] = { sha: sha, text: text, parsed: parseNote(text) }; st.list[me.key] = sha;
+        if (st.status === 'missing') st.status = 'ok';
+        try { localStorage.removeItem(DRAFT_KEY + mdraftKey(me.key)); } catch (x) {}
+        if (state.medit === me) state.medit = null;
+        state.mflash = { key: me.key, cls: 'ok', text: '已保存' + (commit ? '（提交 <a target="_blank" rel="noopener" href="' + esc(REPO + '/commit/' + commit) + '">' + esc(commit.slice(0, 7)) + '</a>）' : '') + '。' };
+        renderCalendar(); renderMonthMain(); if (!periodEditorActive()) renderPeriods();
+        return;
+      }
+      if (res.status === 409 || res.status === 422) {
+        return api('GET', repoPath + '/contents/' + path + '?ref=' + BRANCH).then(function (r) {
+          var latest = r.status === 404 ? { sha: null, text: '' } : (r.ok && r.json ? { sha: r.json.sha, text: b64ToUtf8(r.json.content) } : null);
+          if (!latest) return setMStatus(me, 'error', '保存失败：' + esc(apiErrText(r)));
+          if (latest.sha === me.sha) return setMStatus(me, 'error', '保存失败：' + esc(apiErrText(res)));
+          me.sha = latest.sha; me.baseText = latest.text;
+          var vals = monthMainValues(latest.text);
+          me.base = {}; MONTH_MAIN.forEach(function (s) { me.base[s[0]] = vals[s[0]]; });
+          me.remote = latest.text;
+          if (latest.sha) { st.cache[me.key] = { sha: latest.sha, text: latest.text, parsed: parseNote(latest.text) }; st.list[me.key] = latest.sha; } else { delete st.cache[me.key]; delete st.list[me.key]; }
+          renderCalendar();
+          setMStatus(me, 'error', '保存失败：这个文件在别处被修改过（版本冲突）。已获取远端最新内容（见下方），你的输入仍保留在输入框里，请对照合并后再点「保存」。');
+        });
+      }
+      setMStatus(me, 'error', '保存失败：' + esc(apiErrText(res)) + (res.status === 401 ? ' <button type="button" class="link" data-mact="settings">打开设置</button>' : ''));
+    }).catch(function (err) { me.saving = false; setMStatus(me, 'error', '保存失败：' + esc(err.message)); });
+  }
+
   // calendar search over week / month notes
   function noteKeys(kind) {
     var st = state.notes[kind], set = {};
@@ -1764,8 +1997,10 @@
       noteKeys(kind).forEach(function (key) {
         var info = noteInfo(kind, key), p = info.parsed, secs = [], title = PERIOD[kind].noun + ' ' + periodTitle(kind, key);
         if (p) {
-          PSECTIONS.forEach(function (s) { var x = excerpt(p[s[0]], q); if (x) secs.push({ cls: s[2], label: s[1], html: x }); });
-          p.others.forEach(function (o) { var x = excerpt(o.heading + ' ' + o.body, q); if (x) secs.push({ cls: 'log', label: o.heading, html: x }); });
+          var secsDef = kind === 'month' ? MONTH_MAIN.concat(PMONTH_SIDEBAR) : PSECTIONS;
+          var bodies = kind === 'month' ? parseMonthMain((state.notes.month.cache[key] || {}).text || '') : p;
+          secsDef.forEach(function (s) { var x = excerpt(bodies[s[0]], q); if (x) secs.push({ cls: s[2], label: s[1], html: x }); });
+          if (kind === 'week') p.others.forEach(function (o) { var x = excerpt(o.heading + ' ' + o.body, q); if (x) secs.push({ cls: 'log', label: o.heading, html: x }); });
         }
         if (secs.length || title.toLowerCase().indexOf(q) >= 0) out.push({ kind: kind, key: key, title: title, secs: secs });
       });
@@ -2737,7 +2972,15 @@
     if (d.showModal) { if (!d.open) d.showModal(); } else d.setAttribute('open', '');
   }
   function closeSettings() { var d = $('settings'); if (d.close) d.close(); else d.removeAttribute('open'); }
-  function refreshTokenHints() { if (state.tab === 'bots') { var be = state.bots.edit, bt = $('botText'); if (be && bt) be.value = bt.value; renderBots(); } if (state.tab === 'areas') { var ae = state.areas.edit, at = $('areaText'); if (ae && at) ae.value = at.value; renderAreas(); } if (state.tab === 'calendar') { renderDetail(); if (state.pedit && !state.pedit.loading) { readPInputs(state.pedit); renderPeriods(); } } }
+  function refreshTokenHints() {
+    if (state.tab === 'bots') { var be = state.bots.edit, bt = $('botText'); if (be && bt) be.value = bt.value; renderBots(); }
+    if (state.tab === 'areas') { var ae = state.areas.edit, at = $('areaText'); if (ae && at) ae.value = at.value; renderAreas(); }
+    if (state.tab === 'calendar') {
+      renderDetail();
+      if (state.pedit && !state.pedit.loading) { readPInputs(state.pedit); renderPeriods(); }
+      if (state.medit && !state.medit.loading) { readMInputs(state.medit); renderMonthMain(); }
+    }
+  }
 
   // ---------- routing ----------
   function setTab(tab) {
@@ -3008,6 +3251,15 @@
     else if (act === 'cancel' && pe) { try { localStorage.removeItem(DRAFT_KEY + pdraftKey(pe.kind, pe.key)); } catch (x) {} state.pedit = null; renderPeriods(); }
   });
   $('periods').addEventListener('click', function (ev) { if (ev.target.closest('.tokenhint [data-act="settings"]')) { state.pendingSave = false; openSettings(); } });
+  $('monthMain').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-mact]'); if (!b) return;
+    var act = b.getAttribute('data-mact'), me = state.medit;
+    if (act === 'edit') startMonthEdit();
+    else if (act === 'save') saveMonthMain();
+    else if (act === 'settings') { state.pendingSave = false; openSettings(); }
+    else if (act === 'cancel' && me) { try { localStorage.removeItem(DRAFT_KEY + mdraftKey(me.key)); } catch (x) {} state.medit = null; renderMonthMain(); }
+  });
+  $('monthMain').addEventListener('click', function (ev) { if (ev.target.closest('.tokenhint [data-act="settings"]')) { state.pendingSave = false; openSettings(); } });
   $('tokenShow').addEventListener('click', function () { var i = $('tokenInput'); i.type = i.type === 'password' ? 'text' : 'password'; });
   $('tokenSave').addEventListener('click', function () {
     var v = $('tokenInput').value.trim();
