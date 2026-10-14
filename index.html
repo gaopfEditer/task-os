@@ -1067,7 +1067,11 @@
         state.daily.list = list; state.daily.status = 'ok'; state.daily.error = '';
       });
     };
-    return attempt(true).catch(function (e) { state.daily.status = 'error'; state.daily.error = '无法连接 GitHub API：' + e.message; });
+    return attempt(true).catch(function (e) { state.daily.status = 'error'; state.daily.error = '无法连接 GitHub API：' + e.message; })
+      .then(function (r) {
+        if (state.tab === 'calendar' && state.month) { renderCalendar(); loadVisibleMonth(); }
+        return r;
+      });
   }
   function dailyPath(date) { return DAILY_DIR + '/' + date + '.md'; }
   function putCache(date, sha, text, stale) {
@@ -1476,7 +1480,7 @@
     for (var d = 1; d <= last; d++) out.push(ymd(new Date(y, mo, d)));
     return out;
   }
-  // Listed daily files for the displayed month (every in-month day + padding cells on the grid).
+  // Visible calendar days (in-month + grid padding). Listed → only days with a file in daily.list; loading/error → try each day via dayNeedsLoad (Pages/raw, 404 → tried).
   function monthPrefetchDates() {
     var set = {};
     monthDayStrings().forEach(function (ds) { set[ds] = 1; });
@@ -1484,11 +1488,11 @@
     var listed = state.daily.status === 'ok' || state.daily.status === 'missing';
     return Object.keys(set).filter(function (ds) {
       if (!dayNeedsLoad(ds)) return false;
-      if (state.daily.list[ds]) return true;
-      if (!listed && ds === state.selected) return true;
-      return false;
+      if (listed) return !!state.daily.list[ds];
+      return true;
     }).sort();
   }
+  // Batch-prefetch visible month: setTab(calendar), selectDay, shiftMonth, listDaily/listAll done (see listDaily + applyHash).
   function loadVisibleMonth() {
     if (state.tab !== 'calendar' || !state.month) return Promise.resolve();
     state.monthPrefetchGen++;
@@ -2221,7 +2225,7 @@
     el.setAttribute('aria-label', cnDate(ds) + ' 预览');
     el.innerHTML = dayPopHtml(ds, mode); el.hidden = false; el.scrollTop = 0;
     placePop();
-    if (dayNeedsLoad(ds)) loadDay(ds).then(function () { calRedraw(); });
+    if (!state.daily.pending[ds] && dayNeedsLoad(ds)) loadDay(ds).then(function () { calRedraw(); });
   }
   function refreshPop() {
     var el = $('dayPop');
@@ -2865,7 +2869,7 @@
     if (state.daily.status === 'error') h += '<div class="msg error">无法列出 daily/：' + esc(state.daily.error) + '</div>';
     dates.forEach(function (ds) {
       var listed = !!state.daily.list[ds], c = state.daily.cache[ds], parsed = c && c.parsed;
-      if (listed && !parsed && (state.daily.pending[ds] || needsLoad(ds))) {
+      if (!parsed && (state.daily.pending[ds] || dayNeedsLoad(ds)) && (listed || state.daily.status === 'error' || state.daily.status === 'loading')) {
         h += '<article class="sp-day"><div class="sp-date">' + esc(shortDotDate(ds)) + '<span class="sp-sub">' + esc(ds) + '</span></div><div class="none">读取中…</div></article>';
         shown++;
         return;
@@ -3386,6 +3390,7 @@
     document.querySelectorAll('nav.tabs a').forEach(function (a) { a.classList.toggle('active', a.getAttribute('data-tab') === tab); });
     document.querySelectorAll('.tab').forEach(function (s) { s.classList.toggle('active', s.id === 'tab-' + tab); });
     if (tab !== 'calendar') { hidePop(); closeSimplePreview(); }
+    else if (state.month) loadVisibleMonth();
   }
   function selectDay(ds, fromHash) {
     if (!parseYmd(ds)) return;
