@@ -370,7 +370,8 @@
   @media (hover: none) and (pointer: coarse) { .hint-touch { display: inline; } .hint-hover { display: none; } }
 
   /* ---------- 简版预览弹窗 ---------- */
-  dialog.sp-dialog { max-width: 960px; width: calc(100% - 24px); max-height: calc(100vh - 32px); overflow: hidden; display: flex; flex-direction: column; padding: 14px 16px 16px; }
+  dialog.sp-dialog { max-width: 960px; width: calc(100% - 24px); max-height: calc(100vh - 32px); overflow: hidden; padding: 14px 16px 16px; }
+  dialog.sp-dialog[open] { display: flex; flex-direction: column; }
   .sp-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
   .sp-hd h3 { flex: 1; margin: 0; }
   .sp-hint { margin: 0 0 8px; }
