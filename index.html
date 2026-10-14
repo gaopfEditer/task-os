@@ -603,11 +603,12 @@
   };
   var WEEK = ['日', '一', '二', '三', '四', '五', '六'];
   var TL_COLLAPSED = 5;
+  var DAILY_FETCH_CONCURRENCY = 6;   // calendar month prefetch + search/detail loads
 
   var state = {
     tasks: [], logs: [], loadedAt: null, src: '',
     daily: { list: {}, status: 'idle', error: '', cache: {}, pending: {}, tried: {} },
-    tab: 'board', month: null, selected: null, edit: null, flash: null,
+    tab: 'board', month: null, monthPrefetchGen: 0, selected: null, edit: null, flash: null,
     stat: '', mstatus: '', tlOpen: false, cq: '', kevOnly: false, dload: null, pendingSave: false,
     dextraShow: { ops: true, orders: true, overseas: true, dayidea: true },
     tokenStorageErr: '', tokenBanner: '',
@@ -1089,12 +1090,12 @@
     d.pending[date] = p;
     return p;
   }
-  function loadMany(dates, onEach) {
-    var queue = dates.slice(), running = 0;
+  function loadMany(dates, onEach, concurrency) {
+    var limit = concurrency || DAILY_FETCH_CONCURRENCY, queue = dates.slice(), running = 0;
     return new Promise(function (resolve) {
       function next() {
         if (!queue.length && !running) return resolve();
-        while (running < 4 && queue.length) { running++; loadDay(queue.shift()).then(function () { running--; onEach && onEach(); next(); }); }
+        while (running < limit && queue.length) { running++; loadDay(queue.shift()).then(function () { running--; onEach && onEach(); next(); }); }
       }
       next();
     });
@@ -1427,7 +1428,30 @@
     return h + (n ? '</ul>' : '<div class="none">这个月还没有关键事件。在日记里加 <code>## 关键事件</code>（每行一条），或点某天「编辑」填写。</div>') + '</div>';
   }
   function needsLoad(ds) { var c = state.daily.cache[ds], sha = state.daily.list[ds]; return !!sha && !(c && c.sha === sha); }
-  function loadVisibleMonth() { return loadMany(gridDates().map(ymd).filter(needsLoad), calRedraw); }
+  function monthDayStrings() {
+    var m = state.month, y = m.getFullYear(), mo = m.getMonth(), last = new Date(y, mo + 1, 0).getDate(), out = [];
+    for (var d = 1; d <= last; d++) out.push(ymd(new Date(y, mo, d)));
+    return out;
+  }
+  // Listed daily files for the displayed month (every in-month day + padding cells on the grid).
+  function monthPrefetchDates() {
+    var set = {};
+    monthDayStrings().forEach(function (ds) { set[ds] = 1; });
+    gridDates().forEach(function (d) { set[ymd(d)] = 1; });
+    return Object.keys(set).filter(function (ds) { return !!state.daily.list[ds] && needsLoad(ds); }).sort();
+  }
+  function loadVisibleMonth() {
+    if (state.tab !== 'calendar' || !state.month) return Promise.resolve();
+    state.monthPrefetchGen++;
+    var gen = state.monthPrefetchGen;
+    var dates = monthPrefetchDates();
+    if (!dates.length) return Promise.resolve();
+    return loadMany(dates, function () {
+      if (gen === state.monthPrefetchGen && state.tab === 'calendar') calRedraw();
+    }).then(function () {
+      if (gen === state.monthPrefetchGen && state.tab === 'calendar') calRedraw();
+    });
+  }
 
   function tokenHint() {
     return getToken() ? '' : '<span class="tokenhint">保存需要本地令牌，只写这个仓库 · <button type="button" class="link" data-act="settings">设置</button></span>';
@@ -2145,7 +2169,7 @@
     el.setAttribute('aria-label', cnDate(ds) + ' 预览');
     el.innerHTML = dayPopHtml(ds, mode); el.hidden = false; el.scrollTop = 0;
     placePop();
-    if (!dayInfo(ds).ready || needsLoad(ds)) loadDay(ds).then(function () { calRedraw(); });
+    if (needsLoad(ds)) loadDay(ds).then(function () { calRedraw(); });
   }
   function refreshPop() {
     var el = $('dayPop');
@@ -3142,13 +3166,12 @@
     if (state.selected !== ds) { state.flash = null; if (state.edit && state.edit.date !== ds && !state.edit.saving) state.edit = null; }
     state.selected = ds;
     var d = parseYmd(ds);
-    var newMonth = !state.month || state.month.getFullYear() !== d.getFullYear() || state.month.getMonth() !== d.getMonth();
     state.month = new Date(d.getFullYear(), d.getMonth(), 1);   // month follows selection
     if (location.hash !== '#calendar/' + ds) history.replaceState(null, '', '#calendar/' + ds);
     $('jumpDate').value = ds;
     renderCalendar(); renderDetail(); syncPeriods();
-    if (newMonth || fromHash) loadVisibleMonth();
-    if (!dayInfo(ds).ready || needsLoad(ds)) loadDay(ds).then(function () { if (state.selected === ds) calRedraw(); });
+    loadVisibleMonth();
+    if (needsLoad(ds)) loadDay(ds).then(function () { if (state.selected === ds) calRedraw(); });
   }
   function applyHash() {
     var h = decodeURIComponent(location.hash.replace(/^#/, '')), parts = h.split('/');
@@ -3443,7 +3466,7 @@
     updateTokenDialogUI();
     var resume = state.pendingSave; state.pendingSave = false;
     closeSettings();
-    listDaily().then(function () { if (state.tab === 'calendar') renderCalendar(); });
+    listDaily().then(function () { if (state.tab === 'calendar') { renderCalendar(); loadVisibleMonth(); } });
     if (resume) resumePendingSave(resume); else refreshTokenHints();
   });
   $('tokenClear').addEventListener('click', function () {
