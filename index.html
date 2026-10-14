@@ -370,7 +370,8 @@
   @media (hover: none) and (pointer: coarse) { .hint-touch { display: inline; } .hint-hover { display: none; } }
 
   /* ---------- 简版预览弹窗 ---------- */
-  dialog.sp-dialog { max-width: 960px; width: calc(100% - 24px); max-height: calc(100vh - 32px); overflow: hidden; display: flex; flex-direction: column; padding: 14px 16px 16px; }
+  dialog.sp-dialog:not([open]) { display: none; }
+  dialog.sp-dialog[open] { max-width: 960px; width: calc(100% - 24px); max-height: calc(100vh - 32px); overflow: hidden; display: flex; flex-direction: column; padding: 14px 16px 16px; }
   .sp-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
   .sp-hd h3 { flex: 1; margin: 0; }
   .sp-hint { margin: 0 0 8px; }
@@ -1097,7 +1098,7 @@
       if (sha) return fetchBlob(sha).then(function (t) { return putCache(date, sha, t); });
       throw e;
     }).catch(function (e) { d.cache[date] = { sha: sha, text: '', parsed: parseDaily(''), error: e.message }; return d.cache[date]; })
-      .then(function (r) { delete d.pending[date]; return r; });
+      .then(function (r) { delete d.pending[date]; if (typeof refreshPop === 'function' && pop.date === date) refreshPop(); return r; });
     d.pending[date] = p;
     return p;
   }
@@ -1172,7 +1173,17 @@
     };
     return attempt(true).catch(fallback);
   }
-  function throttled(fn) { var raf = 0; return function () { if (raf) return; raf = requestAnimationFrame(function () { raf = 0; fn(); }); }; }
+  function throttled(fn) {
+    var raf = 0, again = 0;
+    function tick() {
+      raf = 0;
+      if (!again) return;
+      again = 0;
+      fn();
+      if (again) raf = requestAnimationFrame(tick);
+    }
+    return function () { again = 1; if (!raf) raf = requestAnimationFrame(tick); };
+  }
 
   // ---------- tasks helpers ----------
   function normDate(s) { var m = /^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/.exec(s || ''); return m ? m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0') : ''; }
@@ -3344,7 +3355,7 @@
     state.tab = tab;
     document.querySelectorAll('nav.tabs a').forEach(function (a) { a.classList.toggle('active', a.getAttribute('data-tab') === tab); });
     document.querySelectorAll('.tab').forEach(function (s) { s.classList.toggle('active', s.id === 'tab-' + tab); });
-    if (tab !== 'calendar') hidePop();
+    if (tab !== 'calendar') { hidePop(); closeSimplePreview(); }
   }
   function selectDay(ds, fromHash) {
     if (!parseYmd(ds)) return;
@@ -3445,6 +3456,10 @@
   });
   $('openSimplePreview').addEventListener('click', openSimplePreview);
   $('simplePreviewClose').addEventListener('click', closeSimplePreview);
+  document.querySelector('nav.tabs').addEventListener('click', function (ev) {
+    var a = ev.target.closest('a[data-tab]');
+    if (a && a.getAttribute('data-tab') !== 'calendar') closeSimplePreview();
+  });
   $('spApply').addEventListener('click', applyPreviewRangeFromInputs);
   $('spWeek').addEventListener('click', function () {
     var r = defaultPreviewRange(); state.preview.from = r.from; state.preview.to = r.to;
