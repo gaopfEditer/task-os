@@ -1113,15 +1113,19 @@
     });
   }
   function dayInfo(date) {
-    var c = state.daily.cache[date], sha = state.daily.list[date];
-    var info = { exists: !!(sha || (c && c.text)), loaded: !!c, parsed: c ? c.parsed : null, stale: c && c.stale, error: c && c.error, pending: !!state.daily.pending[date] };
+    var d = state.daily, c = d.cache[date], sha = d.list[date];
+    var info = { exists: !!(sha || (c && c.text)), loaded: !!c, parsed: c ? c.parsed : null, stale: c && c.stale, error: c && c.error, pending: !!d.pending[date] };
     info.has = {};
     DSECS.forEach(function (s) { info.has[s[0]] = !!(info.parsed && !sectionEmpty(info.parsed[s[0]])); });
     info.any = info.has.plan || info.has.practice || info.has.review || info.has.events ||
       EXTRA_SECTIONS.some(function (s) { return info.has[s[0]]; });
     info.events = info.parsed ? keyEvents(info.parsed.events) : [];
-    var listed = state.daily.status === 'ok' || state.daily.status === 'missing';
-    info.ready = info.exists ? info.loaded : (listed || !!state.daily.tried[date]) && !info.pending;
+    var listed = d.status === 'ok' || d.status === 'missing';
+    if (info.pending) info.ready = false;
+    else if (info.loaded) info.ready = true;
+    else if (!info.exists && listed) info.ready = true;
+    else if (d.tried[date]) info.ready = true;
+    else info.ready = false;
     return info;
   }
   // ---------- key events: optional "## 关键事件" section, one line (bullet) per event ----------
@@ -1450,6 +1454,23 @@
     return h + (n ? '</ul>' : '<div class="none">这个月还没有关键事件。在日记里加 <code>## 关键事件</code>（每行一条），或点某天「编辑」填写。</div>') + '</div>';
   }
   function needsLoad(ds) { var c = state.daily.cache[ds], sha = state.daily.list[ds]; return !!sha && !(c && c.sha === sha); }
+  // Fetch when cache is stale/missing. Without a directory listing (API error / still loading), still try Pages/raw for the selected day.
+  function dayNeedsLoad(ds) {
+    var d = state.daily;
+    if (d.pending[ds]) return false;
+    var c = d.cache[ds], sha = d.list[ds];
+    if (c && (!sha || c.sha === sha)) return false;
+    if (sha) return true;
+    var listed = d.status === 'ok' || d.status === 'missing';
+    if (listed) return false;
+    return !d.tried[ds];
+  }
+  function refreshSelectedDay() {
+    if (state.tab !== 'calendar' || !state.selected) return Promise.resolve();
+    var ds = state.selected;
+    if (!dayNeedsLoad(ds)) return Promise.resolve();
+    return loadDay(ds).then(function () { if (state.selected === ds) calRedraw(); });
+  }
   function monthDayStrings() {
     var m = state.month, y = m.getFullYear(), mo = m.getMonth(), last = new Date(y, mo + 1, 0).getDate(), out = [];
     for (var d = 1; d <= last; d++) out.push(ymd(new Date(y, mo, d)));
@@ -1460,7 +1481,13 @@
     var set = {};
     monthDayStrings().forEach(function (ds) { set[ds] = 1; });
     gridDates().forEach(function (d) { set[ymd(d)] = 1; });
-    return Object.keys(set).filter(function (ds) { return !!state.daily.list[ds] && needsLoad(ds); }).sort();
+    var listed = state.daily.status === 'ok' || state.daily.status === 'missing';
+    return Object.keys(set).filter(function (ds) {
+      if (!dayNeedsLoad(ds)) return false;
+      if (state.daily.list[ds]) return true;
+      if (!listed && ds === state.selected) return true;
+      return false;
+    }).sort();
   }
   function loadVisibleMonth() {
     if (state.tab !== 'calendar' || !state.month) return Promise.resolve();
@@ -1556,9 +1583,12 @@
     if (state.flash) h += '<div class="msg ' + state.flash.kind + '">' + state.flash.text + '</div>';
     h += renderDayTasks(date);
     if (e) h += editorHtml(e);
-    else if (!info.ready) h += '<div class="nodata">正在读取日记…</div>';
-    else {
+    else if (!info.ready) {
+      if (!info.pending && dayNeedsLoad(date)) loadDay(date).then(function () { if (state.selected === date) calRedraw(); });
+      h += '<div class="nodata">正在读取日记…</div>';
+    } else {
       var verb = date > today && !info.any ? '写计划' : '编辑';
+      if (state.daily.status === 'error' && !state.daily.list[date]) h += '<div class="msg info">无法列出 daily/ 目录（' + esc(state.daily.error) + '），已尝试从本站或 raw 直接读取。</div>';
       if (info.error) h += '<div class="msg error">读取日记失败：' + esc(info.error) + '</div>';
       if (info.stale) h += '<div class="msg info">这是缓存中的旧版本，GitHub 可能还在更新，稍后点「刷新」。</div>';
       if (loadDraft(date)) h += '<div class="msg info">这一天有未保存的草稿，点「' + verb + '」继续。</div>';
@@ -2191,7 +2221,7 @@
     el.setAttribute('aria-label', cnDate(ds) + ' 预览');
     el.innerHTML = dayPopHtml(ds, mode); el.hidden = false; el.scrollTop = 0;
     placePop();
-    if (needsLoad(ds)) loadDay(ds).then(function () { calRedraw(); });
+    if (dayNeedsLoad(ds)) loadDay(ds).then(function () { calRedraw(); });
   }
   function refreshPop() {
     var el = $('dayPop');
@@ -2775,7 +2805,7 @@
     var pIns = needInsight ? loadInsights(force) : Promise.resolve();
     return Promise.all([pList, pIns]).then(function () {
       dates.forEach(function (ds) {
-        if (state.daily.list[ds] && !state.daily.cache[ds] && !state.daily.pending[ds]) loadDay(ds);
+        if (dayNeedsLoad(ds) && (state.daily.list[ds] || state.daily.status === 'error' || state.daily.status === 'loading')) loadDay(ds);
       });
       return loadMany(dates.filter(function (ds) { return state.daily.list[ds] && needsLoad(ds); }), function () {
         if (gen === D.loadGen && state.tab === 'detail') renderDetailFeed();
@@ -2862,7 +2892,7 @@
       return loadMany(todo, function () { if (gen === P.loadGen && $('simplePreview') && $('simplePreview').open) renderSimplePreview(); });
     }).then(function () {
       dates.forEach(function (ds) {
-        if (state.daily.list[ds] && !state.daily.cache[ds] && !state.daily.pending[ds]) loadDay(ds);
+        if (dayNeedsLoad(ds) && (state.daily.list[ds] || state.daily.status === 'error' || state.daily.status === 'loading')) loadDay(ds);
       });
       return loadMany(dates.filter(function (ds) { return state.daily.list[ds] && needsLoad(ds); }), function () {
         if (gen === P.loadGen && $('simplePreview') && $('simplePreview').open) renderSimplePreview();
@@ -3367,7 +3397,7 @@
     $('jumpDate').value = ds;
     renderCalendar(); renderDetail(); syncPeriods();
     loadVisibleMonth();
-    if (needsLoad(ds)) loadDay(ds).then(function () { if (state.selected === ds) calRedraw(); });
+    if (dayNeedsLoad(ds)) loadDay(ds).then(function () { if (state.selected === ds) calRedraw(); });
   }
   function applyHash() {
     var h = decodeURIComponent(location.hash.replace(/^#/, '')), parts = h.split('/');
@@ -3435,7 +3465,7 @@
     }).catch(function (e) {
       $('updated').textContent = '加载失败';
       $('msg').innerHTML = '<div class="msg error">' + esc(e.message) + '</div>';
-    }).then(function () { return daily; }).then(function () { applyHash(); })
+    }).then(function () { return daily; }).then(function () { applyHash(); return refreshSelectedDay(); })
       .then(function () { $('refresh').disabled = false; });
   }
 
@@ -3693,7 +3723,7 @@
     updateTokenDialogUI();
     var resume = state.pendingSave; state.pendingSave = false;
     closeSettings();
-    listDaily().then(function () { if (state.tab === 'calendar') { renderCalendar(); loadVisibleMonth(); } });
+    listDaily().then(function () { if (state.tab === 'calendar') { renderCalendar(); loadVisibleMonth(); return refreshSelectedDay(); } });
     if (resume) resumePendingSave(resume); else refreshTokenHints();
   });
   $('tokenClear').addEventListener('click', function () {
@@ -3728,7 +3758,7 @@
   window.__taskos = { parseIndex: parseIndex, parseCSV: parseCSV, parseDaily: parseDaily, serializeDaily: serializeDaily, utf8ToB64: utf8ToB64, b64ToUtf8: b64ToUtf8,
     getToken: getToken, setToken: setToken, probeTokenStorage: probeTokenStorage, TOKEN_KEY: TOKEN_KEY,
     renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, parseAreas: parseAreas, areasHtml: areasHtml, parseBots: parseBots, botsSplit: botsSplit, botEdges: botEdges, botMatch: botMatch, BOTS_STARTER: BOTS_STARTER, parseInsights: parseInsights, parseResources: parseResources, renderDetailFeed: renderDetailFeed, datesInRange: datesInRange, splitTags: splitTags, resUrl: resUrl, keyEvents: keyEvents, truncLines: truncLines, dayPopHtml: dayPopHtml, relDayWord: relDayWord, firstLine: firstLine,
-    excerpt: excerpt, addDays: addDays, metaText: metaText, API: API, state: state,
+    excerpt: excerpt, addDays: addDays, metaText: metaText, API: API, state: state, dayNeedsLoad: dayNeedsLoad, dayInfo: dayInfo, loadDay: loadDay,
     shortDotDate: shortDotDate, defaultPreviewRange: defaultPreviewRange, previewDayBody: previewDayBody, renderSimplePreview: renderSimplePreview };
   load();
 })();
