@@ -283,6 +283,8 @@
   .res-empty b { color: var(--text); font-size: 15px; }
   .res-empty p { margin: 6px 0 0; font-size: 13px; }
   .res-empty .rerr { color: var(--red); font-size: 12px; overflow-wrap: anywhere; }
+  .doc-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .doc-body { padding: 12px 14px; max-width: 52rem; }
   .ins-bar { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 8px; }
   .ins-bar input { flex: 1 1 240px; min-width: 0; }
   .ins-info { font-size: 12px; color: var(--muted); }
@@ -436,6 +438,7 @@
   <a href="#calendar" data-tab="calendar">日历</a>
   <a href="#detail" data-tab="detail">明细扩展</a>
   <a href="#areas" data-tab="areas">关注领域</a>
+  <a href="#docs" data-tab="docs">文档资源</a>
   <a href="#resources" data-tab="resources">资源</a>
   <a href="#bots" data-tab="bots">Bot</a>
 </nav>
@@ -504,6 +507,14 @@
     <div id="areas"><div class="nodata">加载中…</div></div>
   </section>
 
+  <section class="tab" id="tab-docs">
+    <h2 class="pagetitle">文档资源</h2>
+    <p class="hint" style="margin:0 0 8px">专题长文存放在 <code>docs/</code>（与资讯创作官维护的 <code>info/resources.md</code> 链接收藏分开）。索引见 <code>docs/index.md</code>。</p>
+    <div class="res-bar doc-list-bar"><input id="dqDocs" type="search" placeholder="搜索标题 / 摘要 / 标签 / 路径" autocomplete="off" aria-label="搜索文档"><span id="docsInfo" class="res-info"></span><a href="https://github.com/gaopfEditer/task-os/tree/main/docs" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 docs/</a></div>
+    <div id="docsTags" class="res-tags"></div>
+    <div id="docsPanel"><div class="nodata">加载中…</div></div>
+  </section>
+
   <section class="tab" id="tab-resources">
     <div class="res-bar"><input id="rq" type="search" placeholder="搜索名称 / 简述 / 标签 / 备注 / 域名" autocomplete="off" aria-label="搜索资源"><span id="resInfo" class="res-info"></span><a href="https://github.com/gaopfEditer/task-os/blob/main/info/resources.md" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 info/resources.md</a></div>
     <div id="resTags" class="res-tags"></div>
@@ -515,7 +526,7 @@
   </section>
 
   <footer>
-    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>areas.md</code>、<code>insights.md</code>、<code>bots.md</code>，以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
+    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>areas.md</code>、<code>insights.md</code>、<code>bots.md</code>、只读的 <code>docs/</code>（专题文档），以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
   </footer>
 </main>
 <div id="dayPop" class="daypop" role="dialog" hidden></div>
@@ -3111,6 +3122,180 @@
     el.innerHTML = h;
   }
 
+  // ---------- 文档资源: docs/index.md + docs/*.md (read-only; not info/resources.md) ----------
+  var DOCS_INDEX_PATH = 'docs/index.md';
+  state.docs = { status: '', text: '', parsed: null, error: '', gen: 0, q: '', tag: '', view: '', body: { status: '', text: '', error: '', path: '' } };
+  var DOCS_COLS = [
+    ['title', /^(标题|题目|name|title)$/],
+    ['path', /^(路径|文件|path|file)$/],
+    ['summary', /摘要|简述|说明|summary/],
+    ['tags', /标签|tags?$/],
+    ['updated', /更新时间|更新日期|日期|时间|updated|date/]
+  ];
+  function docsMapCols(cells) {
+    var cols = { title: -1, path: -1, summary: -1, tags: -1, updated: -1 };
+    cells.forEach(function (c, i) {
+      var h = stripMd(c).replace(/\s+/g, '').toLowerCase();
+      if (!h) return;
+      for (var k = 0; k < DOCS_COLS.length; k++) {
+        var key = DOCS_COLS[k][0];
+        if (cols[key] < 0 && DOCS_COLS[k][1].test(h)) { cols[key] = i; return; }
+      }
+    });
+    return cols;
+  }
+  function docsItem(cells, cols) {
+    function get(k) { return cols[k] >= 0 ? String(cells[cols[k]] || '').trim() : ''; }
+    if (!cells.some(function (c) { return c.trim(); })) return null;
+    var path = get('path').replace(/^<|>$/g, '').trim();
+    var title = resStrip(get('title')) || path;
+    if (!title && !path) return null;
+    return { title: title, path: path, summary: resStrip(get('summary')), tags: splitTags(get('tags')), updated: resStrip(get('updated')) };
+  }
+  function parseDocsIndex(text) {
+    var lines = String(text || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').split('\n');
+    var items = [], tbl = null, title = '';
+    lines.forEach(function (line) {
+      var t = line.trim();
+      var h = /^(#{1,6})\s+(.*?)\s*#*\s*$/.exec(t);
+      if (h && h[1].length === 1 && !title) title = stripMd(h[2]);
+      if (t.charAt(0) !== '|') return;
+      var cells = resSplitRow(t);
+      if (!tbl) {
+        var cols = docsMapCols(cells);
+        if (cols.title < 0 && cols.path < 0) { tbl = { skip: true }; return; }
+        tbl = { skip: false, cols: cols };
+        return;
+      }
+      if (tbl.skip) return;
+      if (cells.every(function (c) { return /^:?-*:?$/.test(c); })) return;
+      var it = docsItem(cells, tbl.cols);
+      if (it) items.push(it);
+    });
+    return { title: title || '文档资源', items: items };
+  }
+  function docsPathOk(path) {
+    path = String(path || '').trim();
+    return path && path.indexOf('..') < 0 && path.charAt(0) !== '/' && /^docs\/[^/]+\.md$/i.test(path);
+  }
+  function docsListed(path) {
+    var D = state.docs, p = D.parsed || (D.status === 'ok' ? (D.parsed = parseDocsIndex(D.text)) : null);
+    if (!p) return false;
+    for (var i = 0; i < p.items.length; i++) if (p.items[i].path === path) return true;
+    return false;
+  }
+  function docsMatch(it, words, tag) {
+    if (tag && it.tags.indexOf(tag) < 0) return false;
+    if (!words.length) return true;
+    var hay = [it.title, it.summary, it.path, it.tags.join(' '), it.updated].join('\n').toLowerCase();
+    return words.every(function (w) { return hay.indexOf(w) >= 0; });
+  }
+  function fetchDocsIndex() {
+    function viaFile() { return loadFile(DOCS_INDEX_PATH); }
+    function viaApi(useToken) {
+      var withToken = useToken !== false && !!getToken();
+      return api('GET', repoPath + '/contents/' + DOCS_INDEX_PATH + '?ref=' + BRANCH, null, useToken).then(function (res) {
+        if (withToken && (res.status === 401 || res.status === 404)) return viaApi(false);
+        if (res.status === 404) { var e = new Error('main 上还没有 ' + DOCS_INDEX_PATH); e.status = 404; throw e; }
+        if (!res.ok || !res.json || res.json.encoding !== 'base64' || typeof res.json.content !== 'string') return viaFile();
+        return { text: b64ToUtf8(res.json.content), src: 'api' };
+      }, viaFile);
+    }
+    return viaApi();
+  }
+  function loadDocsIndex(force) {
+    var D = state.docs;
+    if (!force && (D.status === 'ok' || D.status === 'missing' || D.status === 'loading')) return Promise.resolve();
+    var gen = ++D.gen;
+    D.status = 'loading';
+    if (state.tab === 'docs' && !D.view) renderDocs();
+    return fetchDocsIndex().then(function (r) {
+      if (gen !== D.gen) return;
+      D.text = r.text; D.parsed = null; D.status = 'ok'; D.error = '';
+    }, function (e) {
+      if (gen !== D.gen) return;
+      D.text = ''; D.parsed = null;
+      if (e && e.status === 404) { D.status = 'missing'; D.error = ''; } else { D.status = 'error'; D.error = (e && e.message) || String(e); }
+    }).then(function () { if (gen === D.gen && state.tab === 'docs') renderDocs(); });
+  }
+  function loadDocBody(path, force) {
+    var D = state.docs, B = D.body;
+    if (!docsPathOk(path)) { B.status = 'error'; B.error = '路径无效'; B.path = path; B.text = ''; return Promise.resolve(); }
+    if (D.status === 'ok' && !docsListed(path)) {
+      B.status = 'error'; B.error = '该文档未在 docs/index.md 登记'; B.path = path; B.text = '';
+      return Promise.resolve();
+    }
+    if (!force && B.path === path && B.status === 'ok') return Promise.resolve();
+    B.status = 'loading'; B.path = path; B.text = ''; B.error = '';
+    if (state.tab === 'docs' && D.view === path) renderDocs();
+    return loadFile(path).then(function (res) { B.text = res.text; B.status = 'ok'; B.error = ''; }, function (e) {
+      B.status = 'error'; B.error = (e && e.message) || String(e); B.text = '';
+    }).then(function () { if (state.tab === 'docs' && D.view === path) renderDocs(); });
+  }
+  function docsItemHtml(it, hq, tag) {
+    var enc = encodeURIComponent(it.path);
+    var h = '<li class="ritem"><div class="rhead">';
+    h += '<a class="rname" href="#docs/' + enc + '">' + markText(it.title, hq) + '</a>';
+    if (it.updated) h += '<span class="rdate">更新 ' + esc(it.updated) + '</span>';
+    h += '</div>';
+    if (it.summary) h += '<div class="rdesc">' + markText(it.summary, hq) + '</div>';
+    if (it.tags.length) {
+      h += '<div class="rmeta">';
+      it.tags.forEach(function (t) { h += '<button type="button" class="rtag' + (t === tag ? ' on' : '') + '" data-dtag="' + esc(t) + '">' + markText(t, hq) + '</button>'; });
+      h += '</div>';
+    }
+    return h + '</li>';
+  }
+  function renderDocs() {
+    var D = state.docs, el = $('docsPanel'), info = $('docsInfo'), tagsEl = $('docsTags'), listBar = document.querySelector('.doc-list-bar');
+    if (!el) return;
+    if (D.view) {
+      if (listBar) listBar.style.display = 'none';
+      tagsEl.innerHTML = '';
+      info.textContent = '';
+      var B = D.body;
+      var back = '<div class="doc-bar"><button type="button" class="link" data-dback="1">← 返回列表</button><a href="' + esc(fileUrl(D.view)) + '" target="_blank" rel="noopener" style="font-size:12px;margin-left:auto">GitHub 上的文件</a></div>';
+      if (B.status === 'loading' || (B.status === '' && B.path !== D.view)) el.innerHTML = back + '<div class="nodata">正在读取 ' + esc(D.view) + '…</div>';
+      else if (B.status === 'error') el.innerHTML = back + '<div class="msg error">读取失败：' + esc(B.error) + '</div>';
+      else if (B.status === 'ok' && B.path === D.view) {
+        var it = null, p = D.parsed || (D.status === 'ok' ? (D.parsed = parseDocsIndex(D.text)) : null);
+        if (p) p.items.forEach(function (x) { if (x.path === D.view) it = x; });
+        el.innerHTML = back + '<h3 style="margin:8px 0 10px;font-size:17px">' + esc(it ? it.title : D.view) + '</h3><div class="panel md doc-body">' + renderMd(B.text) + '</div>';
+      }
+      return;
+    }
+    if (listBar) listBar.style.display = '';
+    if (D.status === '' || D.status === 'loading') { el.innerHTML = '<div class="nodata">正在读取 docs/index.md…</div>'; tagsEl.innerHTML = ''; info.textContent = ''; return; }
+    if (D.status !== 'ok') {
+      tagsEl.innerHTML = ''; info.textContent = '只读 · docs/';
+      el.innerHTML = '<div class="res-empty"><b>文档索引还没同步上来</b><p>在 <code>docs/index.md</code> 登记专题后合并到 main，点「刷新」即可。</p>' +
+        (D.status === 'error' ? '<p class="rerr">' + esc(D.error) + '</p><button type="button" data-dretry="1">重试</button>' : '') + '</div>';
+      return;
+    }
+    var p = D.parsed || (D.parsed = parseDocsIndex(D.text));
+    var q = D.q.trim().toLowerCase(), words = q ? q.split(/\s+/) : [], hq = words.length ? words.reduce(function (a, b) { return b.length > a.length ? b : a; }) : '';
+    var counts = {}, order = [];
+    p.items.forEach(function (it) {
+      if (!docsMatch(it, words, '')) return;
+      it.tags.forEach(function (t) {
+        if (!counts[t]) { counts[t] = 0; order.push(t); }
+        counts[t]++;
+      });
+    });
+    var tagHtml = '';
+    if (order.length) {
+      tagHtml = order.map(function (t) {
+        return '<button type="button" class="rtag-f' + (D.tag === t ? ' on' : '') + '" data-dtag="' + esc(t) + '">' + esc(t) + '<i>' + counts[t] + '</i></button>';
+      }).join('');
+      if (D.tag || q) tagHtml += '<button type="button" class="link rclear" data-dclear="1">清除筛选</button>';
+    }
+    tagsEl.innerHTML = tagHtml;
+    var list = p.items.filter(function (it) { return docsMatch(it, words, D.tag); });
+    info.textContent = (words.length || D.tag ? '匹配 ' + list.length + ' / ' + p.items.length + ' 篇' : '共 ' + p.items.length + ' 篇') + ' · 只读';
+    el.innerHTML = list.length ? '<ul class="rlist">' + list.map(function (it) { return docsItemHtml(it, hq, D.tag); }).join('') + '</ul>' :
+      '<div class="nodata">没有匹配的文档。<button type="button" class="link" data-dclear="1">清除筛选</button></div>';
+  }
+
   // ---------- settings dialog ----------
   function updateTokenDialogUI(note) {
     var t = getToken(), hint = $('tokenCachedHint'), input = $('tokenInput'), status = $('tokenStatus');
@@ -3183,12 +3368,28 @@
       parts[0] = 'detail';
       history.replaceState(null, '', '#detail');
     }
-    var tab = ['board', 'calendar', 'detail', 'areas', 'resources', 'bots'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
+    var tab = ['board', 'calendar', 'detail', 'areas', 'docs', 'resources', 'bots'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
     setTab(tab);
     if (tab === 'board') renderBoardTab();
     if (tab === 'calendar') selectDay(parseYmd(parts[1]) ? parts[1] : (state.selected || todayStr()), true);
     if (tab === 'areas') { if (!areasEditorActive()) renderAreas(); loadAreas(); }
     if (tab === 'detail') { renderDetailFeed(); loadDetailFeed(); }
+    if (tab === 'docs') {
+      var docPath = parts.length > 1 ? parts.slice(1).join('/') : '';
+      try { docPath = decodeURIComponent(docPath); } catch (x) {}
+      state.docs.view = docPath && docsPathOk(docPath) ? docPath : '';
+      if (!state.docs.view) state.docs.body = { status: '', text: '', error: '', path: '' };
+      renderDocs();
+      loadDocsIndex().then(function () {
+        if (!state.docs.view) return;
+        if (state.docs.status !== 'ok' || !docsListed(state.docs.view)) {
+          state.docs.body = { status: 'error', error: state.docs.status !== 'ok' ? '文档索引尚未就绪' : '该文档未在 docs/index.md 登记', path: state.docs.view, text: '' };
+          renderDocs();
+          return;
+        }
+        loadDocBody(state.docs.view, true);
+      });
+    }
     if (tab === 'resources') { renderResources(); loadResources(); }
     if (tab === 'bots') { if (!botsEditorActive()) renderBots(); loadBots(); if (state.areas.status === '') loadAreas().then(function () { if (state.tab === 'bots' && !botsEditorActive()) renderBots(); }); }
   }
@@ -3208,6 +3409,8 @@
     if (!(state.bots.edit && state.bots.edit.saving)) { state.bots.edit = null; state.bots.flash = null; state.bots.status = ''; }   // unsaved bots text stays as a draft
     state.insights.status = ''; state.insights.parsed = null;
     state.res.status = ''; state.res.parsed = null; state.res.gen++;   // re-read info/resources.md on 刷新
+    state.docs.status = ''; state.docs.parsed = null; state.docs.gen++;
+    if (!state.docs.view) state.docs.body = { status: '', text: '', error: '', path: '' };
     var core = Promise.all([loadFile('index.md'), loadFile('log.csv')]);
     var daily = listAll();
     return core.then(function (res) {
@@ -3425,6 +3628,15 @@
     if (detailTypeOn('dayidea') && state.insights.status === '') loadInsights().then(function () { renderDetailFeed(); });
   });
   $('rq').addEventListener('input', function (ev) { state.res.q = ev.target.value; renderResources(); });
+  $('dqDocs').addEventListener('input', function (ev) { state.docs.q = ev.target.value; if (!state.docs.view) renderDocs(); });
+  $('tab-docs').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-dtag],[data-dclear],[data-dretry],[data-dback]'); if (!b) return;
+    var D = state.docs;
+    if (b.hasAttribute('data-dback')) { D.view = ''; D.body = { status: '', text: '', error: '', path: '' }; location.hash = '#docs'; renderDocs(); return; }
+    if (b.hasAttribute('data-dtag')) { var t = b.getAttribute('data-dtag'); D.tag = D.tag === t ? '' : t; renderDocs(); return; }
+    if (b.hasAttribute('data-dclear')) { D.tag = ''; D.q = ''; $('dqDocs').value = ''; renderDocs(); return; }
+    loadDocsIndex(true);
+  });
   $('tab-resources').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-rtag],[data-rclear],[data-rretry]'); if (!b) return;
     var R = state.res;
