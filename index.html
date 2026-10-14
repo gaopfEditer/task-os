@@ -367,6 +367,25 @@
   .hint-touch { display: none; }
   @media (hover: none) and (pointer: coarse) { .hint-touch { display: inline; } .hint-hover { display: none; } }
 
+  /* ---------- 简版预览弹窗 ---------- */
+  dialog.sp-dialog { max-width: 960px; width: calc(100% - 24px); max-height: calc(100vh - 32px); overflow: hidden; display: flex; flex-direction: column; padding: 14px 16px 16px; }
+  .sp-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .sp-hd h3 { flex: 1; margin: 0; }
+  .sp-hint { margin: 0 0 8px; }
+  .sp-tools { margin-bottom: 6px; }
+  .sp-tools .sp-plan { font-size: 13px; display: inline-flex; align-items: center; gap: 5px; margin-left: auto; white-space: nowrap; font-weight: normal; color: var(--text); }
+  #simplePreviewBody { overflow: auto; flex: 1; min-height: 100px; overscroll-behavior: contain; }
+  .sp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; align-content: start; }
+  .sp-day { background: #f6f8fa; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; overflow-wrap: anywhere; }
+  .sp-day .sp-date { font-weight: 700; font-size: 15px; margin: 0 0 4px; line-height: 1.3; }
+  .sp-day .sp-date a { color: inherit; text-decoration: none; }
+  .sp-day .sp-date a:hover { color: var(--accent); }
+  .sp-day .sp-sub { font-size: 11px; color: var(--faint); font-weight: normal; margin-left: 6px; }
+  .sp-day .md { font-size: 13px; }
+  .sp-day .md p { margin: 2px 0 6px; }
+  .sp-day .md ul, .sp-day .md ol { margin: 4px 0; padding-left: 18px; }
+  @media (max-width: 640px) { .sp-grid { grid-template-columns: 1fr; } .sp-tools .sp-plan { margin-left: 0; flex-basis: 100%; } }
+
   footer { color: var(--muted); font-size: 12px; margin-top: 20px; }
   dialog { border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; max-width: 560px; width: calc(100% - 24px); }
   dialog::backdrop { background: rgba(0,0,0,.35); }
@@ -455,6 +474,7 @@
         <div class="cal-tools">
           <input id="cq" type="search" placeholder="搜索日记、关键事件、周记 / 月记和流水，高亮匹配的日子" autocomplete="off" aria-label="在日历里搜索">
           <button type="button" id="kevOnly" aria-pressed="false" title="只突出有关键事件的日子">★ 只看关键事件</button>
+          <button type="button" id="openSimplePreview" title="按日期范围浏览实践与复盘">简版预览</button>
         </div>
         <div id="calHits"></div>
         <div class="cal" id="cal"></div>
@@ -524,6 +544,25 @@
   </div>
 </dialog>
 
+<dialog id="simplePreview" class="sp-dialog" aria-labelledby="simplePreviewTitle">
+  <div class="sp-hd">
+    <h3 id="simplePreviewTitle">简版预览</h3>
+    <button type="button" class="pop-close" id="simplePreviewClose" aria-label="关闭">✕</button>
+  </div>
+  <p class="hint sp-hint">读取各日 <code>daily/YYYY-MM-DD.md</code> 的「实践」与「复盘」正文；默认区间为<b>近 7 天（含今天）</b>，可在下方调整。</p>
+  <div class="sp-tools det-range">
+    <span>时间</span>
+    <input type="date" id="spFrom" aria-label="开始日期">
+    <span>至</span>
+    <input type="date" id="spTo" aria-label="结束日期">
+    <button type="button" id="spWeek">近 7 天</button>
+    <button type="button" class="primary" id="spApply">应用</button>
+    <label class="sp-plan"><input type="checkbox" id="spShowPlan"> 显示计划</label>
+  </div>
+  <div id="spInfo" class="hits-info"></div>
+  <div id="simplePreviewBody" class="sp-grid" role="document"></div>
+</dialog>
+
 <script>
 (function () {
   'use strict';
@@ -573,6 +612,7 @@
     dextraShow: { ops: true, orders: true, overseas: true, dayidea: true },
     tokenStorageErr: '', tokenBanner: '',
     detail: { show: { ops: true, orders: true, overseas: true, dayidea: true }, from: '', to: '', q: '', loading: false, loadGen: 0 },
+    preview: { from: '', to: '', showPlan: false, loading: false, loadGen: 0 },
     insights: { status: '', text: '', parsed: null, error: '' }
   };
   var $ = function (id) { return document.getElementById(id); };
@@ -599,6 +639,11 @@
     if (n === 0) return '今天'; if (n === 1) return '昨日'; if (n === 2) return '前天';
     var d = parseYmd(date);
     return (d.getFullYear() !== parseYmd(today).getFullYear() ? d.getFullYear() + '年' : '') + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+  }
+  function shortDotDate(ds) {
+    var d = parseYmd(ds);
+    if (!d) return ds;
+    return (d.getMonth() + 1) + '.' + pad(d.getDate());
   }
 
   // ---------- UTF-8 base64 / git blob sha ----------
@@ -2701,6 +2746,109 @@
     loadDetailFeed(true);
   }
 
+  // ---------- 日历：简版预览弹窗 ----------
+  function defaultPreviewRange() { return { from: addDays(todayStr(), -6), to: todayStr() }; }
+  function ensurePreviewRange() {
+    var P = state.preview;
+    if (!P.from || !P.to || !parseYmd(P.from) || !parseYmd(P.to)) {
+      var r = defaultPreviewRange(); P.from = r.from; P.to = r.to;
+    }
+    if (P.from > P.to) { var t = P.from; P.from = P.to; P.to = t; }
+  }
+  function previewDatesInRange() {
+    ensurePreviewRange();
+    var from = state.preview.from, to = state.preview.to, out = [];
+    for (var cur = from; cur <= to; cur = addDays(cur, 1)) out.push(cur);
+    return out.reverse();
+  }
+  function previewDayBody(parsed, showPlan) {
+    var parts = [];
+    if (showPlan && parsed && !sectionEmpty(parsed.plan)) parts.push(parsed.plan);
+    if (parsed && !sectionEmpty(parsed.practice)) parts.push(parsed.practice);
+    if (parsed && !sectionEmpty(parsed.review)) parts.push(parsed.review);
+    return parts.join('\n\n');
+  }
+  function syncPreviewInputs() {
+    ensurePreviewRange();
+    var P = state.preview;
+    if ($('spFrom')) $('spFrom').value = P.from;
+    if ($('spTo')) $('spTo').value = P.to;
+    if ($('spShowPlan')) $('spShowPlan').checked = !!P.showPlan;
+  }
+  function renderSimplePreview() {
+    var P = state.preview, body = $('simplePreviewBody'), info = $('spInfo');
+    if (!body) return;
+    ensurePreviewRange();
+    syncPreviewInputs();
+    if (P.loading) {
+      body.innerHTML = '<div class="nodata">正在读取日记…</div>';
+      if (info) info.textContent = '加载中';
+      return;
+    }
+    var dates = previewDatesInRange(), showPlan = !!P.showPlan, shown = 0, h = '';
+    if (state.daily.status === 'error') h += '<div class="msg error">无法列出 daily/：' + esc(state.daily.error) + '</div>';
+    dates.forEach(function (ds) {
+      var listed = !!state.daily.list[ds], c = state.daily.cache[ds], parsed = c && c.parsed;
+      if (listed && !parsed && (state.daily.pending[ds] || needsLoad(ds))) {
+        h += '<article class="sp-day"><div class="sp-date">' + esc(shortDotDate(ds)) + '<span class="sp-sub">' + esc(ds) + '</span></div><div class="none">读取中…</div></article>';
+        shown++;
+        return;
+      }
+      var text = previewDayBody(parsed, showPlan);
+      if (sectionEmpty(text)) return;
+      shown++;
+      h += '<article class="sp-day"><div class="sp-date"><a href="#calendar/' + ds + '" data-sp-day="' + ds + '">' + esc(shortDotDate(ds)) + '</a><span class="sp-sub">' + esc(ds) + '</span></div><div class="md">' + renderMd(text) + '</div></article>';
+    });
+    if (!shown) h += '<div class="nodata" style="grid-column:1/-1">该时间范围内没有可展示的实践' + (showPlan ? '、复盘或计划' : '或复盘') + '。可扩大日期或勾选「显示计划」。</div>';
+    body.innerHTML = h;
+    if (info) info.textContent = '显示 ' + shown + ' 天 · ' + P.from + ' ～ ' + P.to + (showPlan ? ' · 含计划' : ' · 不含计划');
+  }
+  function loadSimplePreview(force) {
+    var P = state.preview;
+    ensurePreviewRange();
+    P.loadGen++;
+    var gen = P.loadGen;
+    P.loading = true;
+    renderSimplePreview();
+    var dates = previewDatesInRange();
+    return listDaily().then(function () {
+      var todo = dates.filter(function (ds) { return state.daily.list[ds] && needsLoad(ds); });
+      return loadMany(todo, function () { if (gen === P.loadGen && $('simplePreview') && $('simplePreview').open) renderSimplePreview(); });
+    }).then(function () {
+      dates.forEach(function (ds) {
+        if (state.daily.list[ds] && !state.daily.cache[ds] && !state.daily.pending[ds]) loadDay(ds);
+      });
+      return loadMany(dates.filter(function (ds) { return state.daily.list[ds] && needsLoad(ds); }), function () {
+        if (gen === P.loadGen && $('simplePreview') && $('simplePreview').open) renderSimplePreview();
+      });
+    }).then(function () {
+      P.loading = false;
+      if (gen === P.loadGen && $('simplePreview') && $('simplePreview').open) renderSimplePreview();
+    });
+  }
+  function openSimplePreview() {
+    var d = $('simplePreview');
+    if (!d) return;
+    var r = defaultPreviewRange();
+    if (!state.preview.from || !state.preview.to) { state.preview.from = r.from; state.preview.to = r.to; }
+    ensurePreviewRange();
+    syncPreviewInputs();
+    renderSimplePreview();
+    if (d.showModal) { if (!d.open) d.showModal(); } else d.setAttribute('open', '');
+    loadSimplePreview(true);
+  }
+  function closeSimplePreview() {
+    var d = $('simplePreview');
+    if (!d) return;
+    if (d.close) d.close(); else d.removeAttribute('open');
+  }
+  function applyPreviewRangeFromInputs() {
+    var f = $('spFrom').value, t = $('spTo').value;
+    if (!parseYmd(f) || !parseYmd(t)) { renderSimplePreview(); return; }
+    state.preview.from = f; state.preview.to = t;
+    loadSimplePreview(true);
+  }
+
   // ---------- 资源: info/resources.md (read-only; maintained by 资讯创作官, never written from this page) ----------
   var RES_PATH = 'info/resources.md';
   state.res = { status: '', text: '', parsed: null, error: '', src: '', gen: 0, q: '', tag: '', closed: {} };
@@ -3069,6 +3217,27 @@
     if (state.cq) { loadAllDaily(); loadAllNotes(); }
     hidePop(); renderCalendar();
   });
+  $('openSimplePreview').addEventListener('click', openSimplePreview);
+  $('simplePreviewClose').addEventListener('click', closeSimplePreview);
+  $('spApply').addEventListener('click', applyPreviewRangeFromInputs);
+  $('spWeek').addEventListener('click', function () {
+    var r = defaultPreviewRange(); state.preview.from = r.from; state.preview.to = r.to;
+    syncPreviewInputs(); loadSimplePreview(true);
+  });
+  $('spShowPlan').addEventListener('change', function (ev) {
+    state.preview.showPlan = !!ev.target.checked;
+    renderSimplePreview();
+  });
+  $('simplePreview').addEventListener('click', function (ev) {
+    var a = ev.target.closest('[data-sp-day]');
+    if (!a) return;
+    ev.preventDefault();
+    var ds = a.getAttribute('data-sp-day');
+    closeSimplePreview();
+    if (state.tab !== 'calendar') location.hash = '#calendar/' + ds;
+    else selectDay(ds);
+  });
+  $('simplePreview').addEventListener('cancel', function (ev) { ev.preventDefault(); closeSimplePreview(); });
   $('kevOnly').addEventListener('click', function () {
     state.kevOnly = !state.kevOnly;
     $('kevOnly').classList.toggle('on', state.kevOnly); $('kevOnly').setAttribute('aria-pressed', String(state.kevOnly));
@@ -3179,7 +3348,7 @@
   document.addEventListener('keydown', function (ev) {
     if (state.tab !== 'calendar' || ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
     var t = ev.target, tag = t && t.tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable) || $('settings').open) return;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (t && t.isContentEditable) || $('settings').open || ($('simplePreview') && $('simplePreview').open)) return;
     var step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[ev.key];
     if (!step) return;
     ev.preventDefault();
@@ -3309,7 +3478,8 @@
   window.__taskos = { parseIndex: parseIndex, parseCSV: parseCSV, parseDaily: parseDaily, serializeDaily: serializeDaily, utf8ToB64: utf8ToB64, b64ToUtf8: b64ToUtf8,
     getToken: getToken, setToken: setToken, probeTokenStorage: probeTokenStorage, TOKEN_KEY: TOKEN_KEY,
     renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, parseAreas: parseAreas, areasHtml: areasHtml, parseBots: parseBots, botsSplit: botsSplit, botEdges: botEdges, botMatch: botMatch, BOTS_STARTER: BOTS_STARTER, parseInsights: parseInsights, parseResources: parseResources, renderDetailFeed: renderDetailFeed, datesInRange: datesInRange, splitTags: splitTags, resUrl: resUrl, keyEvents: keyEvents, truncLines: truncLines, dayPopHtml: dayPopHtml, relDayWord: relDayWord, firstLine: firstLine,
-    excerpt: excerpt, addDays: addDays, metaText: metaText, API: API, state: state };
+    excerpt: excerpt, addDays: addDays, metaText: metaText, API: API, state: state,
+    shortDotDate: shortDotDate, defaultPreviewRange: defaultPreviewRange, previewDayBody: previewDayBody, renderSimplePreview: renderSimplePreview };
   load();
 })();
 </script>
