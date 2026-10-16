@@ -7,3 +7,6 @@ time,task_id,action,from_status,to_status,summary,file
 2026-09-30 23:35,T-20260930-01,plan,inbox,planned,写好计划：10-01 至 10-10 十天日历与每日固定时段，并写入 daily/ 十天计划,tasks/T-20260930-01-国庆十天计划/plan.md
 2026-10-12 16:53,T-20261012-01,create,,inbox,创建任务：文档变更→触达闭环（飞书→msg-relay code）内部验,tasks/T-20261012-01-文档变更触达闭环内部验/task.md
 2026-10-12 16:53,T-20261012-01,plan,inbox,planned,核心六人验收卡落盘：plan.md 含四项可勾选验收与范围,tasks/T-20261012-01-文档变更触达闭环内部验/plan.md
+2026-10-16 12:05,T-20261012-01,status,planned,blocked,本周不做：鹏飞停飞书联调、不配凭证不验收,tasks/T-20261012-01-文档变更触达闭环内部验/task.md
+2026-10-16 12:05,T-20261016-01,create,,inbox,创建任务：接单通道本周唯一验收（三条可勾）,tasks/T-20261016-01-接单通道本周唯一验收/task.md
+2026-10-16 12:05,T-20261016-01,plan,inbox,planned,验收标准落盘：定平台→发出→48h询盘; 雷达本周只人工筛,tasks/T-20261016-01-接单通道本周唯一验收/plan.md
