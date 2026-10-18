@@ -10,3 +10,5 @@ time,task_id,action,from_status,to_status,summary,file
 2026-10-16 12:05,T-20261012-01,status,planned,blocked,本周不做：鹏飞停飞书联调、不配凭证不验收,tasks/T-20261012-01-文档变更触达闭环内部验/task.md
 2026-10-16 12:05,T-20261016-01,create,,inbox,创建任务：接单通道本周唯一验收（三条可勾）,tasks/T-20261016-01-接单通道本周唯一验收/task.md
 2026-10-16 12:05,T-20261016-01,plan,inbox,planned,验收标准落盘：定平台→发出→48h询盘; 雷达本周只人工筛,tasks/T-20261016-01-接单通道本周唯一验收/plan.md
+2026-10-18 18:00,T-20261018-01,create,,inbox,创建任务：批判思维大师每周工作状态审查（固定 recurring）,tasks/T-20261018-01-批判思维每周工作状态审查固定/task.md
+2026-10-18 18:00,T-20261018-01,plan,inbox,planned,周五20:00触发+每周重点+周巡衔接落盘,tasks/T-20261018-01-批判思维每周工作状态审查固定/plan.md
