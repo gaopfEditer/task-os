@@ -102,6 +102,7 @@ Freelancer 公开 API
 
 ### 相关文档
 
+- 通话笔记（筛选口径与当日快照）：`docs/通话笔记-需求雷达与筛选口径-2026-10-18.md`
 - 跨 bot 总状态：`docs/任务管家视角-状态同步-2026-10-18.md` · Pages https://gaopfediter.github.io/task-os/#docs  
 - 需求发现细节草稿：`/workspace/ops-master/需求发现-bot接手文档-2026-10-18.md`  
 - 双轨策略计划：`/workspace/ops-master/出海接单策略计划-2026-10-17.md`
