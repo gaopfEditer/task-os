@@ -285,6 +285,13 @@
   .res-empty .rerr { color: var(--red); font-size: 12px; overflow-wrap: anywhere; }
   .doc-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
   .doc-body { padding: 12px 14px; max-width: 52rem; }
+  .docs-grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); }
+  @media (min-width: 900px) { .docs-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  .docs-grid .ritem { padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); min-height: 100%; display: flex; flex-direction: column; gap: 4px; }
+  .docs-grid .ritem .rhead { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .docs-grid .ritem .rname { font-size: 14px; line-height: 1.35; }
+  .docs-grid .ritem .rdesc { font-size: 12px; color: var(--muted); flex: 1 1 auto; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+  .docs-grid .ritem .rmeta { margin-top: auto; padding-top: 4px; }
   .ins-bar { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 8px; }
   .ins-bar input { flex: 1 1 240px; min-width: 0; }
   .ins-info { font-size: 12px; color: var(--muted); }
@@ -512,6 +519,7 @@
     <h2 class="pagetitle">文档资源</h2>
     <p class="hint" style="margin:0 0 8px">专题长文存放在 <code>docs/</code>（与资讯创作官维护的 <code>info/resources.md</code> 链接收藏分开）。索引见 <code>docs/index.md</code>。</p>
     <div class="res-bar doc-list-bar"><input id="dqDocs" type="search" placeholder="搜索标题 / 摘要 / 标签 / 路径" autocomplete="off" aria-label="搜索文档"><span id="docsInfo" class="res-info"></span><a href="https://github.com/gaopfEditer/task-os/tree/main/docs" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 docs/</a></div>
+    <div class="det-range doc-range-bar"><span>时间</span><input type="date" id="docsFrom" aria-label="开始日期"><span>至</span><input type="date" id="docsTo" aria-label="结束日期"><button type="button" id="docsMonth">近一个月</button><button type="button" class="primary" id="docsApply">应用</button></div>
     <div id="docsTags" class="res-tags"></div>
     <div id="docsPanel"><div class="nodata">加载中…</div></div>
   </section>
@@ -3169,7 +3177,7 @@
 
   // ---------- 文档资源: docs/index.md + docs/*.md (read-only; not info/resources.md) ----------
   var DOCS_INDEX_PATH = 'docs/index.md';
-  state.docs = { status: '', text: '', parsed: null, error: '', gen: 0, q: '', tag: '', view: '', body: { status: '', text: '', error: '', path: '' } };
+  state.docs = { status: '', text: '', parsed: null, error: '', gen: 0, q: '', tag: '', from: '', to: '', view: '', body: { status: '', text: '', error: '', path: '' } };
   var DOCS_COLS = [
     ['title', /^(标题|题目|name|title)$/],
     ['path', /^(路径|文件|path|file)$/],
@@ -3229,7 +3237,36 @@
     for (var i = 0; i < p.items.length; i++) if (p.items[i].path === path) return true;
     return false;
   }
+  function docsUpdatedYmd(it) {
+    var m = /^(\d{4}-\d{2}-\d{2})/.exec(String(it.updated || '').trim());
+    return m ? m[1] : '';
+  }
+  function ensureDocsRange() {
+    var D = state.docs;
+    if (!D.from || !D.to || !parseYmd(D.from) || !parseYmd(D.to)) {
+      var r = defaultDetailRange(); D.from = r.from; D.to = r.to;
+    }
+    if (D.from > D.to) { var t = D.from; D.from = D.to; D.to = t; }
+  }
+  function docsInRange(it) {
+    ensureDocsRange();
+    var ds = docsUpdatedYmd(it);
+    if (!ds) return false;
+    return ds >= state.docs.from && ds <= state.docs.to;
+  }
+  function syncDocsRangeInputs() {
+    ensureDocsRange();
+    if ($('docsFrom')) $('docsFrom').value = state.docs.from;
+    if ($('docsTo')) $('docsTo').value = state.docs.to;
+  }
+  function applyDocsRangeFromInputs() {
+    var f = $('docsFrom').value, t = $('docsTo').value;
+    if (!parseYmd(f) || !parseYmd(t)) { renderDocs(); return; }
+    state.docs.from = f; state.docs.to = t;
+    renderDocs();
+  }
   function docsMatch(it, words, tag) {
+    if (!docsInRange(it)) return false;
     if (tag && it.tags.indexOf(tag) < 0) return false;
     if (!words.length) return true;
     var hay = [it.title, it.summary, it.path, it.tags.join(' '), it.updated].join('\n').toLowerCase();
@@ -3292,10 +3329,11 @@
     return h + '</li>';
   }
   function renderDocs() {
-    var D = state.docs, el = $('docsPanel'), info = $('docsInfo'), tagsEl = $('docsTags'), listBar = document.querySelector('.doc-list-bar');
+    var D = state.docs, el = $('docsPanel'), info = $('docsInfo'), tagsEl = $('docsTags'), listBar = document.querySelector('.doc-list-bar'), rangeBar = document.querySelector('.doc-range-bar');
     if (!el) return;
     if (D.view) {
       if (listBar) listBar.style.display = 'none';
+      if (rangeBar) rangeBar.style.display = 'none';
       tagsEl.innerHTML = '';
       info.textContent = '';
       var B = D.body;
@@ -3310,6 +3348,9 @@
       return;
     }
     if (listBar) listBar.style.display = '';
+    if (rangeBar) rangeBar.style.display = '';
+    ensureDocsRange();
+    syncDocsRangeInputs();
     if (D.status === '' || D.status === 'loading') { el.innerHTML = '<div class="nodata">正在读取 docs/index.md…</div>'; tagsEl.innerHTML = ''; info.textContent = ''; return; }
     if (D.status !== 'ok') {
       tagsEl.innerHTML = ''; info.textContent = '只读 · docs/';
@@ -3336,9 +3377,11 @@
     }
     tagsEl.innerHTML = tagHtml;
     var list = p.items.filter(function (it) { return docsMatch(it, words, D.tag); });
-    info.textContent = (words.length || D.tag ? '匹配 ' + list.length + ' / ' + p.items.length + ' 篇' : '共 ' + p.items.length + ' 篇') + ' · 只读';
-    el.innerHTML = list.length ? '<ul class="rlist">' + list.map(function (it) { return docsItemHtml(it, hq, D.tag); }).join('') + '</ul>' :
-      '<div class="nodata">没有匹配的文档。<button type="button" class="link" data-dclear="1">清除筛选</button></div>';
+    var inRangeN = p.items.filter(function (it) { return docsInRange(it); }).length;
+    var filt = words.length || D.tag;
+    info.textContent = (filt ? '匹配 ' + list.length + ' / ' + inRangeN + ' 篇' : '时间范围内 ' + inRangeN + ' / 共 ' + p.items.length + ' 篇') + ' · ' + D.from + ' ～ ' + D.to + ' · 只读';
+    el.innerHTML = list.length ? '<ul class="rlist docs-grid">' + list.map(function (it) { return docsItemHtml(it, hq, D.tag); }).join('') + '</ul>' :
+      '<div class="nodata">没有匹配的文档。可扩大日期或<button type="button" class="link" data-dclear="1">清除筛选</button></div>';
   }
 
   // ---------- settings dialog ----------
@@ -3679,12 +3722,21 @@
   });
   $('rq').addEventListener('input', function (ev) { state.res.q = ev.target.value; renderResources(); });
   $('dqDocs').addEventListener('input', function (ev) { state.docs.q = ev.target.value; if (!state.docs.view) renderDocs(); });
+  $('docsApply').addEventListener('click', applyDocsRangeFromInputs);
+  $('docsMonth').addEventListener('click', function () {
+    var r = defaultDetailRange(); state.docs.from = r.from; state.docs.to = r.to;
+    syncDocsRangeInputs(); renderDocs();
+  });
   $('tab-docs').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-dtag],[data-dclear],[data-dretry],[data-dback]'); if (!b) return;
     var D = state.docs;
     if (b.hasAttribute('data-dback')) { D.view = ''; D.body = { status: '', text: '', error: '', path: '' }; location.hash = '#docs'; renderDocs(); return; }
     if (b.hasAttribute('data-dtag')) { var t = b.getAttribute('data-dtag'); D.tag = D.tag === t ? '' : t; renderDocs(); return; }
-    if (b.hasAttribute('data-dclear')) { D.tag = ''; D.q = ''; $('dqDocs').value = ''; renderDocs(); return; }
+    if (b.hasAttribute('data-dclear')) {
+      D.tag = ''; D.q = ''; $('dqDocs').value = '';
+      var r = defaultDetailRange(); D.from = r.from; D.to = r.to;
+      syncDocsRangeInputs(); renderDocs(); return;
+    }
     loadDocsIndex(true);
   });
   $('tab-resources').addEventListener('click', function (ev) {
