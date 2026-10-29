@@ -259,10 +259,17 @@
   .res-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
   .rtag-f { font-size: 12px; padding: 2px 9px; border-radius: 12px; max-width: 100%; overflow-wrap: anywhere; }
   .rtag-f i { font-style: normal; color: var(--faint); margin-left: 4px; }
+  .rtag-f.pin { background: #ddf4ff; border-color: #54aeff; color: #0550ae; }
+  .rtag-f.pin i { color: #656d76; }
   .rtag-f.on, .rtag.on { background: #24292f; color: #fff; border-color: #24292f; }
   .rtag-f.on i { color: #d0d7de; }
+  .rtag-f.pin.on { background: #24292f; color: #fff; border-color: #24292f; }
+  .rtag-f.pin.on i { color: #d0d7de; }
   .rtag-f.zero { color: var(--faint); }
   .rclear { font-size: 12px; }
+  details.area.rgroup-priority { border-color: #54aeff; box-shadow: inset 4px 0 0 var(--accent); }
+  details.area.rgroup-priority > summary b { color: var(--accent); }
+  .rpriority-badge { font-size: 11px; font-weight: 600; color: #fff; background: var(--accent); border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: middle; }
   .rsub { margin: 4px 0 8px; min-width: 0; }
   .rsub h5 { font-size: 13px; margin: 10px 0 4px; color: var(--muted); border-left: 3px solid var(--border); padding-left: 8px; }
   .rcount { font-weight: normal; color: var(--faint); margin-left: 6px; font-size: 12px; }
@@ -3129,6 +3136,7 @@
   }
   function renderResources() {
     var R = state.res, el = $('resources'), info = $('resInfo'), tagsEl = $('resTags');
+    var RES_PIN_TAG = '信息来源';
     if (R.status === '' || R.status === 'loading') { el.innerHTML = '<div class="nodata">正在读取 info/resources.md…</div>'; tagsEl.innerHTML = ''; info.textContent = ''; return; }
     if (R.status !== 'ok') {
       tagsEl.innerHTML = ''; info.textContent = '只读 · 由资讯创作官维护';
@@ -3146,7 +3154,7 @@
     if (R.tag && !counts[R.tag]) { counts[R.tag] = 0; order.push(R.tag); }
     order.sort(function (a, b) { return counts[b] - counts[a] || order.indexOf(a) - order.indexOf(b); });
     var th = '';
-    order.forEach(function (t) { th += '<button type="button" class="rtag-f' + (t === R.tag ? ' on' : '') + (counts[t] ? '' : ' zero') + '" data-rtag="' + esc(t) + '" aria-pressed="' + (t === R.tag) + '">' + esc(t) + '<i>' + counts[t] + '</i></button>'; });
+    order.forEach(function (t) { th += '<button type="button" class="rtag-f' + (t === R.tag ? ' on' : '') + (t === RES_PIN_TAG ? ' pin' : '') + (counts[t] ? '' : ' zero') + '" data-rtag="' + esc(t) + '" aria-pressed="' + (t === R.tag) + '">' + esc(t) + '<i>' + counts[t] + '</i></button>'; });
     if (filtering) th += '<button type="button" class="link rclear" data-rclear="1">清除筛选</button>';
     tagsEl.innerHTML = th;
     var h = '';
@@ -3166,8 +3174,9 @@
       shown += gShown;
       if (filtering && !gShown) return;
       var meta = filtering ? '<span class="ameta">匹配 ' + gShown + ' / ' + g.count + ' 条</span>' : (g.count ? '<span class="ameta">' + g.count + ' 条</span>' : '<span class="ameta">待补充</span>');
+      var gPri = g.name.indexOf(RES_PIN_TAG) >= 0;
       var notes = filtering ? '' : g.notes.map(function (n) { return '<div class="rgnote md">' + renderMd(n) + '</div>'; }).join('');
-      h += '<details class="area rgroup" id="res-' + gi + '"' + (!filtering && R.closed[g.name] ? '' : ' open') + ' data-rname="' + esc(g.name) + '"><summary><b>' + esc(g.name) + '</b>' + meta + '</summary>' +
+      h += '<details class="area rgroup' + (gPri ? ' rgroup-priority' : '') + '" id="res-' + gi + '"' + (!filtering && R.closed[g.name] ? '' : ' open') + ' data-rname="' + esc(g.name) + '"><summary><b>' + esc(g.name) + '</b>' + (gPri ? '<span class="rpriority-badge">重点</span>' : '') + meta + '</summary>' +
         '<div class="abody">' + notes + (subsHtml || '<div class="none">待补充</div>') + '</div></details>';
     });
     if (filtering && !shown) h += '<div class="nodata">没有匹配的资源。<button type="button" class="link" data-rclear="1">清除筛选</button></div>';
