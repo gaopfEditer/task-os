@@ -452,6 +452,7 @@
   <a href="#board" data-tab="board">看板</a>
   <a href="#calendar" data-tab="calendar">日历</a>
   <a href="#detail" data-tab="detail">明细扩展</a>
+  <a href="#memo" data-tab="memo">备忘清单</a>
   <a href="#areas" data-tab="areas">关注领域</a>
   <a href="#docs" data-tab="docs">文档资源</a>
   <a href="#resources" data-tab="resources">资源</a>
@@ -517,6 +518,11 @@
     <div id="detailFeed"><div class="nodata">加载中…</div></div>
   </section>
 
+  <section class="tab" id="tab-memo">
+    <h2 class="pagetitle">备忘清单：待额度充足时执行</h2>
+    <div id="memo"><div class="nodata">加载中…</div></div>
+  </section>
+
   <section class="tab" id="tab-areas">
     <h2 class="pagetitle">关注领域</h2>
     <div id="areas"><div class="nodata">加载中…</div></div>
@@ -542,7 +548,7 @@
   </section>
 
   <footer>
-    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>areas.md</code>、<code>insights.md</code>、<code>bots.md</code>、只读的 <code>docs/</code>（专题文档），以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
+    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>areas.md</code>、<code>memo.md</code>、<code>insights.md</code>、<code>bots.md</code>、只读的 <code>docs/</code>（专题文档），以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
   </footer>
 </main>
 <div id="dayPop" class="daypop" role="dialog" hidden></div>
@@ -759,6 +765,7 @@
     if (state.pedit && !state.pedit.loading) setPStatus(state.pedit, 'error', esc(text));
     if (state.areas.edit) { state.areas.edit.status = { kind: 'error', text: esc(text) }; renderAreas(); }
     if (state.bots.edit) { state.bots.edit.status = { kind: 'error', text: esc(text) }; renderBots(); }
+    if (state.memo.edit) { state.memo.edit.status = { kind: 'error', text: esc(text) }; renderMemo(); }
   }
   function renderTokenBanner() {
     var el = $('msg');
@@ -776,6 +783,7 @@
     else if (resume === 'monthMain') saveMonthMain();
     else if (resume === 'areas') saveAreas();
     else if (resume === 'bots') saveBots();
+    else if (resume === 'memo') saveMemo();
     else if (resume) saveEdit();
     else refreshTokenHints();
   }
@@ -2638,6 +2646,131 @@
     });
   }
 
+  // ---------- 备忘清单: memo.md (one "## " per backlog item), whole-file editor ----------
+  var MEMO_PATH = 'memo.md';
+  var MEMO_STARTER = '# 备忘清单：待额度充足时执行\n\n以后想到要点或点子就记到这里；课测/算力额度宽裕时再从这里挑出来执行。\n\n看板「备忘清单」页（`#memo`）读取并编辑此文件。每条备忘一个 `## ` 标题，正文可写背景、触发条件或预估成本。\n';
+  state.memo = { status: '', text: '', sha: null, error: '', edit: null, flash: null, closed: {} };
+  function parseMemo(text) {
+    var lines = String(text || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').split('\n'), out = { title: '', intro: [], items: [] }, cur = null, fence = false;
+    lines.forEach(function (line) {
+      if (/^\s*(```|~~~)/.test(line)) fence = !fence;
+      var m = !fence && /^(#{1,2})\s+(.*?)\s*#*\s*$/.exec(line);
+      if (m && m[1] === '#' && !out.title && !cur) { out.title = m[2]; return; }
+      if (m && m[1] === '##') { cur = { title: m[2], lines: [] }; out.items.push(cur); return; }
+      (cur ? cur.lines : out.intro).push(line);
+    });
+    out.intro = out.intro.join('\n').trim();
+    out.items.forEach(function (a) { a.body = a.lines.join('\n').replace(/^\n+|\s+$/g, ''); delete a.lines; });
+    return out;
+  }
+  function loadMemo(force) {
+    var M = state.memo;
+    if (!force && (M.status === 'ok' || M.status === 'missing' || M.status === 'loading')) return Promise.resolve();
+    M.status = 'loading';
+    return loadFile(MEMO_PATH).then(function (res) { M.text = res.text; M.status = 'ok'; M.error = ''; }, function (e) {
+      if (e.status === 404) { M.text = ''; M.status = 'missing'; M.error = ''; } else { M.status = 'error'; M.error = e.message; }
+    }).then(function () { if (state.tab === 'memo' && !memoEditorActive()) renderMemo(); });
+  }
+  function memoEditorActive() { return !!(state.memo.edit && !state.memo.edit.loading && $('memoText')); }
+  function hasMemoDraft() { try { return localStorage.getItem(DRAFT_KEY + 'memo') != null; } catch (x) { return false; } }
+  function renderMemo() {
+    var M = state.memo, el = $('memo'), e = M.edit, h = '';
+    if (M.status === 'loading' || M.status === '') { el.innerHTML = '<div class="nodata">正在读取 memo.md…</div>'; return; }
+    var p = parseMemo(M.text);
+    h += '<div class="area-bar">';
+    if (!e) p.items.forEach(function (a, i) { h += '<button type="button" class="area-chip" data-memo="' + i + '">' + esc(a.title) + '</button>'; });
+    h += '<span class="spacer"></span>';
+    if (!e) h += '<button type="button" class="primary" data-mact="edit">编辑</button>' + tokenHint();
+    if (M.status === 'ok' || M.edit) h += '<a href="' + esc(fileUrl(MEMO_PATH)) + '" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 memo.md</a>';
+    h += '</div>';
+    if (M.flash) h += '<div class="msg ' + M.flash.kind + '">' + M.flash.text + '</div>';
+    if (M.status === 'error') h += '<div class="msg error">读取 memo.md 失败：' + esc(M.error) + '</div>';
+    if (e) {
+      if (e.loading) h += '<div class="nodata">正在读取最新版本…</div>';
+      else {
+        h += '<div class="panel area-editor"><div class="hint">整个 memo.md 一起编辑：说明写在开头；每条备忘一个 <code>## </code> 标题，下面写正文。内容原样保存。</div>' +
+          '<textarea id="memoText" spellcheck="false">' + esc(e.value) + '</textarea>';
+        if (e.status) h += '<div class="msg ' + e.status.kind + '">' + e.status.text + '</div>';
+        if (e.remote != null) h += '<details class="remote" open><summary>远端最新内容（' + (e.remote ? '已存在' : '文件不存在') + '）</summary><pre>' + esc(e.remote || '（空）') + '</pre></details>';
+        h += '<div class="actions"><button type="button" class="primary" data-mact="save"' + (e.saving ? ' disabled' : '') + '>' + (e.saving ? '保存中…' : '保存') + '</button>' +
+          '<button type="button" data-mact="cancel"' + (e.saving ? ' disabled' : '') + '>取消</button>' + tokenHint() + '</div></div>';
+      }
+    } else if (M.status === 'missing') {
+      h += '<div class="nodata">仓库里还没有 memo.md。点「编辑」按模板新建。</div>';
+    } else if (M.status === 'ok') {
+      if (hasMemoDraft()) h += '<div class="msg info">有未保存的草稿，点「编辑」继续。</div>';
+      if (p.intro) h += '<div class="areas-intro md">' + renderMd(p.intro) + '</div>';
+      if (!p.items.length) h += '<div class="nodata">还没有备忘条目。点「编辑」在文件中追加 <code>## </code> 标题。</div>';
+      p.items.forEach(function (a, i) {
+        h += '<details class="area" id="memo-' + i + '"' + (M.closed[a.title] ? '' : ' open') + ' data-name="' + esc(a.title) + '"><summary><b>' + esc(a.title) + '</b></summary>' +
+          '<div class="abody md">' + (a.body ? renderMd(a.body) : '<div class="none">（空）</div>') + '</div></details>';
+      });
+    }
+    el.innerHTML = h;
+    if (e && !e.loading && $('memoText')) {
+      $('memoText').addEventListener('input', function (ev) { e.value = ev.target.value; try { if (e.value !== e.baseText) localStorage.setItem(DRAFT_KEY + 'memo', e.value); else localStorage.removeItem(DRAFT_KEY + 'memo'); } catch (x) {} });
+      if (e.focus) { e.focus = false; $('memoText').focus(); }
+    }
+  }
+  function fetchMemoLatest() {
+    return api('GET', repoPath + '/contents/' + MEMO_PATH + '?ref=' + BRANCH).then(function (res) {
+      if (res.status === 404) return { sha: null, text: '' };
+      if (!res.ok || !res.json) throw new Error(apiErrText(res));
+      return { sha: res.json.sha, text: b64ToUtf8(res.json.content) };
+    });
+  }
+  function startMemoEdit() {
+    var M = state.memo; M.flash = null; M.edit = { loading: true }; renderMemo();
+    fetchMemoLatest().then(function (latest) { return latest; }, function (err) {
+      return { sha: undefined, text: M.text, warn: err.message };
+    }).then(function (latest) {
+      if (!M.edit || !M.edit.loading) return;
+      if (latest.sha !== undefined && latest.text !== M.text) { M.text = latest.text; M.status = latest.sha ? 'ok' : 'missing'; }
+      var base = latest.sha === null ? '' : latest.text, value = base || MEMO_STARTER, status = null, dr = null;
+      try { dr = localStorage.getItem(DRAFT_KEY + 'memo'); } catch (x) {}
+      if (dr != null && dr !== base) { value = dr; status = { kind: 'info', text: '已恢复未保存的草稿（还没提交到仓库）。' }; }
+      if (latest.warn) status = { kind: 'info', text: '暂时取不到 GitHub 上的最新版本（' + esc(latest.warn) + '），先按页面上的内容编辑。' };
+      M.edit = { value: value, baseText: base, sha: latest.sha === undefined ? null : latest.sha, unknownSha: latest.sha === undefined, status: status, remote: null, saving: false, focus: true };
+      renderMemo();
+    });
+  }
+  function saveMemo() {
+    var M = state.memo, e = M.edit; if (!e || e.loading || e.saving) return;
+    var ta = $('memoText'); if (ta) e.value = ta.value;
+    if (!requestTokenForSave('memo', '保存 memo.md 需要 GitHub 令牌，填好后会自动继续保存。')) return;
+    if (e.value === e.baseText) { e.status = { kind: 'info', text: '没有改动。' }; return renderMemo(); }
+    var go = e.unknownSha ? fetchMemoLatest().then(function (l) { e.unknownSha = false; e.sha = l.sha; if (l.text !== e.baseText) { e.baseText = l.text; e.remote = l.text; throw { conflict: true }; } }) : Promise.resolve();
+    e.saving = true; e.status = null; renderMemo();
+    go.then(function () {
+      var body = { message: '备忘清单：' + (e.sha ? '更新' : '新建') + ' memo.md', content: utf8ToB64(e.value), branch: BRANCH };
+      if (e.sha) body.sha = e.sha;
+      return api('PUT', repoPath + '/contents/' + MEMO_PATH, body).then(function (res) {
+        e.saving = false;
+        if (res.ok && res.json && res.json.content) {
+          var commit = res.json.commit && res.json.commit.sha ? res.json.commit.sha : '';
+          M.text = e.value; M.sha = res.json.content.sha; M.status = 'ok'; M.edit = null;
+          try { localStorage.removeItem(DRAFT_KEY + 'memo'); } catch (x) {}
+          M.flash = { kind: 'ok', text: '已保存' + (commit ? '（提交 <a target="_blank" rel="noopener" href="' + esc(REPO + '/commit/' + commit) + '">' + esc(commit.slice(0, 7)) + '</a>）' : '') + '。GitHub Pages 上的文件可能要 1–2 分钟才更新，这里已显示保存后的内容。' };
+          return renderMemo();
+        }
+        if (res.status === 409 || res.status === 422) {
+          return fetchMemoLatest().then(function (l) {
+            if (l.sha === e.sha) { e.status = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) }; return renderMemo(); }
+            e.sha = l.sha; e.baseText = l.text; e.remote = l.text; M.text = l.text;
+            e.status = { kind: 'error', text: '保存失败：memo.md 在别处被修改过（版本冲突）。已获取远端最新内容（见下方），你的输入仍保留在输入框里，请对照合并后再点「保存」。' };
+            renderMemo();
+          });
+        }
+        e.status = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) + (res.status === 401 ? ' <button type="button" class="link" data-act="settings">打开设置</button>' : '') };
+        renderMemo();
+      });
+    }).catch(function (err) {
+      e.saving = false;
+      e.status = { kind: 'error', text: err && err.conflict ? '保存前发现 memo.md 已在别处更新（见下方远端最新内容），你的输入仍保留，请对照合并后再点「保存」。' : '保存失败：' + esc(err && err.message || String(err)) };
+      renderMemo();
+    });
+  }
+
   // ---------- 明细扩展: daily 四类小节 + insights.md（灵感来源，只读） ----------
   var INS_PATH = 'insights.md';
   function insSplitTags(s) {
@@ -3400,7 +3533,7 @@
     if (t) {
       hint.innerHTML = '已缓存令牌（…' + esc(t.slice(-4)) + '）：<b>不必再粘贴</b>，直接点「验证」或「关闭」即可继续；要更换再在左侧输入新令牌。';
       if (input) input.placeholder = '留空则沿用已缓存令牌';
-      status.textContent = storageMsg || ('当前已缓存（…' + t.slice(-4) + '）。保存日记 / areas / bots / insights / 周记月记会直接使用，无需再点本页「保存」。');
+      status.textContent = storageMsg || ('当前已缓存（…' + t.slice(-4) + '）。保存日记 / areas / memo / bots / insights / 周记月记会直接使用，无需再点本页「保存」。');
     } else {
       hint.textContent = storageMsg ? storageMsg : '';
       if (input) input.placeholder = 'github_pat_…';
@@ -3428,6 +3561,7 @@
   function closeSettings() { var d = $('settings'); if (d.close) d.close(); else d.removeAttribute('open'); }
   function refreshTokenHints() {
     if (state.tab === 'bots') { var be = state.bots.edit, bt = $('botText'); if (be && bt) be.value = bt.value; renderBots(); }
+    if (state.tab === 'memo') { var me = state.memo.edit, mt = $('memoText'); if (me && mt) me.value = mt.value; renderMemo(); }
     if (state.tab === 'areas') { var ae = state.areas.edit, at = $('areaText'); if (ae && at) ae.value = at.value; renderAreas(); }
     if (state.tab === 'calendar') {
       renderDetail();
@@ -3466,11 +3600,12 @@
       parts[0] = 'detail';
       history.replaceState(null, '', '#detail');
     }
-    var tab = ['board', 'calendar', 'detail', 'areas', 'docs', 'resources', 'bots'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
+    var tab = ['board', 'calendar', 'detail', 'memo', 'areas', 'docs', 'resources', 'bots'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
     setTab(tab);
     if (tab === 'board') renderBoardTab();
     if (tab === 'calendar') selectDay(parseYmd(parts[1]) ? parts[1] : (state.selected || todayStr()), true);
     if (tab === 'areas') { if (!areasEditorActive()) renderAreas(); loadAreas(); }
+    if (tab === 'memo') { if (!memoEditorActive()) renderMemo(); loadMemo(); }
     if (tab === 'detail') { renderDetailFeed(); loadDetailFeed(); }
     if (tab === 'docs') {
       var docPath = parts.length > 1 ? parts.slice(1).join('/') : '';
@@ -3505,6 +3640,7 @@
     ['week', 'month'].forEach(function (k) { state.notes[k].cache = {}; state.notes[k].pending = {}; });
     if (!(state.areas.edit && state.areas.edit.saving)) { state.areas.edit = null; state.areas.flash = null; state.areas.status = ''; }   // unsaved areas text stays as a draft
     if (!(state.bots.edit && state.bots.edit.saving)) { state.bots.edit = null; state.bots.flash = null; state.bots.status = ''; }   // unsaved bots text stays as a draft
+    if (!(state.memo.edit && state.memo.edit.saving)) { state.memo.edit = null; state.memo.flash = null; state.memo.status = ''; }
     state.insights.status = ''; state.insights.parsed = null;
     state.res.status = ''; state.res.parsed = null; state.res.gen++;   // re-read info/resources.md on 刷新
     state.docs.status = ''; state.docs.parsed = null; state.docs.gen++;
@@ -3684,6 +3820,16 @@
     var cell = document.querySelector('[data-date="' + state.selected + '"]'); if (cell) cell.focus({ preventScroll: true });
   });
   window.addEventListener('hashchange', applyHash);
+  $('memo').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-mact],[data-memo],[data-act="settings"]'); if (!b) return;
+    if (b.hasAttribute('data-memo')) { var d = $('memo-' + b.getAttribute('data-memo')); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
+    if (b.getAttribute('data-act') === 'settings') { state.pendingSave = false; openSettings(); return; }
+    var act = b.getAttribute('data-mact'), M = state.memo;
+    if (act === 'edit') startMemoEdit();
+    else if (act === 'save') saveMemo();
+    else if (act === 'cancel') { try { localStorage.removeItem(DRAFT_KEY + 'memo'); } catch (x) {} M.edit = null; renderMemo(); }
+  });
+  $('memo').addEventListener('toggle', function (ev) { var d = ev.target; if (d.classList && d.classList.contains('area')) state.memo.closed[d.getAttribute('data-name')] = !d.open; }, true);
   $('areas').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-aact],[data-area],[data-act="settings"]'); if (!b) return;
     if (b.hasAttribute('data-area')) { var d = $('area-' + b.getAttribute('data-area')); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
