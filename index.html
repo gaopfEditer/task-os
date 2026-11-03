@@ -3168,7 +3168,7 @@
         var head = sb.name ? '<h5>' + esc(sb.name) + '<span class="rcount">' + (filtering ? list.length + ' / ' : '') + sb.items.length + '</span></h5>' : '';
         subsHtml += '<div class="rsub">' + head;
         if (!filtering) sb.notes.forEach(function (n) { subsHtml += '<div class="rgnote md">' + renderMd(n) + '</div>'; });
-        subsHtml += sb.items.length ? '<ul class="rlist">' + list.map(function (it) { return resItemHtml(it, hq, R.tag); }).join('') + '</ul>' : '<div class="none">待补充</div>';
+        subsHtml += sb.items.length ? '<ul class="rlist docs-grid">' + list.map(function (it) { return resItemHtml(it, hq, R.tag); }).join('') + '</ul>' : '<div class="none">待补充</div>';
         subsHtml += '</div>';
       });
       shown += gShown;
