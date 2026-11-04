@@ -181,6 +181,7 @@
 
   var restTimer = null;
   function fallbackRest(syms) {
+    wsGen++;
     closeWs();
     if (restTimer) clearInterval(restTimer);
     function poll() {
