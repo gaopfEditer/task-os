@@ -190,3 +190,7 @@ monthly/
 - 看板在浏览器里实时读取仓库根目录的 `index.md` 和 `log.csv`，按状态分列显示任务卡片、汇总数量、截止提醒和执行时间线，不存任何副本数据。
 - 只要按上面的规则保持 `index.md` 和 `log.csv` 更新，看板就会自动反映最新状态（推送后 Pages 通常 1–2 分钟生效，点「刷新」重新加载）。
 - 根目录的 `.nojekyll` 让 Pages 原样提供 `.md` / `.csv` 文件，请勿删除。
+
+### 桌面版（Tauri）
+
+仓库 `desktop/` 提供 **Task OS** 原生窗口，加载与线上一致的根目录 `index.html`，读写仍走 GitHub API，数据与网页看板共享。安装 Rust / 平台 WebView 依赖后，在 `desktop/` 执行 `npm install` 与 `npm run tauri:dev` / `npm run tauri:build`。详见 [`desktop/README.md`](desktop/README.md)。

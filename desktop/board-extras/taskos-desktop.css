@@ -1,0 +1,56 @@
+#taskosCryptoBar {
+  background: #161b22;
+  color: #c9d1d9;
+  border-bottom: 1px solid #30363d;
+  padding: 6px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  font-size: 12px;
+}
+#taskosCryptoBar .tc-label { color: #8b949e; margin-right: 4px; }
+#taskosCryptoBar .tc-prices { display: flex; flex-wrap: wrap; gap: 6px 12px; flex: 1 1 auto; min-width: 0; }
+#taskosCryptoBar .tc-chip {
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 999px;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+#taskosCryptoBar .tc-chip b { color: #fff; font-weight: 600; }
+#taskosCryptoBar .tc-chip .up { color: #3fb950; }
+#taskosCryptoBar .tc-chip .down { color: #f85149; }
+#taskosCryptoBar .tc-status { color: #8b949e; font-size: 11px; }
+#taskosCryptoBar button {
+  background: #21262d;
+  border-color: #30363d;
+  color: #c9d1d9;
+  font-size: 12px;
+  padding: 3px 10px;
+}
+#taskosCryptoPanel {
+  background: #0d1117;
+  color: #c9d1d9;
+  border-bottom: 1px solid #30363d;
+  padding: 10px 14px 12px;
+  font-size: 13px;
+  display: none;
+}
+#taskosCryptoPanel.open { display: block; }
+#taskosCryptoPanel label { display: block; margin: 8px 0 4px; color: #8b949e; font-size: 12px; }
+#taskosCryptoPanel input[type=text],
+#taskosCryptoPanel input[type=number],
+#taskosCryptoPanel select {
+  width: 100%;
+  max-width: 420px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+}
+#taskosCryptoPanel .tc-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-top: 8px; }
+#taskosCryptoPanel .tc-row > * { flex: 0 0 auto; }
+#taskosCryptoPanel .tc-alerts { margin-top: 10px; }
+#taskosCryptoPanel .tc-alerts ul { margin: 6px 0 0; padding-left: 18px; }
+#taskosCryptoPanel .tc-alerts li { margin: 4px 0; }
+#taskosCryptoPanel .tc-note { color: #8b949e; font-size: 11px; margin-top: 8px; }

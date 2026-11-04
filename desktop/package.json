@@ -1,0 +1,17 @@
+{
+  "name": "task-os-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "sync-board": "node scripts/sync-board.mjs",
+    "dev:web": "npm run sync-board && serve dist -l 1420 --no-clipboard",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "serve": "^14.2.4"
+  }
+}
