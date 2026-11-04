@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-github-token-commands"
+description = "Read/write GitHub PAT in the OS keychain"
+commands.allow = ["load_github_token", "save_github_token", "show_price_alert"]

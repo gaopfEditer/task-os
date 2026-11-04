@@ -567,7 +567,7 @@
     <button type="button" id="tokenShow">显示</button>
   </div>
   <p id="tokenCachedHint" class="note" style="margin:6px 0 0;font-size:13px"></p>
-  <p class="note">令牌只保存在当前浏览器的 localStorage（键名 <code>taskos.github_token</code>）中，只会发送给 GitHub API（api.github.com），不会写进仓库。在公用设备上用完请点「清除」。</p>
+  <p class="note" id="tokenStorageNote">令牌保存在本机：网页版用浏览器 localStorage（键名 <code>taskos.github_token</code>）；桌面版会优先写入系统钥匙串，并同步到同名 localStorage 供看板读写。令牌只会发送给 GitHub API（api.github.com），不会写进仓库。在公用设备上用完请点「清除」。</p>
   <div id="tokenStatus" class="note"></div>
   <div class="btns">
     <button type="button" id="tokenClear">清除</button>
@@ -603,6 +603,15 @@
   var REPO = 'https://github.com/' + OWNER + '/' + REPONAME;
   var RAW = 'https://raw.githubusercontent.com/' + OWNER + '/' + REPONAME + '/' + BRANCH + '/';
   var TOKEN_KEY = 'taskos.github_token', DRAFT_KEY = 'taskos.draft.';
+  var IS_TAURI = !!(window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke);
+  function tauriInvoke(cmd, payload) {
+    if (!IS_TAURI) return Promise.resolve(undefined);
+    return window.__TAURI__.core.invoke(cmd, payload || {});
+  }
+  function syncTokenToKeychain(t) {
+    if (!IS_TAURI) return;
+    tauriInvoke('save_github_token', { token: t || '' }).catch(function () {});
+  }
   var DAILY_DIR = 'daily';
   // Test hook: ?api=<url> is honoured ONLY when the page itself is served from localhost,
   // so a crafted link can never redirect the token to another host on the real site.
@@ -738,6 +747,7 @@
       t = String(t || '').trim();
       if (t) localStorage.setItem(TOKEN_KEY, t);
       else localStorage.removeItem(TOKEN_KEY);
+      syncTokenToKeychain(t);
       return true;
     } catch (e) {
       state.tokenStorageErr = (e && e.message) ? e.message : String(e);
@@ -3972,7 +3982,16 @@
     renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, parseAreas: parseAreas, areasHtml: areasHtml, parseBots: parseBots, botsSplit: botsSplit, botEdges: botEdges, botMatch: botMatch, BOTS_STARTER: BOTS_STARTER, parseInsights: parseInsights, parseResources: parseResources, renderDetailFeed: renderDetailFeed, datesInRange: datesInRange, splitTags: splitTags, resUrl: resUrl, keyEvents: keyEvents, truncLines: truncLines, dayPopHtml: dayPopHtml, relDayWord: relDayWord, firstLine: firstLine,
     excerpt: excerpt, addDays: addDays, metaText: metaText, API: API, state: state, dayNeedsLoad: dayNeedsLoad, dayInfo: dayInfo, loadDay: loadDay,
     shortDotDate: shortDotDate, defaultPreviewRange: defaultPreviewRange, previewDayBody: previewDayBody, renderSimplePreview: renderSimplePreview };
-  load();
+  function hydrateTokenFromKeychain() {
+    if (!IS_TAURI) return Promise.resolve();
+    return tauriInvoke('load_github_token').then(function (k) {
+      if (k == null) return;
+      k = String(k).trim();
+      if (!k || getToken()) return;
+      setToken(k);
+    }, function () {});
+  }
+  hydrateTokenFromKeychain().then(load);
 })();
 </script>
 </body>
