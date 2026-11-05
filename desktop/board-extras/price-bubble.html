@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>行情</title>
+<link rel="stylesheet" href="price-bubble.css">
+</head>
+<body>
+<div id="bubbleRoot" class="bubble-root">
+  <div class="bubble-orbit" aria-hidden="true"></div>
+  <div class="bubble-core">
+    <div class="bubble-brand bubble-drag" id="bubbleDragHandle" title="按住拖动窗口">行情</div>
+    <div class="bubble-body" id="bubbleList"></div>
+  </div>
+  <button type="button" class="bubble-open" id="btnOpenMain" title="打开 Task OS 主窗口">↗</button>
+</div>
+<script src="market-symbols.js" defer></script>
+<script src="price-bubble.js" defer></script>
+</body>
+</html>

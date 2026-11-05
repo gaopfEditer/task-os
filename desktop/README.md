@@ -47,7 +47,9 @@ npm run tauri icon ../favicon.svg
 
 仅 Tauri 打包的 `dist/index.html` 会注入 `board-extras/` 脚本，**GitHub Pages 上的根 `index.html` 不含此功能**。
 
-- **关注列表**：顶栏「关注 / 提醒」面板，逗号分隔输入（如 `BTC,ETH,SOL`），默认 `BTC,ETH,SOL`；保存后通过 Binance 公开 WebSocket（`miniTicker`）推送现价，失败时降级为 REST 轮询。
+- **关注列表**：顶栏「关注 / 提醒」面板，逗号分隔输入（如 `BTC,ETH,SOL`），默认 **`BTC,ETH,SOL`**；仅 **CoinGecko / Binance** 交易所公开 REST，每 **3 分钟**刷新。
+- **独立悬浮窗**：额外原生小窗（无边框；顶栏拖动），与主窗口共用同一份关注列表；悬停点 ↗ 可聚焦主窗口。
+- **开机自启**：首次启动后会在 Windows「登录时启动项」注册 **Task OS**（开发模式 `tauri dev` 注册的是当前 debug 可执行文件；正式安装包用 `tauri:build` 产物）。
 - **价格提醒**：为指定币种设置目标价与方向（涨到 ≥ / 跌到 ≤），触达后发送**系统桌面通知**（一次性，可在列表中删除）。
 - **本地持久化**：`localStorage` 键 `taskos.desktop.watchlist`、`taskos.desktop.alerts`，**不同步**到 GitHub 任务文件。
 

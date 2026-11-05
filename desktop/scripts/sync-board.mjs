@@ -11,7 +11,14 @@ mkdirSync(dist, { recursive: true });
 for (const name of ["index.html", "favicon.svg"]) {
   copyFileSync(join(repoRoot, name), join(dist, name));
 }
-for (const name of ["taskos-desktop.js", "taskos-desktop.css"]) {
+for (const name of [
+  "market-symbols.js",
+  "taskos-desktop.js",
+  "taskos-desktop.css",
+  "price-bubble.html",
+  "price-bubble.js",
+  "price-bubble.css",
+]) {
   copyFileSync(join(extrasDir, name), join(dist, name));
 }
 
@@ -20,9 +27,15 @@ const marker = "taskos-desktop.js";
 if (!html.includes(marker)) {
   const inject =
     '<link rel="stylesheet" href="taskos-desktop.css">\n' +
+    '<script src="market-symbols.js" defer></script>\n' +
     '<script src="taskos-desktop.js" defer></script>\n';
   html = html.replace("</body>", inject + "</body>");
-  writeFileSync(join(dist, "index.html"), html);
+} else if (!html.includes("market-symbols.js")) {
+  html = html.replace(
+    '<script src="taskos-desktop.js" defer></script>',
+    '<script src="market-symbols.js" defer></script>\n<script src="taskos-desktop.js" defer></script>'
+  );
 }
+writeFileSync(join(dist, "index.html"), html);
 
 console.log("Synced board UI + desktop extras to", dist);

@@ -5,13 +5,15 @@
   var WATCH_KEY = 'taskos.desktop.watchlist';
   var ALERTS_KEY = 'taskos.desktop.alerts';
   var DEFAULT_WATCH = 'BTC,ETH,SOL';
-  var WS_BASE = 'wss://stream.binance.com:9443/stream?streams=';
-  var REST_TICKER = 'https://api.binance.com/api/v3/ticker/price?symbol=';
+  var Q = window.TaskOsQuotes;
+  if (!Q) return;
+  var POLL_MS = 3 * 60 * 1000;
 
-  var ws = null;
-  var wsGen = 0;
+  var pollTimer = null;
+  var pollGen = 0;
   var prices = Object.create(null);
   var prevPrices = Object.create(null);
+  var lastPollAt = null;
 
   function invoke(cmd, payload) {
     return window.__TAURI__.core.invoke(cmd, payload || {});
@@ -20,7 +22,11 @@
   function loadWatchlist() {
     try {
       var s = localStorage.getItem(WATCH_KEY);
-      if (s != null && String(s).trim()) return String(s).trim();
+      if (s != null && String(s).trim()) {
+        s = String(s).trim();
+        if (s === 'BTC,ETH,SOL' || s === 'BTC,ETH,QQQ,SOL') return DEFAULT_WATCH;
+        return s;
+      }
     } catch (e) {}
     return DEFAULT_WATCH;
   }
@@ -30,18 +36,11 @@
   }
 
   function parseSymbols(csv) {
-    return String(csv || '')
-      .split(/[,，\s]+/)
-      .map(function (x) { return x.trim().toUpperCase(); })
-      .filter(Boolean)
-      .map(function (sym) {
-        if (sym.endsWith('USDT')) return sym;
-        return sym + 'USDT';
-      });
+    return Q.parseSymbols(csv);
   }
 
   function displaySym(pair) {
-    return pair.replace(/USDT$/i, '');
+    return Q.displaySym(pair);
   }
 
   function loadAlerts() {
@@ -67,6 +66,13 @@
     if (x >= 1000) return x.toLocaleString(undefined, { maximumFractionDigits: 2 });
     if (x >= 1) return x.toLocaleString(undefined, { maximumFractionDigits: 4 });
     return x.toLocaleString(undefined, { maximumFractionDigits: 6 });
+  }
+
+  function fmtTime(d) {
+    if (!d) return '';
+    try {
+      return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return ''; }
   }
 
   function notifyAlert(sym, price, target, op) {
@@ -99,6 +105,21 @@
     renderAlertsList();
   }
 
+  function applyPrice(pair, close) {
+    if (prices[pair] != null) prevPrices[pair] = prices[pair];
+    prices[pair] = parseFloat(close);
+    checkAlerts(pair, close);
+  }
+
+  function priceChipHtml(pair) {
+    var p = prices[pair];
+    var prev = prevPrices[pair];
+    var cls = '';
+    if (p != null && prev != null) cls = p >= prev ? 'up' : 'down';
+    var text = p != null ? fmtPrice(p) : '…';
+    return '<span class="tc-chip"><b>' + displaySym(pair) + '</b> <span class="' + cls + '">' + text + '</span></span>';
+  }
+
   function renderPrices() {
     var el = document.getElementById('tcPrices');
     if (!el) return;
@@ -107,98 +128,64 @@
       el.innerHTML = '<span class="tc-status">未设置关注列表</span>';
       return;
     }
-    el.innerHTML = syms.map(function (pair) {
-      var p = prices[pair];
-      var prev = prevPrices[pair];
-      var cls = '';
-      if (p != null && prev != null) cls = p >= prev ? 'up' : 'down';
-      var text = p != null ? fmtPrice(p) : '…';
-      return '<span class="tc-chip"><b>' + displaySym(pair) + '</b> <span class="' + cls + '">' + text + '</span></span>';
-    }).join('');
+    el.innerHTML = syms.map(priceChipHtml).join('');
+    if (el._markScrollable) el._markScrollable();
   }
 
-  function setStatus(msg) {
-    var el = document.getElementById('tcWsStatus');
-    if (el) el.textContent = msg;
-  }
-
-  function closeWs() {
-    if (ws) {
-      try { ws.close(); } catch (e) {}
-      ws = null;
-    }
-  }
-
-  function connectWs() {
-    var gen = ++wsGen;
-    closeWs();
-    var syms = parseSymbols(loadWatchlist());
-    if (!syms.length) {
-      setStatus('无交易对');
-      renderPrices();
-      return;
-    }
-    setStatus('连接 Binance…');
-    var streams = syms.map(function (s) { return s.toLowerCase() + '@miniTicker'; }).join('/');
-    try {
-      ws = new WebSocket(WS_BASE + streams);
-    } catch (e) {
-      setStatus('WebSocket 不可用');
-      fallbackRest(syms);
-      return;
-    }
-    ws.onopen = function () {
-      if (gen !== wsGen) return;
-      setStatus('实时 · Binance');
-    };
-    ws.onmessage = function (ev) {
-      if (gen !== wsGen) return;
-      try {
-        var msg = JSON.parse(ev.data);
-        var d = msg.data || msg;
-        var pair = (d.s || '').toUpperCase();
-        var close = d.c;
-        if (pair && close != null) {
-          if (prices[pair] != null) prevPrices[pair] = prices[pair];
-          prices[pair] = parseFloat(close);
-          checkAlerts(pair, close);
-          renderPrices();
-        }
-      } catch (e) {}
-    };
-    ws.onerror = function () {
-      if (gen !== wsGen) return;
-      setStatus('连接异常，改用 REST 轮询');
-      fallbackRest(syms);
-    };
-    ws.onclose = function () {
-      if (gen !== wsGen) return;
-      setStatus('已断开，5 秒后重连…');
-      setTimeout(function () { if (gen === wsGen) connectWs(); }, 5000);
-    };
+  function renderAllPrices() {
     renderPrices();
   }
 
-  var restTimer = null;
-  function fallbackRest(syms) {
-    wsGen++;
-    closeWs();
-    if (restTimer) clearInterval(restTimer);
-    function poll() {
-      syms.forEach(function (pair) {
-        fetch(REST_TICKER + pair, { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
-          if (!j || !j.symbol) return;
-          var close = j.price;
-          if (prices[j.symbol] != null) prevPrices[j.symbol] = prices[j.symbol];
-          prices[j.symbol] = parseFloat(close);
-          checkAlerts(j.symbol, close);
-          renderPrices();
-        }).catch(function () {});
-      });
+  function setStatus() {}
+
+  function stopPolling() {
+    pollGen++;
+    if (pollTimer) {
+      clearInterval(pollTimer);
+      pollTimer = null;
     }
-    poll();
-    restTimer = setInterval(poll, 15000);
-    setStatus('REST 轮询 · Binance');
+  }
+
+  function pollOnce(syms, gen) {
+    if (!syms.length) return Promise.resolve();
+    setStatus('拉取行情…');
+    return Promise.all(syms.map(function (pair) {
+      return Q.fetchExchangePrice(pair)
+        .then(function (p) { applyPrice(pair, p); })
+        .catch(function () {});
+    }))
+      .then(function () {
+        if (gen !== pollGen) return;
+        var missing = syms.filter(function (p) { return prices[p] == null; });
+        if (!missing.length) return;
+        return Q.fetchCoinGeckoPrices(missing)
+          .then(function (map) {
+            missing.forEach(function (pair) {
+              if (map[pair] != null) applyPrice(pair, map[pair]);
+            });
+          })
+          .catch(function () {});
+      })
+      .then(function () {
+        if (gen !== pollGen) return;
+        lastPollAt = new Date();
+        renderAllPrices();
+      });
+  }
+
+  function startPolling() {
+    stopPolling();
+    var gen = pollGen;
+    var syms = parseSymbols(loadWatchlist());
+    if (!syms.length) {
+      setStatus('无交易对');
+      renderAllPrices();
+      return;
+    }
+    pollOnce(syms, gen);
+    pollTimer = setInterval(function () {
+      pollOnce(parseSymbols(loadWatchlist()), gen);
+    }, POLL_MS);
   }
 
   function renderAlertsList() {
@@ -224,6 +211,49 @@
     });
   }
 
+  function setupPricesDragScroll(el) {
+    if (!el) return;
+    var dragging = false;
+    var startY = 0;
+    var startScroll = 0;
+
+    function canScroll() {
+      return el.scrollHeight > el.clientHeight + 1;
+    }
+
+    function markScrollable() {
+      el.classList.toggle('tc-scrollable', canScroll());
+    }
+
+    markScrollable();
+    el._markScrollable = markScrollable;
+    if (typeof ResizeObserver !== 'undefined') {
+      var ro = new ResizeObserver(markScrollable);
+      ro.observe(el);
+    }
+
+    el.addEventListener('mousedown', function (e) {
+      if (e.button !== 0 || !canScroll()) return;
+      dragging = true;
+      startY = e.clientY;
+      startScroll = el.scrollTop;
+      el.classList.add('tc-scroll-drag');
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      var dy = e.clientY - startY;
+      el.scrollTop = Math.max(0, Math.min(el.scrollHeight - el.clientHeight, startScroll + dy));
+    });
+
+    window.addEventListener('mouseup', function () {
+      if (!dragging) return;
+      dragging = false;
+      el.classList.remove('tc-scroll-drag');
+    });
+  }
+
   function buildUi() {
     var header = document.querySelector('header');
     if (!header || document.getElementById('taskosCryptoBar')) return;
@@ -233,8 +263,10 @@
     bar.innerHTML =
       '<span class="tc-label">行情</span>' +
       '<div class="tc-prices" id="tcPrices"></div>' +
-      '<span class="tc-status" id="tcWsStatus"></span>' +
-      '<button type="button" id="tcTogglePanel">关注 / 提醒</button>';
+      '<div class="tc-bar-actions">' +
+      '<button type="button" id="tcShowBubble">行情气泡</button>' +
+      '<button type="button" id="tcTogglePanel">关注 / 提醒</button>' +
+      '</div>';
 
     var panel = document.createElement('div');
     panel.id = 'taskosCryptoPanel';
@@ -252,20 +284,26 @@
       '<button type="button" id="tcAddAlert">添加提醒</button>' +
       '</div>' +
       '<div class="tc-alerts"><ul id="tcAlertsList"></ul></div>' +
-      '<p class="tc-note">数据来源：Binance 公开行情（无需 API Key）。提醒与关注列表仅保存在本机，不同步到 GitHub 任务仓库。</p>';
+      '<p class="tc-note">币种：Binance 现货→合约→Gate→CoinGecko。UAI 等新币 Binance 现货可能未上，会走合约/Gate。QQQ 等为美股 ETF，Binance 无 QQQUSDT，最后走东方财富。每 3 分钟刷新。</p>';
 
     header.insertAdjacentElement('afterend', panel);
     header.insertAdjacentElement('afterend', bar);
 
     var watchInput = document.getElementById('tcWatchInput');
     watchInput.value = loadWatchlist();
+    setupPricesDragScroll(document.getElementById('tcPrices'));
 
+    document.getElementById('tcShowBubble').addEventListener('click', function () {
+      invoke('focus_price_bubble').catch(function () {
+        alert('无法打开行情悬浮窗，请重启桌面版后再试。');
+      });
+    });
     document.getElementById('tcTogglePanel').addEventListener('click', function () {
       panel.classList.toggle('open');
     });
     document.getElementById('tcSaveWatch').addEventListener('click', function () {
       saveWatchlist(watchInput.value.trim() || DEFAULT_WATCH);
-      connectWs();
+      startPolling();
     });
     document.getElementById('tcAddAlert').addEventListener('click', function () {
       var sym = document.getElementById('tcAlertSym').value.trim() || 'BTC';
@@ -283,7 +321,7 @@
     });
 
     renderAlertsList();
-    connectWs();
+    startPolling();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildUi);
