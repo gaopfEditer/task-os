@@ -2,7 +2,7 @@ use keyring::Entry;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
-use tauri::{Listener, Manager, PhysicalPosition, WebviewUrl, WebviewWindow, WebviewWindowBuilder, WindowEvent};
+use tauri::{Manager, PhysicalPosition, WebviewUrl, WebviewWindow, WebviewWindowBuilder, WindowEvent};
 use tauri_utils::config::Color;
 use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_notification::NotificationExt;
@@ -142,14 +142,7 @@ fn show_price_alert(app: tauri::AppHandle, title: String, body: String) -> Resul
 }
 
 fn bubble_url() -> Result<WebviewUrl, String> {
-    if cfg!(debug_assertions) {
-        "http://localhost:1420/price-bubble.html"
-            .parse()
-            .map(WebviewUrl::External)
-            .map_err(|e| e.to_string())
-    } else {
-        Ok(WebviewUrl::App("price-bubble.html".into()))
-    }
+    Ok(WebviewUrl::App("price-bubble.html".into()))
 }
 
 fn place_bubble_bottom_right(

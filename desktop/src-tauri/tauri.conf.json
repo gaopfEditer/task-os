@@ -4,8 +4,7 @@
   "version": "0.1.0",
   "identifier": "com.taskos.desktop",
   "build": {
-    "beforeDevCommand": "npm run dev:web",
-    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "npm run sync-board",
     "beforeBuildCommand": "npm run sync-board",
     "frontendDist": "../dist"
   },

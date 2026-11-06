@@ -22,11 +22,13 @@
 ```bash
 cd desktop
 npm install
-npm run tauri:dev      # 开发：同步根目录 index.html → dist/，本地静态服务 + 桌面窗口
+npm run tauri:dev      # 开发：先 sync-board，再从 desktop/dist 内嵌加载（不依赖 localhost）
 npm run tauri:build    # 发布：产物在 src-tauri/target/release/bundle/
 ```
 
-`npm run sync-board` 会把仓库根的 `index.html`、`favicon.svg` 复制到 `desktop/dist/`（不打包整个仓库，避免把 `tasks/` 等打进安装包）。改根目录看板后重新 dev/build 即可同步。
+`npm run sync-board` 会把仓库根的 `index.html`、`favicon.svg` 及 `board-extras/` 复制到 `desktop/dist/`。**桌面壳默认始终读 `dist/`**，即使未单独启动 `npm run dev:web`，窗口也有内容。改根目录看板后重新 `tauri:dev` / `tauri:build` 即可同步。
+
+可选：另开终端 `npm run dev:web` 在浏览器预览 `http://localhost:1420`（与桌面内嵌页同源内容，非必须）。
 
 ### 自定义图标（可选）
 
