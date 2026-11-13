@@ -197,6 +197,11 @@
   .abody h5.time { border-color: var(--foc); }
   .sugg { font-size: 11px; font-weight: 600; color: #fff; background: var(--orange); border-radius: 4px; padding: 0 5px; margin-right: 4px; }
   .area-editor textarea { width: 100%; min-height: 60vh; resize: vertical; line-height: 1.55; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+  .area-types { margin-top: 0; }
+  .area-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-items: start; }
+  .area-col { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; min-width: 0; }
+  .area-col h3 { margin: 0 0 8px; font-size: 15px; }
+  @media (max-width: 800px) { .area-cols { grid-template-columns: 1fr; } }
   @media (max-width: 700px) { details.area .abody { padding: 0 10px 8px 14px; } .area-editor textarea { min-height: 55vh; } }
   .bot-bar .area-chip i { color: var(--orange); }
   details.bot { background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; }
@@ -451,12 +456,12 @@
 <nav class="tabs">
   <a href="#board" data-tab="board">看板</a>
   <a href="#calendar" data-tab="calendar">日历</a>
-  <a href="#detail" data-tab="detail">明细扩展</a>
-  <a href="#memo" data-tab="memo">备忘清单</a>
   <a href="#areas" data-tab="areas">关注领域</a>
+  <a href="#detail" data-tab="detail">明细扩展</a>
   <a href="#docs" data-tab="docs">文档资源</a>
   <a href="#resources" data-tab="resources">资源</a>
   <a href="#bots" data-tab="bots">Bot</a>
+  <a href="#memo" data-tab="memo">备忘清单</a>
 </nav>
 <main>
   <div id="msg"></div>
@@ -509,6 +514,11 @@
     </div>
   </section>
 
+  <section class="tab" id="tab-areas">
+    <h2 class="pagetitle">关注领域</h2>
+    <div id="areas"><div class="nodata">加载中…</div></div>
+  </section>
+
   <section class="tab" id="tab-detail">
     <h2 class="pagetitle">明细扩展</h2>
     <p class="hint" style="margin:0 0 8px">汇总 <code>daily/</code> 里运营 / 接单 / 海外需求 / 灵感四类小节；勾选「灵感」时也会显示 <code>insights.md</code> 里同一天的长期灵感（只读）。编辑请在「日历」对应日或 GitHub 上改文件。</p>
@@ -516,16 +526,6 @@
     <div id="detTypes" class="dextra-filters"></div>
     <div class="det-range"><span>时间</span><input type="date" id="detFrom" aria-label="开始日期"><span>至</span><input type="date" id="detTo" aria-label="结束日期"><button type="button" id="detMonth">近一个月</button><button type="button" class="primary" id="detApply">应用</button><a href="https://github.com/gaopfEditer/task-os/blob/main/insights.md" target="_blank" rel="noopener" style="font-size:12px;margin-left:auto">insights.md</a></div>
     <div id="detailFeed"><div class="nodata">加载中…</div></div>
-  </section>
-
-  <section class="tab" id="tab-memo">
-    <h2 class="pagetitle">备忘清单：待额度充足时执行</h2>
-    <div id="memo"><div class="nodata">加载中…</div></div>
-  </section>
-
-  <section class="tab" id="tab-areas">
-    <h2 class="pagetitle">关注领域</h2>
-    <div id="areas"><div class="nodata">加载中…</div></div>
   </section>
 
   <section class="tab" id="tab-docs">
@@ -545,6 +545,11 @@
 
   <section class="tab" id="tab-bots">
     <div id="bots"><div class="nodata">加载中…</div></div>
+  </section>
+
+  <section class="tab" id="tab-memo">
+    <h2 class="pagetitle">备忘清单：待额度充足时执行</h2>
+    <div id="memo"><div class="nodata">加载中…</div></div>
   </section>
 
   <footer>
@@ -2284,8 +2289,9 @@
 
   // ---------- 领域: areas.md (one "## " section per area), whole-file editor ----------
   var AREAS_PATH = 'areas.md';
+  var AREAS_TEMPLATE = '行为模板';
   var AREAS_STARTER = '# 领域\n\n## 领域名\n\n### 目标\n\n### 正在做\n\n### 负责 bot / 工具\n\n### 缺口与待优化\n\n### 时间投入（周）\n\n待记录\n';
-  state.areas = { status: '', text: '', sha: null, error: '', edit: null, flash: null, closed: {}, focus: '' };
+  state.areas = { status: '', text: '', sha: null, error: '', edit: null, flash: null, closed: {}, focus: '', type: AREAS_TEMPLATE };
   function parseAreas(text) {   // → { title, intro, areas: [{ name, body, time, gaps }] }
     var lines = String(text || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').split('\n'), out = { title: '', intro: [], areas: [] }, cur = null, fence = false;
     lines.forEach(function (line) {
@@ -2319,13 +2325,63 @@
   }
   function areasEditorActive() { return !!(state.areas.edit && !state.areas.edit.loading && $('areaText')); }
   function hasAreasDraft() { try { return localStorage.getItem(DRAFT_KEY + 'areas') != null; } catch (x) { return false; } }
+  function areaTypeList(p) {
+    var names = [AREAS_TEMPLATE];
+    (p && p.areas || []).forEach(function (a) { if (a.name && names.indexOf(a.name) < 0) names.push(a.name); });
+    return names;
+  }
+  function activeAreaType(p) {
+    var names = areaTypeList(p), t = state.areas.type;
+    if (!t || names.indexOf(t) < 0) t = AREAS_TEMPLATE;
+    state.areas.type = t;
+    return t;
+  }
+  function splitAreaColumns(body) {
+    var lines = String(body || '').replace(/\r\n?/g, '\n').split('\n'), pre = [], cols = [], cur = null;
+    lines.forEach(function (line) {
+      var m = /^###\s+(.*)$/.exec(line);
+      if (m) { cur = { title: m[1].replace(/\s*#+\s*$/, '').trim(), lines: [] }; cols.push(cur); return; }
+      (cur ? cur.lines : pre).push(line);
+    });
+    return {
+      pre: pre.join('\n').trim(),
+      cols: cols.map(function (c) { return { title: c.title, body: c.lines.join('\n').replace(/^\n+|\s+$/g, '') }; })
+    };
+  }
+  function areaTemplateHtml(body) {
+    var parts = splitAreaColumns(body), h = '';
+    if (parts.pre) h += '<div class="areas-intro md">' + areasHtml(parts.pre) + '</div>';
+    if (!parts.cols.length) {
+      h += '<div class="panel"><div class="md">' + (String(body || '').trim() ? areasHtml(body) : '<div class="none">（空）</div>') + '</div></div>';
+      return h;
+    }
+    h += '<div class="area-cols">';
+    parts.cols.forEach(function (c) {
+      h += '<section class="area-col"><h3>' + esc(c.title) + '</h3><div class="md">' + (c.body ? areasHtml(c.body) : '<div class="none">（空）</div>') + '</div></section>';
+    });
+    h += '</div>';
+    return h;
+  }
+  function areaTypesHtml(p) {
+    var cur = activeAreaType(p), h = '<div class="dextra-filters area-types"><span>类型</span>';
+    areaTypeList(p).forEach(function (name) {
+      var on = name === cur;
+      h += '<button type="button" class="dxf' + (on ? ' on' : ' off') + '" data-atype="' + esc(name) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(name) + '</button>';
+    });
+    return h + '</div>';
+  }
+  function areaCardHtml(a, i, A) {
+    var meta = (a.gaps ? '<span class="ameta gap">待优化 ' + a.gaps + '</span>' : '') + (a.time ? '<span class="ameta">时间投入：' + esc(a.time) + '</span>' : '');
+    return '<details class="area" id="area-' + i + '"' + (A.closed[a.name] ? '' : ' open') + ' data-name="' + esc(a.name) + '"><summary><b>' + esc(a.name) + '</b>' + meta + '</summary>' +
+      '<div class="abody md">' + (a.body ? areasHtml(a.body) : '<div class="none">（空）</div>') + '</div></details>';
+  }
   function renderAreas() {
     var A = state.areas, el = $('areas'), e = A.edit, h = '';
     if (A.status === 'loading' || A.status === '') { el.innerHTML = '<div class="nodata">正在读取 areas.md…</div>'; return; }
     var p = parseAreas(A.text);
-    h += '<div class="area-bar">';
-    if (!e) p.areas.forEach(function (a, i) { h += '<button type="button" class="area-chip" data-area="' + i + '">' + esc(a.name) + (a.time ? '<i>' + esc(a.time) + '</i>' : '') + '</button>'; });
-    h += '<span class="spacer"></span>';
+    if (A.focus && !e) A.type = A.focus;
+    if (!e) h += areaTypesHtml(p);
+    h += '<div class="area-bar"><span class="spacer"></span>';
     if (!e) h += '<button type="button" class="primary" data-aact="edit">编辑</button>' + tokenHint();
     if (A.status === 'ok' || A.edit) h += '<a href="' + esc(fileUrl(AREAS_PATH)) + '" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 areas.md</a>';
     h += '</div>';
@@ -2334,7 +2390,7 @@
     if (e) {
       if (e.loading) h += '<div class="nodata">正在读取最新版本…</div>';
       else {
-        h += '<div class="panel area-editor"><div class="hint">整个 areas.md 一起编辑：每个 <code>## </code> 是一个领域，下面用 <code>### 目标</code> / <code>### 正在做</code> / <code>### 负责 bot / 工具</code> / <code>### 缺口与待优化</code> / <code>### 时间投入（周）</code>。内容原样保存。</div>' +
+        h += '<div class="panel area-editor"><div class="hint">整个 areas.md 一起编辑：每个 <code>## </code> 是一个领域，下面用 <code>### 目标</code> / <code>### 正在做</code> / <code>### 负责 bot / 工具</code> / <code>### 缺口与待优化</code> / <code>### 时间投入（周）</code>。「行为模板」用 <code>### 上午</code> / <code>### 午后与间隙</code> / <code>### 晚上</code> 分列。内容原样保存。</div>' +
           '<textarea id="areaText" spellcheck="false">' + esc(e.value) + '</textarea>';
         if (e.status) h += '<div class="msg ' + e.status.kind + '">' + e.status.text + '</div>';
         if (e.remote != null) h += '<details class="remote" open><summary>远端最新内容（' + (e.remote ? '已存在' : '文件不存在') + '）</summary><pre>' + esc(e.remote || '（空）') + '</pre></details>';
@@ -2345,13 +2401,19 @@
       h += '<div class="nodata">仓库里还没有 areas.md。点「编辑」按模板新建：每个 <code>## </code> 一个领域。</div>';
     } else if (A.status === 'ok') {
       if (hasAreasDraft()) h += '<div class="msg info">有未保存的草稿，点「编辑」继续。</div>';
-      if (p.intro) h += '<div class="areas-intro md">' + areasHtml(p.intro) + '</div>';
-      if (!p.areas.length) h += '<div class="nodata">areas.md 里还没有 <code>## </code> 领域小节。</div>';
-      p.areas.forEach(function (a, i) {
-        var meta = (a.gaps ? '<span class="ameta gap">待优化 ' + a.gaps + '</span>' : '') + (a.time ? '<span class="ameta">时间投入：' + esc(a.time) + '</span>' : '');
-        h += '<details class="area" id="area-' + i + '"' + (A.closed[a.name] ? '' : ' open') + ' data-name="' + esc(a.name) + '"><summary><b>' + esc(a.name) + '</b>' + meta + '</summary>' +
-          '<div class="abody md">' + (a.body ? areasHtml(a.body) : '<div class="none">（空）</div>') + '</div></details>';
-      });
+      var type = activeAreaType(p);
+      if (type === AREAS_TEMPLATE) {
+        var tpl = null;
+        p.areas.forEach(function (a) { if (a.name === AREAS_TEMPLATE) tpl = a; });
+        if (!tpl) h += '<div class="nodata">areas.md 里还没有「' + esc(AREAS_TEMPLATE) + '」小节。</div>';
+        else h += areaTemplateHtml(tpl.body);
+      } else {
+        if (p.intro) h += '<div class="areas-intro md">' + areasHtml(p.intro) + '</div>';
+        var shown = null, idx = -1;
+        p.areas.forEach(function (a, i) { if (a.name === type) { shown = a; idx = i; } });
+        if (!shown) h += '<div class="nodata">没有这个领域。</div>';
+        else h += areaCardHtml(shown, idx, A);
+      }
     }
     el.innerHTML = h;
     if (A.focus && !e && A.status !== 'loading') {   // opened from a Bot card's area chip
@@ -2512,7 +2574,7 @@
   }
   function botAreaNames() {
     var A = state.areas, extra = [];
-    if (A.status === 'ok' && A.text) extra = parseAreas(A.text).areas.map(function (a) { return a.name; }).filter(function (n) { return !/分工/.test(n); });
+    if (A.status === 'ok' && A.text) extra = parseAreas(A.text).areas.map(function (a) { return a.name; }).filter(function (n) { return n !== AREAS_TEMPLATE && !/分工/.test(n); });
     return BOT_AREAS.concat(extra.filter(function (n) { return BOT_AREAS.indexOf(n) < 0; }));
   }
   function botTodoHtml(html) { return html.replace(/(^|>)([^<]+)/g, function (m, a, t) { return a + t.replace(/待补充/g, '<mark class="todo">待补充</mark>'); }); }
@@ -3601,6 +3663,7 @@
     if (dayNeedsLoad(ds)) loadDay(ds).then(function () { if (state.selected === ds) calRedraw(); });
   }
   function applyHash() {
+    var prevTab = state.tab;
     var h = decodeURIComponent(location.hash.replace(/^#/, '')), parts = h.split('/');
     if (parts[0] === 'history') {   // the 历史 tab is gone: old links open the calendar (on that day if given)
       parts = ['calendar', parseYmd(parts[1]) ? parts[1] : ''];
@@ -3614,7 +3677,12 @@
     setTab(tab);
     if (tab === 'board') renderBoardTab();
     if (tab === 'calendar') selectDay(parseYmd(parts[1]) ? parts[1] : (state.selected || todayStr()), true);
-    if (tab === 'areas') { if (!areasEditorActive()) renderAreas(); loadAreas(); }
+    if (tab === 'areas') {
+      if (state.areas.focus) state.areas.type = state.areas.focus;
+      else if (prevTab !== 'areas') state.areas.type = AREAS_TEMPLATE;
+      if (!areasEditorActive()) renderAreas();
+      loadAreas();
+    }
     if (tab === 'memo') { if (!memoEditorActive()) renderMemo(); loadMemo(); }
     if (tab === 'detail') { renderDetailFeed(); loadDetailFeed(); }
     if (tab === 'docs') {
@@ -3841,7 +3909,12 @@
   });
   $('memo').addEventListener('toggle', function (ev) { var d = ev.target; if (d.classList && d.classList.contains('area')) state.memo.closed[d.getAttribute('data-name')] = !d.open; }, true);
   $('areas').addEventListener('click', function (ev) {
-    var b = ev.target.closest('[data-aact],[data-area],[data-act="settings"]'); if (!b) return;
+    var b = ev.target.closest('[data-aact],[data-area],[data-atype],[data-act="settings"]'); if (!b) return;
+    if (b.hasAttribute('data-atype')) {
+      var typeName = b.getAttribute('data-atype');
+      if (typeName) { state.areas.type = typeName; state.areas.focus = ''; renderAreas(); }
+      return;
+    }
     if (b.hasAttribute('data-area')) { var d = $('area-' + b.getAttribute('data-area')); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
     if (b.getAttribute('data-act') === 'settings') { state.pendingSave = false; openSettings(); return; }
     var act = b.getAttribute('data-aact'), A = state.areas;
@@ -3853,7 +3926,17 @@
   $('bots').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-bact],[data-bot],[data-goarea],[data-act="settings"]'); if (!b) return;
     if (b.hasAttribute('data-bot')) { var d = $('bot-' + b.getAttribute('data-bot')); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
-    if (b.hasAttribute('data-goarea')) { ev.preventDefault(); state.areas.focus = b.getAttribute('data-goarea'); location.hash = '#areas'; return; }
+    if (b.hasAttribute('data-goarea')) {
+      ev.preventDefault();
+      var areaName = b.getAttribute('data-goarea');
+      state.areas.focus = areaName;
+      state.areas.type = areaName;
+      if (decodeURIComponent(location.hash.replace(/^#/, '')) === 'areas') {
+        if (!areasEditorActive()) renderAreas();
+        loadAreas();
+      } else location.hash = '#areas';
+      return;
+    }
     if (b.getAttribute('data-act') === 'settings') { state.pendingSave = false; openSettings(); return; }
     var act = b.getAttribute('data-bact'), B = state.bots;
     if (act === 'edit') startBotsEdit();
