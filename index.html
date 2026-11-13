@@ -202,6 +202,45 @@
   .area-col { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; min-width: 0; }
   .area-col h3 { margin: 0 0 8px; font-size: 15px; }
   @media (max-width: 800px) { .area-cols { grid-template-columns: 1fr; } }
+  .ann-layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 14px; align-items: start; }
+  .ann-main { min-width: 0; }
+  .ann-rail { position: sticky; top: 48px; max-height: calc(100vh - 64px); overflow: auto; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+  .ann-rail h3 { margin: 0 0 8px; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+  .ann-rail h3 .ann-count { font-size: 12px; color: var(--faint); font-weight: 500; }
+  .ann-scope { display: flex; gap: 6px; margin: 0 0 8px; }
+  .ann-scope button.on { background: #24292f; color: #fff; border-color: #24292f; }
+  .ann-card { border: 1px solid var(--line); border-left: 3px solid #f0b429; border-radius: 8px; padding: 8px 8px 6px; margin: 0 0 8px; background: #fffdf6; }
+  .ann-card.active { border-color: #e6a700; box-shadow: 0 0 0 1px #f0b429; }
+  .ann-card.resolved { border-left-color: var(--border); background: #f6f8fa; }
+  .ann-quote { display: block; width: 100%; text-align: left; background: none; border: none; padding: 0; color: var(--muted); font-size: 12px; cursor: pointer; }
+  .ann-quote:hover { color: var(--text); background: none; }
+  .ann-meta { font-size: 11px; color: var(--faint); margin: 2px 0 4px; }
+  .ann-text { font-size: 13px; white-space: pre-wrap; word-break: break-word; }
+  .ann-replies { margin-top: 6px; padding-top: 4px; border-top: 1px dashed var(--line); }
+  .ann-replyline { display: flex; gap: 6px; align-items: flex-start; margin-top: 6px; }
+  .ann-replyline .ann-meta { margin: 0; }
+  .ann-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .ann-actions button, .ann-scope button, .ann-replyline button { font-size: 12px; padding: 2px 8px; }
+  .ann-compose textarea { width: 100%; min-height: 56px; resize: vertical; margin-top: 6px; }
+  .ann-compose-actions { display: flex; justify-content: flex-end; margin-top: 6px; }
+  .ann-orphan { font-size: 11px; color: var(--orange); margin-bottom: 4px; }
+  .ann-done { margin-top: 8px; }
+  .ann-done > summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+  .ann-hint { font-size: 12px; color: var(--muted); margin: 0 0 8px; }
+  mark.ann { background: #fff1a8; color: inherit; border-radius: 2px; padding: 0 1px; cursor: pointer; }
+  mark.ann.active { background: #ffd56a; box-shadow: 0 0 0 1px #e6a700; }
+  mark.ann.is-resolved { background: #eef1f4; box-shadow: inset 0 -1px 0 #afb8c1; }
+  .ann-pop { position: fixed; z-index: 40; background: #fff; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(31,35,40,.18); padding: 8px; width: 280px; max-width: calc(100vw - 16px); }
+  .ann-pop.mini { width: auto; padding: 4px; }
+  .ann-pop[hidden], .ann-pop [hidden] { display: none !important; }
+  .ann-pop-quote { font-size: 12px; color: var(--muted); border-left: 3px solid #f0b429; padding-left: 8px; margin-bottom: 6px; max-height: 4.6em; overflow: hidden; white-space: pre-wrap; }
+  .ann-pop textarea { width: 100%; min-height: 72px; resize: vertical; }
+  .ann-pop-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 6px; }
+  .ann-pop-err { color: var(--red); font-size: 12px; margin-top: 4px; }
+  @media (max-width: 1100px) {
+    .ann-layout { grid-template-columns: minmax(0, 1fr); }
+    .ann-rail { position: static; max-height: none; }
+  }
   @media (max-width: 700px) { details.area .abody { padding: 0 10px 8px 14px; } .area-editor textarea { min-height: 55vh; } }
   .bot-bar .area-chip i { color: var(--orange); }
   details.bot { background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; }
@@ -456,7 +495,8 @@
 <nav class="tabs">
   <a href="#board" data-tab="board">看板</a>
   <a href="#calendar" data-tab="calendar">日历</a>
-  <a href="#areas" data-tab="areas">关注领域</a>
+  <a href="#behavior" data-tab="behavior">行为模板</a>
+  <a href="#areas" data-tab="areas">实践思路</a>
   <a href="#detail" data-tab="detail">明细扩展</a>
   <a href="#docs" data-tab="docs">文档资源</a>
   <a href="#resources" data-tab="resources">资源</a>
@@ -514,8 +554,13 @@
     </div>
   </section>
 
+  <section class="tab" id="tab-behavior">
+    <h2 class="pagetitle">行为模板</h2>
+    <div id="behavior"><div class="nodata">加载中…</div></div>
+  </section>
+
   <section class="tab" id="tab-areas">
-    <h2 class="pagetitle">关注领域</h2>
+    <h2 class="pagetitle">实践思路</h2>
     <div id="areas"><div class="nodata">加载中…</div></div>
   </section>
 
@@ -553,10 +598,19 @@
   </section>
 
   <footer>
-    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>areas.md</code>、<code>memo.md</code>、<code>insights.md</code>、<code>bots.md</code>、只读的 <code>docs/</code>（专题文档），以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
+    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>behavior.md</code>、<code>areas.md</code>、<code>annotations.json</code>、<code>memo.md</code>、<code>insights.md</code>、<code>bots.md</code>、只读的 <code>docs/</code>（专题文档），以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
   </footer>
 </main>
 <div id="dayPop" class="daypop" role="dialog" hidden></div>
+<div id="annPop" class="ann-pop mini" hidden>
+  <button type="button" id="annPopBtn">批注</button>
+  <div id="annPopBox" hidden>
+    <div class="ann-pop-quote" id="annPopQuote"></div>
+    <textarea id="annPopText" placeholder="写下批注"></textarea>
+    <div class="ann-pop-actions"><button type="button" class="primary" id="annPopSend">发送</button><button type="button" id="annPopCancel">取消</button></div>
+    <div class="ann-pop-err" id="annPopErr"></div>
+  </div>
+</div>
 
 <dialog id="settings">
   <h3>设置：GitHub 令牌</h3>
@@ -779,6 +833,7 @@
     if (state.edit && state.edit.date === state.selected) setEditStatus('error', esc(text));
     if (state.pedit && !state.pedit.loading) setPStatus(state.pedit, 'error', esc(text));
     if (state.areas.edit) { state.areas.edit.status = { kind: 'error', text: esc(text) }; renderAreas(); }
+    if (state.behavior && state.behavior.edit) { state.behavior.edit.status = { kind: 'error', text: esc(text) }; renderBehavior(); }
     if (state.bots.edit) { state.bots.edit.status = { kind: 'error', text: esc(text) }; renderBots(); }
     if (state.memo.edit) { state.memo.edit.status = { kind: 'error', text: esc(text) }; renderMemo(); }
   }
@@ -797,8 +852,10 @@
     if (resume === 'period') savePeriod();
     else if (resume === 'monthMain') saveMonthMain();
     else if (resume === 'areas') saveAreas();
+    else if (resume === 'behavior') saveBehavior();
     else if (resume === 'bots') saveBots();
     else if (resume === 'memo') saveMemo();
+    else if (resume === 'ann') saveAnn();
     else if (resume) saveEdit();
     else refreshTokenHints();
   }
@@ -2287,11 +2344,30 @@
 
 
 
-  // ---------- 领域: areas.md (one "## " section per area), whole-file editor ----------
+  // ---------- 实践思路 areas.md / 行为模板 behavior.md（各自的类型芯片只作用于当前页）----------
+  var AREA_TYPES = ['Web3 信号和单子', 'Web3 运营', '软件开发和海外需求', '成长', '系统与 bot 分工'];
+  var BEHAVIOR_DEFAULT = AREA_TYPES[0];
   var AREAS_PATH = 'areas.md';
-  var AREAS_TEMPLATE = '行为模板';
+  var BEHAVIOR_PATH = 'behavior.md';
   var AREAS_STARTER = '# 领域\n\n## 领域名\n\n### 目标\n\n### 正在做\n\n### 负责 bot / 工具\n\n### 缺口与待优化\n\n### 时间投入（周）\n\n待记录\n';
-  state.areas = { status: '', text: '', sha: null, error: '', edit: null, flash: null, closed: {}, focus: '', type: AREAS_TEMPLATE };
+  var BEHAVIOR_STARTER = '# 行为模板\n\n## Web3 信号和单子\n\n### 上午\n\n### 午后与间隙\n\n### 晚上\n\n## Web3 运营\n\n## 软件开发和海外需求\n\n## 成长\n\n## 系统与 bot 分工\n';
+  state.areas = { status: '', text: '', sha: null, error: '', edit: null, flash: null, closed: {}, focus: '', type: '' };
+  state.behavior = { status: '', text: '', sha: null, error: '', edit: null, flash: null, closed: {}, focus: '', type: BEHAVIOR_DEFAULT };
+  var SHEETS = {
+    areas: {
+      key: 'areas', path: AREAS_PATH, el: 'areas', textId: 'areaText', starter: AREAS_STARTER, mode: 'practice',
+      hint: '整个 areas.md 一起编辑：每个 <code>## </code> 是一个领域，下面用 <code>### 目标</code> / <code>### 正在做</code> / <code>### 负责 bot / 工具</code> / <code>### 缺口与待优化</code> / <code>### 时间投入（周）</code>。内容原样保存。',
+      missing: '仓库里还没有 areas.md。点「编辑」按模板新建：每个 <code>## </code> 一个领域。',
+      commit: function (e) { return '领域：' + (e.sha ? '更新' : '新建') + ' areas.md'; }
+    },
+    behavior: {
+      key: 'behavior', path: BEHAVIOR_PATH, el: 'behavior', textId: 'behaviorText', starter: BEHAVIOR_STARTER, mode: 'behavior',
+      hint: '整个 behavior.md 一起编辑：每个 <code>## </code> 与实践思路的领域同名。<code>### 上午</code> / <code>### 午后与间隙</code> / <code>### 晚上</code> 会分成三列。内容原样保存。',
+      missing: '仓库里还没有 behavior.md。点「编辑」按模板新建：每个 <code>## </code> 一个领域。',
+      commit: function (e) { return '行为模板：' + (e.sha ? '更新' : '新建') + ' behavior.md'; }
+    }
+  };
+  function sheetState(sh) { return state[sh.key]; }
   function parseAreas(text) {   // → { title, intro, areas: [{ name, body, time, gaps }] }
     var lines = String(text || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').split('\n'), out = { title: '', intro: [], areas: [] }, cur = null, fence = false;
     lines.forEach(function (line) {
@@ -2314,27 +2390,6 @@
   function areasHtml(md) {
     return renderMd(md).replace(/<strong>建议<\/strong>/g, '<span class="sugg">建议</span>')
       .replace(/<h5>(缺口[^<]*)<\/h5>/g, '<h5 class="gaps">$1</h5>').replace(/<h5>(时间投入[^<]*)<\/h5>/g, '<h5 class="time">$1</h5>');
-  }
-  function loadAreas(force) {
-    var A = state.areas;
-    if (!force && (A.status === 'ok' || A.status === 'missing' || A.status === 'loading')) return Promise.resolve();
-    A.status = 'loading';
-    return loadFile(AREAS_PATH).then(function (res) { A.text = res.text; A.status = 'ok'; A.error = ''; }, function (e) {
-      if (e.status === 404) { A.text = ''; A.status = 'missing'; A.error = ''; } else { A.status = 'error'; A.error = e.message; }
-    }).then(function () { if (state.tab === 'areas' && !areasEditorActive()) renderAreas(); });
-  }
-  function areasEditorActive() { return !!(state.areas.edit && !state.areas.edit.loading && $('areaText')); }
-  function hasAreasDraft() { try { return localStorage.getItem(DRAFT_KEY + 'areas') != null; } catch (x) { return false; } }
-  function areaTypeList(p) {
-    var names = [AREAS_TEMPLATE];
-    (p && p.areas || []).forEach(function (a) { if (a.name && names.indexOf(a.name) < 0) names.push(a.name); });
-    return names;
-  }
-  function activeAreaType(p) {
-    var names = areaTypeList(p), t = state.areas.type;
-    if (!t || names.indexOf(t) < 0) t = AREAS_TEMPLATE;
-    state.areas.type = t;
-    return t;
   }
   function splitAreaColumns(body) {
     var lines = String(body || '').replace(/\r\n?/g, '\n').split('\n'), pre = [], cols = [], cur = null;
@@ -2362,129 +2417,706 @@
     h += '</div>';
     return h;
   }
-  function areaTypesHtml(p) {
-    var cur = activeAreaType(p), h = '<div class="dextra-filters area-types"><span>类型</span>';
-    areaTypeList(p).forEach(function (name) {
-      var on = name === cur;
-      h += '<button type="button" class="dxf' + (on ? ' on' : ' off') + '" data-atype="' + esc(name) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(name) + '</button>';
-    });
-    return h + '</div>';
-  }
   function areaCardHtml(a, i, A) {
     var meta = (a.gaps ? '<span class="ameta gap">待优化 ' + a.gaps + '</span>' : '') + (a.time ? '<span class="ameta">时间投入：' + esc(a.time) + '</span>' : '');
     return '<details class="area" id="area-' + i + '"' + (A.closed[a.name] ? '' : ' open') + ' data-name="' + esc(a.name) + '"><summary><b>' + esc(a.name) + '</b>' + meta + '</summary>' +
       '<div class="abody md">' + (a.body ? areasHtml(a.body) : '<div class="none">（空）</div>') + '</div></details>';
   }
-  function renderAreas() {
-    var A = state.areas, el = $('areas'), e = A.edit, h = '';
-    if (A.status === 'loading' || A.status === '') { el.innerHTML = '<div class="nodata">正在读取 areas.md…</div>'; return; }
-    var p = parseAreas(A.text);
-    if (A.focus && !e) A.type = A.focus;
-    if (!e) h += areaTypesHtml(p);
+  function sheetTypeNames(sh, p) {
+    if (sh.mode === 'behavior') return AREA_TYPES.slice();
+    var names = [];
+    (p && p.areas || []).forEach(function (a) { if (a.name && a.name !== '行为模板' && names.indexOf(a.name) < 0) names.push(a.name); });
+    return names;
+  }
+  function sheetActiveType(sh, p) {
+    var S = sheetState(sh), names = sheetTypeNames(sh, p), t = S.type;
+    var fallback = sh.mode === 'behavior' ? BEHAVIOR_DEFAULT : (names[0] || '');
+    if (!t || names.indexOf(t) < 0) t = names.indexOf(fallback) >= 0 ? fallback : (names[0] || '');
+    S.type = t;
+    return t;
+  }
+  function findSheetArea(p, name) {
+    var found = null;
+    (p.areas || []).forEach(function (a) { if (a.name === name) found = a; });
+    return found;
+  }
+  function behaviorSectionHtml(area) {
+    if (!area || !String(area.body || '').trim()) return '<div class="nodata">这一类还没有内容。</div>';
+    if (splitAreaColumns(area.body).cols.length) return areaTemplateHtml(area.body);
+    return '<div class="panel"><div class="md">' + areasHtml(area.body) + '</div></div>';
+  }
+  function sheetTypesHtml(sh, p) {
+    var cur = sheetActiveType(sh, p), h = '<div class="dextra-filters area-types"><span>类型</span>';
+    sheetTypeNames(sh, p).forEach(function (name) {
+      var on = name === cur;
+      h += '<button type="button" class="dxf' + (on ? ' on' : ' off') + '" data-atype="' + esc(name) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(name) + '</button>';
+    });
+    return h + '</div>';
+  }
+  function sheetEditorActive(sh) {
+    var S = sheetState(sh);
+    return !!(S.edit && !S.edit.loading && $(sh.textId));
+  }
+  function sheetHasDraft(sh) {
+    try { return localStorage.getItem(DRAFT_KEY + sh.key) != null; } catch (x) { return false; }
+  }
+  function renderSheet(sh) {
+    var S = sheetState(sh), el = $(sh.el), e = S.edit, h = '';
+    if (!el) return;
+    if (S.status === 'loading' || S.status === '') { el.innerHTML = '<div class="nodata">正在读取 ' + esc(sh.path) + '…</div>'; hideAnnPop(); return; }
+    var p = parseAreas(S.text);
+    if (S.focus && !e) S.type = S.focus;
+    if (!e) h += sheetTypesHtml(sh, p);
     h += '<div class="area-bar"><span class="spacer"></span>';
     if (!e) h += '<button type="button" class="primary" data-aact="edit">编辑</button>' + tokenHint();
-    if (A.status === 'ok' || A.edit) h += '<a href="' + esc(fileUrl(AREAS_PATH)) + '" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 areas.md</a>';
+    if (S.status === 'ok' || S.edit) h += '<a href="' + esc(fileUrl(sh.path)) + '" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 ' + esc(sh.path) + '</a>';
     h += '</div>';
-    if (A.flash) h += '<div class="msg ' + A.flash.kind + '">' + A.flash.text + '</div>';
-    if (A.status === 'error') h += '<div class="msg error">读取 areas.md 失败：' + esc(A.error) + '</div>';
+    if (S.flash) h += '<div class="msg ' + S.flash.kind + '">' + S.flash.text + '</div>';
+    if (S.status === 'error') h += '<div class="msg error">读取 ' + esc(sh.path) + ' 失败：' + esc(S.error) + '</div>';
     if (e) {
       if (e.loading) h += '<div class="nodata">正在读取最新版本…</div>';
       else {
-        h += '<div class="panel area-editor"><div class="hint">整个 areas.md 一起编辑：每个 <code>## </code> 是一个领域，下面用 <code>### 目标</code> / <code>### 正在做</code> / <code>### 负责 bot / 工具</code> / <code>### 缺口与待优化</code> / <code>### 时间投入（周）</code>。「行为模板」用 <code>### 上午</code> / <code>### 午后与间隙</code> / <code>### 晚上</code> 分列。内容原样保存。</div>' +
-          '<textarea id="areaText" spellcheck="false">' + esc(e.value) + '</textarea>';
+        h += '<div class="panel area-editor"><div class="hint">' + sh.hint + '</div>' +
+          '<textarea id="' + sh.textId + '" spellcheck="false">' + esc(e.value) + '</textarea>';
         if (e.status) h += '<div class="msg ' + e.status.kind + '">' + e.status.text + '</div>';
         if (e.remote != null) h += '<details class="remote" open><summary>远端最新内容（' + (e.remote ? '已存在' : '文件不存在') + '）</summary><pre>' + esc(e.remote || '（空）') + '</pre></details>';
         h += '<div class="actions"><button type="button" class="primary" data-aact="save"' + (e.saving ? ' disabled' : '') + '>' + (e.saving ? '保存中…' : '保存') + '</button>' +
           '<button type="button" data-aact="cancel"' + (e.saving ? ' disabled' : '') + '>取消</button>' + tokenHint() + '</div></div>';
       }
-    } else if (A.status === 'missing') {
-      h += '<div class="nodata">仓库里还没有 areas.md。点「编辑」按模板新建：每个 <code>## </code> 一个领域。</div>';
-    } else if (A.status === 'ok') {
-      if (hasAreasDraft()) h += '<div class="msg info">有未保存的草稿，点「编辑」继续。</div>';
-      var type = activeAreaType(p);
-      if (type === AREAS_TEMPLATE) {
-        var tpl = null;
-        p.areas.forEach(function (a) { if (a.name === AREAS_TEMPLATE) tpl = a; });
-        if (!tpl) h += '<div class="nodata">areas.md 里还没有「' + esc(AREAS_TEMPLATE) + '」小节。</div>';
-        else h += areaTemplateHtml(tpl.body);
+    } else if (S.status === 'missing') {
+      h += '<div class="nodata">' + sh.missing + '</div>';
+    } else if (S.status === 'ok') {
+      if (sheetHasDraft(sh)) h += '<div class="msg info">有未保存的草稿，点「编辑」继续。</div>';
+      var type = sheetActiveType(sh, p);
+      var body = '', ready = false;
+      if (sh.mode === 'behavior') {
+        var area = findSheetArea(p, type);
+        body = behaviorSectionHtml(area);
+        ready = !!(area && String(area.body || '').trim());
       } else {
         if (p.intro) h += '<div class="areas-intro md">' + areasHtml(p.intro) + '</div>';
         var shown = null, idx = -1;
         p.areas.forEach(function (a, i) { if (a.name === type) { shown = a; idx = i; } });
-        if (!shown) h += '<div class="nodata">没有这个领域。</div>';
-        else h += areaCardHtml(shown, idx, A);
+        if (!shown) body = '<div class="nodata">' + (p.areas.length ? '没有这个领域。' : esc(sh.path) + ' 里还没有 <code>## </code> 领域小节。') + '</div>';
+        else { body = areaCardHtml(shown, idx, S); ready = !!(shown.body && String(shown.body).trim()); }
       }
+      h += annFrame(sh.key, type, body, ready);
     }
     el.innerHTML = h;
-    if (A.focus && !e && A.status !== 'loading') {   // opened from a Bot card's area chip
-      var fd = null; el.querySelectorAll('details.area').forEach(function (d) { if (d.getAttribute('data-name') === A.focus) fd = d; });
-      A.focus = '';
-      if (fd) { fd.open = true; A.closed[fd.getAttribute('data-name')] = false; fd.scrollIntoView({ block: 'start' }); }
+    hideAnnPop();
+    if (!e && S.status === 'ok') paintAnn(sh);
+    if (S.focus && !e && S.status !== 'loading') {   // opened from a Bot card's area chip
+      var fd = null; el.querySelectorAll('details.area').forEach(function (d) { if (d.getAttribute('data-name') === S.focus) fd = d; });
+      S.focus = '';
+      if (fd) { fd.open = true; S.closed[fd.getAttribute('data-name')] = false; fd.scrollIntoView({ block: 'start' }); }
     }
-    if (e && !e.loading && $('areaText')) {
-      $('areaText').addEventListener('input', function (ev) { e.value = ev.target.value; try { if (e.value !== e.baseText) localStorage.setItem(DRAFT_KEY + 'areas', e.value); else localStorage.removeItem(DRAFT_KEY + 'areas'); } catch (x) {} });
-      if (e.focus) { e.focus = false; $('areaText').focus(); }
+    if (e && !e.loading && $(sh.textId)) {
+      $(sh.textId).addEventListener('input', function (ev) {
+        e.value = ev.target.value;
+        try { if (e.value !== e.baseText) localStorage.setItem(DRAFT_KEY + sh.key, e.value); else localStorage.removeItem(DRAFT_KEY + sh.key); } catch (x) {}
+      });
+      if (e.focus) { e.focus = false; $(sh.textId).focus(); }
     }
   }
-  function fetchAreasLatest() {
-    return api('GET', repoPath + '/contents/' + AREAS_PATH + '?ref=' + BRANCH).then(function (res) {
+  function loadSheet(sh, force) {
+    var S = sheetState(sh);
+    if (!force && (S.status === 'ok' || S.status === 'missing' || S.status === 'loading')) return Promise.resolve();
+    S.status = 'loading';
+    return loadFile(sh.path).then(function (res) { S.text = res.text; S.status = 'ok'; S.error = ''; }, function (err) {
+      if (err.status === 404) { S.text = ''; S.status = 'missing'; S.error = ''; } else { S.status = 'error'; S.error = err.message; }
+    }).then(function () { if (state.tab === sh.key && !sheetEditorActive(sh)) renderSheet(sh); });
+  }
+  function fetchSheetLatest(sh) {
+    return api('GET', repoPath + '/contents/' + sh.path + '?ref=' + BRANCH).then(function (res) {
       if (res.status === 404) return { sha: null, text: '' };
       if (!res.ok || !res.json) throw new Error(apiErrText(res));
       return { sha: res.json.sha, text: b64ToUtf8(res.json.content) };
     });
   }
-  function startAreasEdit() {
-    var A = state.areas; A.flash = null; A.edit = { loading: true }; renderAreas();
-    fetchAreasLatest().then(function (latest) { return latest; }, function (err) {
+  function startSheetEdit(sh) {
+    var S = sheetState(sh); S.flash = null; S.edit = { loading: true }; renderSheet(sh);
+    fetchSheetLatest(sh).then(function (latest) { return latest; }, function (err) {
       // API unavailable (e.g. rate limit): edit the Pages copy; the save will report a conflict if it is stale
-      return { sha: undefined, text: A.text, warn: err.message };
+      return { sha: undefined, text: S.text, warn: err.message };
     }).then(function (latest) {
-      if (!A.edit || !A.edit.loading) return;
-      if (latest.sha !== undefined && latest.text !== A.text) { A.text = latest.text; A.status = latest.sha ? 'ok' : 'missing'; }
-      var base = latest.sha === null ? '' : latest.text, value = base || AREAS_STARTER, status = null, dr = null;
-      try { dr = localStorage.getItem(DRAFT_KEY + 'areas'); } catch (x) {}
+      if (!S.edit || !S.edit.loading) return;
+      if (latest.sha !== undefined && latest.text !== S.text) { S.text = latest.text; S.status = latest.sha ? 'ok' : 'missing'; }
+      var base = latest.sha === null ? '' : latest.text, value = base || sh.starter, status = null, dr = null;
+      try { dr = localStorage.getItem(DRAFT_KEY + sh.key); } catch (x) {}
       if (dr != null && dr !== base) { value = dr; status = { kind: 'info', text: '已恢复未保存的草稿（还没提交到仓库）。' }; }
       if (latest.warn) status = { kind: 'info', text: '暂时取不到 GitHub 上的最新版本（' + esc(latest.warn) + '），先按页面上的内容编辑。' };
-      A.edit = { value: value, baseText: base, sha: latest.sha === undefined ? null : latest.sha, unknownSha: latest.sha === undefined, status: status, remote: null, saving: false, focus: true };
-      renderAreas();
+      S.edit = { value: value, baseText: base, sha: latest.sha === undefined ? null : latest.sha, unknownSha: latest.sha === undefined, status: status, remote: null, saving: false, focus: true };
+      renderSheet(sh);
     });
   }
-  function saveAreas() {
-    var A = state.areas, e = A.edit; if (!e || e.loading || e.saving) return;
-    var ta = $('areaText'); if (ta) e.value = ta.value;
-    if (!requestTokenForSave('areas', '保存 areas.md 需要 GitHub 令牌，填好后会自动继续保存。')) return;
-    if (e.value === e.baseText) { e.status = { kind: 'info', text: '没有改动。' }; return renderAreas(); }
-    var go = e.unknownSha ? fetchAreasLatest().then(function (l) { e.unknownSha = false; e.sha = l.sha; if (l.text !== e.baseText) { e.baseText = l.text; e.remote = l.text; throw { conflict: true }; } }) : Promise.resolve();
-    e.saving = true; e.status = null; renderAreas();
+  function saveSheet(sh) {
+    var S = sheetState(sh), e = S.edit; if (!e || e.loading || e.saving) return;
+    var ta = $(sh.textId); if (ta) e.value = ta.value;
+    if (!requestTokenForSave(sh.key, '保存 ' + sh.path + ' 需要 GitHub 令牌，填好后会自动继续保存。')) return;
+    if (e.value === e.baseText) { e.status = { kind: 'info', text: '没有改动。' }; return renderSheet(sh); }
+    var go = e.unknownSha ? fetchSheetLatest(sh).then(function (l) { e.unknownSha = false; e.sha = l.sha; if (l.text !== e.baseText) { e.baseText = l.text; e.remote = l.text; throw { conflict: true }; } }) : Promise.resolve();
+    e.saving = true; e.status = null; renderSheet(sh);
     go.then(function () {
-      var body = { message: '领域：' + (e.sha ? '更新' : '新建') + ' areas.md', content: utf8ToB64(e.value), branch: BRANCH };
+      var body = { message: sh.commit(e), content: utf8ToB64(e.value), branch: BRANCH };
       if (e.sha) body.sha = e.sha;
-      return api('PUT', repoPath + '/contents/' + AREAS_PATH, body).then(function (res) {
+      return api('PUT', repoPath + '/contents/' + sh.path, body).then(function (res) {
         e.saving = false;
         if (res.ok && res.json && res.json.content) {
           var commit = res.json.commit && res.json.commit.sha ? res.json.commit.sha : '';
-          A.text = e.value; A.sha = res.json.content.sha; A.status = 'ok'; A.edit = null;
-          try { localStorage.removeItem(DRAFT_KEY + 'areas'); } catch (x) {}
-          A.flash = { kind: 'ok', text: '已保存' + (commit ? '（提交 <a target="_blank" rel="noopener" href="' + esc(REPO + '/commit/' + commit) + '">' + esc(commit.slice(0, 7)) + '</a>）' : '') + '。GitHub Pages 上的文件可能要 1–2 分钟才更新，这里已显示保存后的内容。' };
-          return renderAreas();
+          S.text = e.value; S.sha = res.json.content.sha; S.status = 'ok'; S.edit = null;
+          try { localStorage.removeItem(DRAFT_KEY + sh.key); } catch (x) {}
+          S.flash = { kind: 'ok', text: '已保存' + (commit ? '（提交 <a target="_blank" rel="noopener" href="' + esc(REPO + '/commit/' + commit) + '">' + esc(commit.slice(0, 7)) + '</a>）' : '') + '。GitHub Pages 上的文件可能要 1–2 分钟才更新，这里已显示保存后的内容。' };
+          return renderSheet(sh);
         }
         if (res.status === 409 || res.status === 422) {
-          return fetchAreasLatest().then(function (l) {
-            if (l.sha === e.sha) { e.status = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) }; return renderAreas(); }
-            e.sha = l.sha; e.baseText = l.text; e.remote = l.text; A.text = l.text;
-            e.status = { kind: 'error', text: '保存失败：areas.md 在别处被修改过（版本冲突）。已获取远端最新内容（见下方），你的输入仍保留在输入框里，请对照合并后再点「保存」。' };
-            renderAreas();
+          return fetchSheetLatest(sh).then(function (l) {
+            if (l.sha === e.sha) { e.status = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) }; return renderSheet(sh); }
+            e.sha = l.sha; e.baseText = l.text; e.remote = l.text; S.text = l.text;
+            e.status = { kind: 'error', text: '保存失败：' + esc(sh.path) + ' 在别处被修改过（版本冲突）。已获取远端最新内容（见下方），你的输入仍保留在输入框里，请对照合并后再点「保存」。' };
+            renderSheet(sh);
           });
         }
         e.status = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) + (res.status === 401 ? ' <button type="button" class="link" data-act="settings">打开设置</button>' : '') };
-        renderAreas();
+        renderSheet(sh);
       });
     }).catch(function (err) {
       e.saving = false;
-      e.status = { kind: 'error', text: err && err.conflict ? '保存前发现 areas.md 已在别处更新（见下方远端最新内容），你的输入仍保留，请对照合并后再点「保存」。' : '保存失败：' + esc(err && err.message || String(err)) };
-      renderAreas();
+      e.status = { kind: 'error', text: err && err.conflict ? '保存前发现 ' + esc(sh.path) + ' 已在别处更新（见下方远端最新内容），你的输入仍保留，请对照合并后再点「保存」。' : '保存失败：' + esc(err && err.message || String(err)) };
+      renderSheet(sh);
     });
   }
+  function bindSheet(sh) {
+    var el = $(sh.el); if (!el) return;
+    el.addEventListener('click', function (ev) {
+      var b = ev.target.closest('[data-aact],[data-area],[data-atype],[data-act="settings"]'); if (!b) return;
+      var S = sheetState(sh);
+      if (b.hasAttribute('data-atype')) {
+        var typeName = b.getAttribute('data-atype');
+        if (typeName) { S.type = typeName; S.focus = ''; renderSheet(sh); }
+        return;
+      }
+      if (b.hasAttribute('data-area')) { var d = $('area-' + b.getAttribute('data-area')); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
+      if (b.getAttribute('data-act') === 'settings') { state.pendingSave = false; openSettings(); return; }
+      var act = b.getAttribute('data-aact');
+      if (act === 'edit') startSheetEdit(sh);
+      else if (act === 'save') saveSheet(sh);
+      else if (act === 'cancel') { try { localStorage.removeItem(DRAFT_KEY + sh.key); } catch (x) {} S.edit = null; renderSheet(sh); }
+    });
+    el.addEventListener('toggle', function (ev) {
+      var d = ev.target; if (d.classList && d.classList.contains('area')) sheetState(sh).closed[d.getAttribute('data-name')] = !d.open;
+    }, true);
+  }
+  function loadAreas(force) { return loadSheet(SHEETS.areas, force); }
+  function renderAreas() { renderSheet(SHEETS.areas); }
+  function areasEditorActive() { return sheetEditorActive(SHEETS.areas); }
+  function saveAreas() { saveSheet(SHEETS.areas); }
+  function loadBehavior(force) { return loadSheet(SHEETS.behavior, force); }
+  function renderBehavior() { renderSheet(SHEETS.behavior); }
+  function behaviorEditorActive() { return sheetEditorActive(SHEETS.behavior); }
+  function saveBehavior() { saveSheet(SHEETS.behavior); }
+  bindSheet(SHEETS.areas);
+  bindSheet(SHEETS.behavior);
+
+
+  // ---------- 批注：实践思路 / 行为模板，以及之后的「评价」共用 ----------
+  // 存储是仓库根目录 annotations.json，读写走和 areas.md 一样的 GitHub Contents API（要令牌）。
+  // 挂载：annFrame(doc, target, innerHtml, ready) 产出侧栏骨架，annPaintDoc({ doc, target, layout }) 画高亮和列表。
+  // doc 是文档键（现在是 areas / behavior）。评价以后用自己的 doc 调用同一套 annMutate / annPaintDoc 即可。
+  var ANN_PATH = 'annotations.json';
+  state.ann = { status: '', sha: null, data: { version: 1, items: [] }, error: '', saving: false, flash: null, activeId: '', showAll: false, ops: [], armDelete: '', sel: null };
+  function annId(prefix) { return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function annStamp(d) {
+    d = d || new Date();
+    try {
+      var parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).formatToParts(d);
+      var g = {};
+      parts.forEach(function (p) { g[p.type] = p.value; });
+      return g.year + '-' + g.month + '-' + g.day + 'T' + g.hour + ':' + g.minute + ':' + g.second + '+08:00';
+    } catch (e) { return d.toISOString(); }
+  }
+  function annTimeLabel(iso) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(String(iso || ''));
+    return m ? m[2] + '-' + m[3] + ' ' + m[4] + ':' + m[5] : (iso || '');
+  }
+  function annClip(s, n) {
+    s = String(s || '').replace(/\s+/g, ' ').trim();
+    return s.length > n ? s.slice(0, n) + '…' : s;
+  }
+  function annById(data, id) {
+    var found = null;
+    (data.items || []).forEach(function (it) { if (it.id === id) found = it; });
+    return found;
+  }
+  function annParse(text) {
+    var data = { version: 1, items: [] };
+    if (!String(text || '').trim()) return data;
+    var raw;
+    try { raw = JSON.parse(text); } catch (e) { data.error = '批注文件不是合法 JSON'; return data; }
+    var items = Array.isArray(raw) ? raw : (raw && raw.items);
+    if (!Array.isArray(items)) return data;
+    data.version = raw && raw.version || 1;
+    data.items = items.filter(function (it) { return it && it.id && it.doc && it.quote; }).map(function (it) {
+      return {
+        id: String(it.id), doc: String(it.doc), target: String(it.target || ''), quote: String(it.quote),
+        prefix: String(it.prefix || ''), suffix: String(it.suffix || ''), resolved: !!it.resolved,
+        created: String(it.created || ''), text: String(it.text || ''),
+        replies: (Array.isArray(it.replies) ? it.replies : []).filter(function (r) { return r && r.id && r.text; }).map(function (r) {
+          return { id: String(r.id), text: String(r.text), created: String(r.created || '') };
+        })
+      };
+    });
+    return data;
+  }
+  function annSerialize(data) {
+    var items = ((data && data.items) || []).map(function (it) {
+      return {
+        id: it.id, doc: it.doc, target: it.target || '', quote: it.quote, prefix: it.prefix || '', suffix: it.suffix || '',
+        resolved: !!it.resolved, created: it.created || '', text: it.text || '',
+        replies: (it.replies || []).map(function (r) { return { id: r.id, text: r.text, created: r.created || '' }; })
+      };
+    });
+    return JSON.stringify({ version: 1, items: items }, null, 2) + '\n';
+  }
+  function annFindQuote(raw, quote, prefix, suffix) {
+    raw = String(raw || ''); quote = String(quote || '');
+    if (!quote) return null;
+    function all(hay, needle) {
+      var out = [], i = 0;
+      if (!needle) return out;
+      while ((i = hay.indexOf(needle, i)) >= 0) { out.push(i); i += needle.length; }
+      return out;
+    }
+    function score(hay, i, len) {
+      var s = 0, pre = hay.slice(Math.max(0, i - String(prefix || '').length), i), suf = hay.slice(i + len, i + len + String(suffix || '').length);
+      if (prefix && pre === prefix) s += 2;
+      if (suffix && suf === suffix) s += 2;
+      return s;
+    }
+    function pick(hay, idxs, len) {
+      if (!idxs.length) return null;
+      var best = idxs[0], bestS = score(hay, idxs[0], len);
+      for (var k = 1; k < idxs.length; k++) { var sc = score(hay, idxs[k], len); if (sc > bestS) { bestS = sc; best = idxs[k]; } }
+      return { index: best, length: len };
+    }
+    var exact = pick(raw, all(raw, quote), quote.length);
+    if (exact) return exact;
+    var nq = quote.replace(/\s+/g, ' ').trim();
+    if (!nq) return null;
+    var norm = '', map = [], i = 0;
+    while (i < raw.length) {
+      if (/\s/.test(raw.charAt(i))) {
+        if (norm && norm.charAt(norm.length - 1) !== ' ') { norm += ' '; map.push(i); }
+        i++; continue;
+      }
+      norm += raw.charAt(i); map.push(i); i++;
+    }
+    var hit = pick(norm, all(norm, nq), nq.length);
+    if (!hit || !map.length) return null;
+    var endAt = hit.index + nq.length - 1;
+    if (!map[hit.index] && map[hit.index] !== 0) return null;
+    if (!map[endAt] && map[endAt] !== 0) return null;
+    return { index: map[hit.index], length: map[endAt] + 1 - map[hit.index] };
+  }
+  function annApplyOp(data, op) {
+    if (!data.items) data.items = [];
+    if (op.t === 'add') {
+      if (!annById(data, op.item.id)) data.items.push(JSON.parse(JSON.stringify(op.item)));
+      return;
+    }
+    if (op.t === 'delete') { data.items = data.items.filter(function (x) { return x.id !== op.id; }); return; }
+    var it = annById(data, op.id);
+    if (!it) return;
+    if (op.t === 'reply') {
+      it.replies = it.replies || [];
+      if (!it.replies.some(function (r) { return r.id === op.reply.id; })) it.replies.push(JSON.parse(JSON.stringify(op.reply)));
+    } else if (op.t === 'resolve') it.resolved = !!op.resolved;
+    else if (op.t === 'delReply') it.replies = (it.replies || []).filter(function (r) { return r.id !== op.replyId; });
+  }
+  function annFrame(doc, target, inner, ready) {
+    return '<div class="ann-layout" data-ann-doc="' + esc(doc) + '" data-ann-target="' + esc(target) + '" data-ann-ready="' + (ready ? '1' : '0') + '"><div class="ann-main">' + inner + '</div><aside class="ann-rail" aria-label="批注" data-ann-rail="1"></aside></div>';
+  }
+  function annIndex(root) {
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), raw = '', map = [], n;
+    while ((n = walker.nextNode())) {
+      var v = n.nodeValue || '';
+      for (var i = 0; i < v.length; i++) { map.push({ node: n, offset: i }); raw += v.charAt(i); }
+    }
+    return { raw: raw, map: map };
+  }
+  function annPoint(indexed, container, offset) {
+    if (!container) return -1;
+    if (container.nodeType === 3) {
+      var last = -1;
+      for (var i = 0; i < indexed.map.length; i++) {
+        if (indexed.map[i].node !== container) continue;
+        if (indexed.map[i].offset === offset) return i;
+        last = i;
+      }
+      if (offset === (container.nodeValue || '').length) return last + 1;
+      return -1;
+    }
+    if (container.nodeType !== 1) return -1;
+    if (offset < container.childNodes.length) {
+      var child = container.childNodes[offset];
+      if (child.nodeType === 3) return annPoint(indexed, child, 0);
+      for (var j = 0; j < indexed.map.length; j++) if (child.contains(indexed.map[j].node)) return j;
+      return -1;
+    }
+    var lastIn = -1;
+    for (var k = 0; k < indexed.map.length; k++) if (container.contains(indexed.map[k].node)) lastIn = k;
+    return lastIn + 1;
+  }
+  function annCapture(root) {
+    var sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+    var range = sel.getRangeAt(0);
+    if (!root.contains(range.startContainer) || !root.contains(range.endContainer)) return null;
+    var indexed = annIndex(root);
+    var a = annPoint(indexed, range.startContainer, range.startOffset);
+    var b = annPoint(indexed, range.endContainer, range.endOffset);
+    if (a < 0 || b < 0 || b <= a) return null;
+    var quote = indexed.raw.slice(a, b);
+    if (!quote.replace(/\s/g, '')) return null;
+    if (quote.length > 400) return { tooLong: true };
+    return { quote: quote, prefix: indexed.raw.slice(Math.max(0, a - 20), a), suffix: indexed.raw.slice(b, Math.min(indexed.raw.length, b + 20)) };
+  }
+  function annClearMarks(root) {
+    var marks = root.querySelectorAll('mark.ann');
+    for (var i = marks.length - 1; i >= 0; i--) {
+      var m = marks[i], parent = m.parentNode;
+      while (m.firstChild) parent.insertBefore(m.firstChild, m);
+      parent.removeChild(m);
+    }
+    root.normalize();
+  }
+  function annWrap(indexed, start, end, item) {
+    if (end <= start || !indexed.map[start] || !indexed.map[end - 1]) return false;
+    var a = indexed.map[start], b = indexed.map[end - 1];
+    var range = document.createRange();
+    try {
+      range.setStart(a.node, a.offset);
+      range.setEnd(b.node, b.offset + 1);
+      var mark = document.createElement('mark');
+      mark.className = 'ann' + (item.resolved ? ' is-resolved' : '') + (item.id === state.ann.activeId ? ' active' : '');
+      mark.setAttribute('data-ann-id', item.id);
+      mark.title = '查看批注';
+      mark.appendChild(range.extractContents());
+      range.insertNode(mark);
+      return true;
+    } catch (e) { return false; }
+  }
+  function annHighlight(root, doc, target) {
+    annClearMarks(root);
+    (state.ann.data.items || []).forEach(function (it) {
+      if (it.doc !== doc || it.target !== target) return;
+      var indexed = annIndex(root);
+      var hit = annFindQuote(indexed.raw, it.quote, it.prefix, it.suffix);
+      if (!hit) { it._orphan = true; return; }
+      it._orphan = !annWrap(indexed, hit.index, hit.index + hit.length, it);
+    });
+  }
+  function annMarkRoot(layout) {
+    var main = layout.querySelector('.ann-main');
+    if (!main || layout.getAttribute('data-ann-ready') !== '1') return null;
+    var host = main.querySelector('.abody') || main.querySelector('.area-cols') || main.querySelector('.panel .md') || main.querySelector('.panel');
+    if (host) host.setAttribute('data-ann-root', '1');
+    return host;
+  }
+  function annCards(items, target) {
+    return items.map(function (it) { return annCard(it, target); }).join('');
+  }
+  function annCard(it, target) {
+    var on = it.id === state.ann.activeId;
+    var orphan = it.target === target && it._orphan;
+    var h = '<article class="ann-card' + (on ? ' active' : '') + (it.resolved ? ' resolved' : '') + '" data-ann-id="' + esc(it.id) + '">';
+    h += '<button type="button" class="ann-quote" data-ann-act="open" data-ann-id="' + esc(it.id) + '">' + esc(annClip(it.quote, 80) || '（空选区）') + '</button>';
+    h += '<div class="ann-meta">' + esc(annTimeLabel(it.created)) + (it.target && it.target !== target ? ' · ' + esc(it.target) : '') + '</div>';
+    if (orphan) h += '<div class="ann-orphan">原文已对不上这段话，批注还留着。</div>';
+    h += '<div class="ann-text">' + esc(on ? it.text : annClip(it.text, 140)) + '</div>';
+    if (on) {
+      if (it.replies && it.replies.length) {
+        h += '<div class="ann-replies">';
+        it.replies.forEach(function (r) {
+          h += '<div class="ann-replyline"><div><div class="ann-meta">' + esc(annTimeLabel(r.created)) + '</div><div class="ann-text">' + esc(r.text) + '</div></div><button type="button" data-ann-act="del-reply" data-ann-id="' + esc(it.id) + '" data-reply-id="' + esc(r.id) + '">删除</button></div>';
+        });
+        h += '</div>';
+      }
+      h += '<div class="ann-compose"><textarea data-ann-reply="' + esc(it.id) + '" placeholder="回复这条批注"></textarea><div class="ann-compose-actions"><button type="button" class="primary" data-ann-act="send-reply" data-ann-id="' + esc(it.id) + '">回复</button></div></div>';
+      h += '<div class="ann-actions">';
+      h += it.resolved ? '<button type="button" data-ann-act="reopen" data-ann-id="' + esc(it.id) + '">重新打开</button>' : '<button type="button" data-ann-act="resolve" data-ann-id="' + esc(it.id) + '">解决</button>';
+      h += '<button type="button" data-ann-act="collapse" data-ann-id="' + esc(it.id) + '">收起</button>';
+      h += '<button type="button" data-ann-act="delete" data-ann-id="' + esc(it.id) + '">' + (state.ann.armDelete === it.id ? '确认删除' : '删除') + '</button>';
+      h += '</div>';
+    }
+    return h + '</article>';
+  }
+  function annRailHtml(doc, target, ready) {
+    var A = state.ann;
+    if (A.status === '' || A.status === 'loading') return '<h3>批注</h3><div class="ann-hint">正在读取批注…</div>';
+    var showAll = !!A.showAll;
+    var items = (A.data.items || []).filter(function (it) { return it.doc === doc && (showAll || it.target === target); });
+    items.sort(function (a, b) { return String(a.created).localeCompare(String(b.created)) || String(a.id).localeCompare(String(b.id)); });
+    var open = items.filter(function (it) { return !it.resolved; }), done = items.filter(function (it) { return it.resolved; });
+    var h = '<h3>批注 <span class="ann-count">' + open.length + '</span></h3>';
+    h += '<div class="ann-scope"><button type="button" data-ann-act="scope" data-ann-scope="here"' + (showAll ? '' : ' class="on"') + '>本节</button><button type="button" data-ann-act="scope" data-ann-scope="all"' + (showAll ? ' class="on"' : '') + '>全部</button></div>';
+    if (A.flash) h += '<div class="msg ' + A.flash.kind + '">' + A.flash.text + '</div>';
+    if (A.saving) h += '<div class="ann-hint">正在保存…</div>';
+    else if (A.ops.length) h += '<div class="msg info">还有没写入仓库的批注。<button type="button" class="link" data-ann-act="retry">写入仓库</button></div>';
+    if (A.status === 'error') h += '<div class="msg error">读取批注失败：' + esc(A.error || '') + '</div>';
+    if (!ready) h += '<div class="ann-hint">这一类还没有正文。</div>';
+    else if (!open.length) h += '<div class="ann-hint">选中正文里的一段文字，点「批注」。</div>';
+    h += annCards(open, target);
+    if (done.length) {
+      var reveal = done.some(function (it) { return it.id === A.activeId; });
+      h += '<details class="ann-done"' + (reveal ? ' open' : '') + '><summary>已解决 ' + done.length + '</summary>' + annCards(done, target) + '</details>';
+    }
+    h += '<div class="ann-meta" style="margin-top:8px"><a href="' + esc(fileUrl(ANN_PATH)) + '" target="_blank" rel="noopener">GitHub 上的 annotations.json</a></div>';
+    if (!getToken()) h += '<div class="ann-hint">保存需要本地令牌，只写这个仓库 · <button type="button" class="link" data-ann-act="settings">设置</button></div>';
+    return h;
+  }
+  function annPaintDoc(opts) {
+    var layout = opts && opts.layout;
+    if (!layout) return;
+    if (state.ann.status === '') loadAnn();
+    var doc = opts.doc || layout.getAttribute('data-ann-doc') || '';
+    var target = opts.target || layout.getAttribute('data-ann-target') || '';
+    var root = annMarkRoot(layout);
+    if (root && (state.ann.status === 'ok' || state.ann.status === 'missing')) annHighlight(root, doc, target);
+    var rail = layout.querySelector('[data-ann-rail]');
+    if (rail) rail.innerHTML = annRailHtml(doc, target, layout.getAttribute('data-ann-ready') === '1');
+    if (state.ann.activeId && rail) {
+      var card = rail.querySelector('.ann-card.active');
+      if (card && card.scrollIntoView) card.scrollIntoView({ block: 'nearest' });
+    }
+  }
+  function paintAnn(sh) {
+    var el = $(sh.el); if (!el) return;
+    var layout = el.querySelector('.ann-layout');
+    if (!layout) return;
+    annPaintDoc({ doc: sh.key, target: layout.getAttribute('data-ann-target') || '', layout: layout });
+  }
+  function annPaintCurrent() { if (SHEETS[state.tab]) paintAnn(SHEETS[state.tab]); }
+  function loadAnn(force) {
+    var A = state.ann;
+    if (!force && (A.status === 'ok' || A.status === 'missing' || A.status === 'loading')) return Promise.resolve();
+    if (A.ops.length && !force) { A.status = A.status || 'ok'; return Promise.resolve(); }
+    A.status = 'loading';
+    return loadFile(ANN_PATH).then(function (res) {
+      if (A.ops.length) { A.status = 'ok'; return; }
+      A.data = annParse(res.text);
+      A.status = A.data.error ? 'error' : 'ok';
+      A.error = A.data.error || '';
+    }, function (err) {
+      if (A.ops.length) { A.status = 'ok'; return; }
+      if (err.status === 404) { A.data = { version: 1, items: [] }; A.status = 'missing'; A.error = ''; }
+      else { A.status = 'error'; A.error = err.message || String(err); }
+    }).then(function () { annPaintCurrent(); });
+  }
+  function fetchAnnLatest() {
+    return api('GET', repoPath + '/contents/' + ANN_PATH + '?ref=' + BRANCH).then(function (res) {
+      if (res.status === 404) return { sha: null, text: '' };
+      if (!res.ok || !res.json) throw new Error(apiErrText(res));
+      return { sha: res.json.sha, text: b64ToUtf8(res.json.content) };
+    });
+  }
+  function saveAnn(retrying) {
+    var A = state.ann;
+    if (!A.ops.length) return;
+    if (A.saving) { A.again = true; return; }
+    if (!requestTokenForSave('ann', '保存批注需要 GitHub 令牌，填好后会自动继续保存。')) return;
+    A.saving = true; A.flash = null; annPaintCurrent();
+    var batch = A.ops.slice();
+    A.ops = [];
+    fetchAnnLatest().then(function (l) {
+      var merged = annParse(l.text);
+      batch.forEach(function (op) { annApplyOp(merged, op); });
+      var payload = annSerialize(merged);
+      if (payload === annSerialize(annParse(l.text || ''))) {
+        A.data = merged; A.sha = l.sha; A.status = 'ok'; A.saving = false;
+        A.flash = { kind: 'ok', text: '已保存。' };
+        annPaintCurrent();
+        if (A.ops.length || A.again) { A.again = false; saveAnn(); }
+        return;
+      }
+      var body = { message: '批注：' + (l.sha ? '更新' : '新建') + ' annotations.json', content: utf8ToB64(payload), branch: BRANCH };
+      if (l.sha) body.sha = l.sha;
+      return api('PUT', repoPath + '/contents/' + ANN_PATH, body).then(function (res) {
+        if (res.ok && res.json && res.json.content) {
+          A.data = merged; A.sha = res.json.content.sha; A.status = 'ok'; A.saving = false;
+          var commit = res.json.commit && res.json.commit.sha ? res.json.commit.sha : '';
+          A.flash = { kind: 'ok', text: '已保存到仓库' + (commit ? '（' + commit.slice(0, 7) + '）' : '') + '。' };
+          annPaintCurrent();
+          if (A.ops.length || A.again) { A.again = false; saveAnn(); }
+          return;
+        }
+        if ((res.status === 409 || res.status === 422) && !retrying) {
+          A.ops = batch.concat(A.ops); A.saving = false; return saveAnn(true);
+        }
+        A.ops = batch.concat(A.ops); A.saving = false;
+        A.flash = { kind: 'error', text: '保存失败：' + apiErrText(res) };
+        annPaintCurrent();
+      });
+    }).catch(function (err) {
+      A.ops = batch.concat(A.ops); A.saving = false;
+      A.flash = { kind: 'error', text: '保存失败：' + esc(err && err.message || String(err)) };
+      annPaintCurrent();
+    });
+  }
+  function annMutate(op) {
+    if (!state.ann.data || !state.ann.data.items) state.ann.data = { version: 1, items: [] };
+    var snap = JSON.parse(JSON.stringify(op));
+    annApplyOp(state.ann.data, snap);
+    state.ann.ops.push(snap);
+    if (op.t === 'add') state.ann.activeId = op.item.id;
+    state.ann.armDelete = '';
+    hideAnnPop();
+    if (state.ann.status === '' || state.ann.status === 'loading') state.ann.status = 'ok';
+    annPaintCurrent();
+    if (!requestTokenForSave('ann', '保存批注需要 GitHub 令牌，填好后会自动继续保存。')) {
+      state.ann.flash = { kind: 'info', text: '还没写入仓库。填好令牌后会自动保存。' };
+      annPaintCurrent();
+      return;
+    }
+    saveAnn();
+  }
+  function annScrollActive() {
+    var id = state.ann.activeId;
+    if (!id || !/^[A-Za-z0-9]+$/.test(id)) return;
+    var mark = document.querySelector('mark.ann[data-ann-id="' + id + '"]');
+    if (mark && mark.scrollIntoView) mark.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+  function annOpenTarget(doc, target) {
+    var sh = SHEETS[doc];
+    if (!sh) return;
+    var S = sheetState(sh);
+    S.type = target; S.focus = '';
+    if (state.tab !== doc) { S.keepType = true; location.hash = '#' + doc; }
+    else renderSheet(sh);
+    annScrollActive();
+  }
+  function annFocus(id) {
+    var it = annById(state.ann.data, id);
+    if (!it) return;
+    state.ann.activeId = id;
+    state.ann.armDelete = '';
+    if (it.doc !== state.tab || !SHEETS[it.doc] || sheetState(SHEETS[it.doc]).type !== it.target) { annOpenTarget(it.doc, it.target); return; }
+    annPaintCurrent();
+    annScrollActive();
+  }
+  function hideAnnPop() {
+    var pop = $('annPop'); if (!pop) return;
+    pop.hidden = true; state.ann.sel = null;
+    var box = $('annPopBox'); if (box) box.hidden = true;
+    var btn = $('annPopBtn'); if (btn) btn.hidden = false;
+  }
+  function showAnnButton(rect, label) {
+    var pop = $('annPop'); if (!pop) return;
+    pop.classList.add('mini');
+    $('annPopBtn').hidden = false;
+    $('annPopBtn').textContent = label || '批注';
+    $('annPopBox').hidden = true;
+    var err = $('annPopErr'); if (err) err.textContent = '';
+    pop.hidden = false;
+    var left = Math.max(8, Math.min(rect.left, window.innerWidth - 96));
+    var top = rect.top - 38;
+    if (top < 8) top = Math.min(window.innerHeight - 40, rect.bottom + 6);
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+  }
+  function annConsider(ev) {
+    var t = ev && ev.target;
+    if (t && t.nodeType === 3) t = t.parentNode;
+    var box = $('annPopBox');
+    if (box && !box.hidden) {
+      if (t && t.closest && t.closest('#annPop')) return;
+      hideAnnPop();
+      return;
+    }
+    if (t && t.closest && t.closest('#annPop')) return;
+    var sel = window.getSelection();
+    var node = sel && !sel.isCollapsed && sel.rangeCount ? sel.getRangeAt(0).commonAncestorContainer : null;
+    if (node && node.nodeType === 3) node = node.parentNode;
+    var root = node && node.closest && node.closest('[data-ann-root]');
+    if (!root) { hideAnnPop(); return; }
+    if (t && t.closest && t.closest('.ann-rail, textarea, input, button') && !(root.contains && root.contains(t))) { hideAnnPop(); return; }
+    var tab = root.closest('.tab');
+    if (tab && !tab.classList.contains('active')) return;
+    var cap = annCapture(root);
+    if (!cap) { hideAnnPop(); return; }
+    var rect = window.getSelection().getRangeAt(0).getBoundingClientRect();
+    if (cap.tooLong) { state.ann.sel = null; showAnnButton(rect, '请缩短选区'); return; }
+    var layout = root.closest('.ann-layout');
+    state.ann.sel = { doc: layout.getAttribute('data-ann-doc'), target: layout.getAttribute('data-ann-target'), quote: cap.quote, prefix: cap.prefix, suffix: cap.suffix };
+    showAnnButton(rect, '批注');
+  }
+  function annOnAct(el) {
+    var act = el.getAttribute('data-ann-act');
+    var id = el.getAttribute('data-ann-id') || '';
+    if (act === 'scope') { state.ann.showAll = el.getAttribute('data-ann-scope') === 'all'; state.ann.armDelete = ''; annPaintCurrent(); return; }
+    if (act === 'settings') {
+      if (state.ann.ops.length) state.pendingSave = 'ann';
+      openSettings(state.ann.ops.length ? '保存批注需要 GitHub 令牌，填好后会自动继续保存。' : '', !!state.ann.ops.length);
+      return;
+    }
+    if (act === 'retry') { saveAnn(); return; }
+    if (act === 'open') { annFocus(id); return; }
+    if (act === 'collapse') { state.ann.activeId = ''; state.ann.armDelete = ''; annPaintCurrent(); return; }
+    if (act === 'resolve') { annMutate({ t: 'resolve', id: id, resolved: true }); return; }
+    if (act === 'reopen') { state.ann.activeId = id; annMutate({ t: 'resolve', id: id, resolved: false }); return; }
+    if (act === 'delete') {
+      if (state.ann.armDelete !== id) { state.ann.armDelete = id; state.ann.activeId = id; annPaintCurrent(); return; }
+      state.ann.activeId = ''; annMutate({ t: 'delete', id: id }); return;
+    }
+    if (act === 'del-reply') { annMutate({ t: 'delReply', id: id, replyId: el.getAttribute('data-reply-id') }); return; }
+    if (act === 'send-reply') {
+      var ta = document.querySelector('textarea[data-ann-reply="' + id + '"]');
+      var text = ta ? ta.value.trim() : '';
+      if (!text) return;
+      if (text.length > 2000) {
+        var note = ta.parentNode && ta.parentNode.querySelector('.ann-pop-err');
+        if (!note && ta.parentNode) { note = document.createElement('div'); note.className = 'ann-pop-err'; ta.parentNode.appendChild(note); }
+        if (note) note.textContent = '回复请写在 2000 字以内。';
+        return;
+      }
+      annMutate({ t: 'reply', id: id, reply: { id: annId('r'), text: text, created: annStamp() } });
+    }
+  }
+  function annBind() {
+    document.addEventListener('mouseup', function (ev) { setTimeout(function () { annConsider(ev); }, 0); });
+    document.addEventListener('click', function (ev) {
+      var actEl = ev.target.closest && ev.target.closest('[data-ann-act]');
+      if (actEl) { annOnAct(actEl); return; }
+      var mark = ev.target.closest && ev.target.closest('mark.ann');
+      if (mark) { annFocus(mark.getAttribute('data-ann-id')); return; }
+      var card = ev.target.closest && ev.target.closest('.ann-card');
+      if (card && !(ev.target.closest && ev.target.closest('textarea, button, a'))) annFocus(card.getAttribute('data-ann-id'));
+    });
+    var popBtn = $('annPopBtn');
+    if (popBtn) popBtn.addEventListener('mousedown', function (ev) { ev.preventDefault(); });
+    if (popBtn) popBtn.addEventListener('click', function () {
+      if (!state.ann.sel) return;
+      $('annPop').classList.remove('mini');
+      popBtn.hidden = true;
+      $('annPopBox').hidden = false;
+      $('annPopQuote').textContent = state.ann.sel.quote;
+      $('annPopText').value = '';
+      var err = $('annPopErr'); if (err) err.textContent = '';
+      $('annPopText').focus();
+    });
+    var cancel = $('annPopCancel'); if (cancel) cancel.addEventListener('click', hideAnnPop);
+    var send = $('annPopSend');
+    if (send) send.addEventListener('click', function () {
+      var sel = state.ann.sel;
+      var text = $('annPopText').value.trim();
+      var err = $('annPopErr');
+      if (!sel) { hideAnnPop(); return; }
+      if (!text) { if (err) err.textContent = '请先写下批注。'; return; }
+      if (text.length > 2000) { if (err) err.textContent = '批注请写在 2000 字以内。'; return; }
+      annMutate({ t: 'add', item: { id: annId('a'), doc: sel.doc, target: sel.target, quote: sel.quote, prefix: sel.prefix, suffix: sel.suffix, resolved: false, created: annStamp(), text: text, replies: [] } });
+    });
+  }
+  annBind();
+
 
   // ---------- Bot: bots.md (one "## " section per bot, "### 字段" subsections), whole-file editor ----------
   var BOTS_PATH = 'bots.md';
@@ -2574,11 +3206,11 @@
   }
   function botAreaNames() {
     var A = state.areas, extra = [];
-    if (A.status === 'ok' && A.text) extra = parseAreas(A.text).areas.map(function (a) { return a.name; }).filter(function (n) { return n !== AREAS_TEMPLATE && !/分工/.test(n); });
+    if (A.status === 'ok' && A.text) extra = parseAreas(A.text).areas.map(function (a) { return a.name; }).filter(function (n) { return n !== '行为模板' && !/分工/.test(n); });
     return BOT_AREAS.concat(extra.filter(function (n) { return BOT_AREAS.indexOf(n) < 0; }));
   }
   function botTodoHtml(html) { return html.replace(/(^|>)([^<]+)/g, function (m, a, t) { return a + t.replace(/待补充/g, '<mark class="todo">待补充</mark>'); }); }
-  function botAreaChip(n) { var i = BOT_AREAS.indexOf(n); return '<button type="button" class="bachip ac' + (i < 0 ? 'x' : i) + '" data-goarea="' + esc(n) + '" title="去「领域」页看 ' + esc(n) + '">' + esc(n) + '</button>'; }
+  function botAreaChip(n) { var i = BOT_AREAS.indexOf(n); return '<button type="button" class="bachip ac' + (i < 0 ? 'x' : i) + '" data-goarea="' + esc(n) + '" title="去「实践思路」看 ' + esc(n) + '">' + esc(n) + '</button>'; }
   function botNode(item, bots, cls) {
     var j = botMatch(item, bots);
     return j >= 0 ? '<button type="button" class="bnode bot ' + cls + '" data-bot="' + j + '">' + esc(item) + '</button>' : '<span class="bnode ' + cls + '">' + esc(item) + '</span>';
@@ -3605,7 +4237,7 @@
     if (t) {
       hint.innerHTML = '已缓存令牌（…' + esc(t.slice(-4)) + '）：<b>不必再粘贴</b>，直接点「验证」或「关闭」即可继续；要更换再在左侧输入新令牌。';
       if (input) input.placeholder = '留空则沿用已缓存令牌';
-      status.textContent = storageMsg || ('当前已缓存（…' + t.slice(-4) + '）。保存日记 / areas / memo / bots / insights / 周记月记会直接使用，无需再点本页「保存」。');
+      status.textContent = storageMsg || ('当前已缓存（…' + t.slice(-4) + '）。保存日记 / areas / memo / bots / insights / 批注 / 周记月记会直接使用，无需再点本页「保存」。');
     } else {
       hint.textContent = storageMsg ? storageMsg : '';
       if (input) input.placeholder = 'github_pat_…';
@@ -3635,6 +4267,7 @@
     if (state.tab === 'bots') { var be = state.bots.edit, bt = $('botText'); if (be && bt) be.value = bt.value; renderBots(); }
     if (state.tab === 'memo') { var me = state.memo.edit, mt = $('memoText'); if (me && mt) me.value = mt.value; renderMemo(); }
     if (state.tab === 'areas') { var ae = state.areas.edit, at = $('areaText'); if (ae && at) ae.value = at.value; renderAreas(); }
+    if (state.tab === 'behavior') { var bhe = state.behavior.edit, bht = $('behaviorText'); if (bhe && bht) bhe.value = bht.value; renderBehavior(); }
     if (state.tab === 'calendar') {
       renderDetail();
       if (state.pedit && !state.pedit.loading) { readPInputs(state.pedit); renderPeriods(); }
@@ -3673,13 +4306,20 @@
       parts[0] = 'detail';
       history.replaceState(null, '', '#detail');
     }
-    var tab = ['board', 'calendar', 'detail', 'memo', 'areas', 'docs', 'resources', 'bots'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
+    var tab = ['board', 'calendar', 'behavior', 'areas', 'detail', 'memo', 'docs', 'resources', 'bots'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
     setTab(tab);
     if (tab === 'board') renderBoardTab();
     if (tab === 'calendar') selectDay(parseYmd(parts[1]) ? parts[1] : (state.selected || todayStr()), true);
+    if (tab === 'behavior') {
+      if (prevTab !== 'behavior' && !state.behavior.keepType) state.behavior.type = BEHAVIOR_DEFAULT;
+      state.behavior.keepType = false;
+      if (!behaviorEditorActive()) renderBehavior();
+      loadBehavior();
+    }
     if (tab === 'areas') {
       if (state.areas.focus) state.areas.type = state.areas.focus;
-      else if (prevTab !== 'areas') state.areas.type = AREAS_TEMPLATE;
+      else if (prevTab !== 'areas' && !state.areas.keepType) state.areas.type = '';
+      state.areas.keepType = false;
       if (!areasEditorActive()) renderAreas();
       loadAreas();
     }
@@ -3717,8 +4357,10 @@
     if (state.pedit && !state.pedit.saving) { if (!state.pedit.loading) { readPInputs(state.pedit); savePDraft(state.pedit); } state.pedit = null; }
     ['week', 'month'].forEach(function (k) { state.notes[k].cache = {}; state.notes[k].pending = {}; });
     if (!(state.areas.edit && state.areas.edit.saving)) { state.areas.edit = null; state.areas.flash = null; state.areas.status = ''; }   // unsaved areas text stays as a draft
+    if (!(state.behavior.edit && state.behavior.edit.saving)) { state.behavior.edit = null; state.behavior.flash = null; state.behavior.status = ''; }
     if (!(state.bots.edit && state.bots.edit.saving)) { state.bots.edit = null; state.bots.flash = null; state.bots.status = ''; }   // unsaved bots text stays as a draft
     if (!(state.memo.edit && state.memo.edit.saving)) { state.memo.edit = null; state.memo.flash = null; state.memo.status = ''; }
+    if (state.ann && !state.ann.saving) { state.ann.status = ''; state.ann.ops = []; state.ann.flash = null; state.ann.error = ''; state.ann.activeId = ''; state.ann.armDelete = ''; }
     state.insights.status = ''; state.insights.parsed = null;
     state.res.status = ''; state.res.parsed = null; state.res.gen++;   // re-read info/resources.md on 刷新
     state.docs.status = ''; state.docs.parsed = null; state.docs.gen++;
@@ -3908,21 +4550,6 @@
     else if (act === 'cancel') { try { localStorage.removeItem(DRAFT_KEY + 'memo'); } catch (x) {} M.edit = null; renderMemo(); }
   });
   $('memo').addEventListener('toggle', function (ev) { var d = ev.target; if (d.classList && d.classList.contains('area')) state.memo.closed[d.getAttribute('data-name')] = !d.open; }, true);
-  $('areas').addEventListener('click', function (ev) {
-    var b = ev.target.closest('[data-aact],[data-area],[data-atype],[data-act="settings"]'); if (!b) return;
-    if (b.hasAttribute('data-atype')) {
-      var typeName = b.getAttribute('data-atype');
-      if (typeName) { state.areas.type = typeName; state.areas.focus = ''; renderAreas(); }
-      return;
-    }
-    if (b.hasAttribute('data-area')) { var d = $('area-' + b.getAttribute('data-area')); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
-    if (b.getAttribute('data-act') === 'settings') { state.pendingSave = false; openSettings(); return; }
-    var act = b.getAttribute('data-aact'), A = state.areas;
-    if (act === 'edit') startAreasEdit();
-    else if (act === 'save') saveAreas();
-    else if (act === 'cancel') { try { localStorage.removeItem(DRAFT_KEY + 'areas'); } catch (x) {} A.edit = null; renderAreas(); }
-  });
-  $('areas').addEventListener('toggle', function (ev) { var d = ev.target; if (d.classList && d.classList.contains('area')) state.areas.closed[d.getAttribute('data-name')] = !d.open; }, true);
   $('bots').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-bact],[data-bot],[data-goarea],[data-act="settings"]'); if (!b) return;
     if (b.hasAttribute('data-bot')) { var d = $('bot-' + b.getAttribute('data-bot')); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
@@ -4063,6 +4690,7 @@
   window.__taskos = { parseIndex: parseIndex, parseCSV: parseCSV, parseDaily: parseDaily, serializeDaily: serializeDaily, utf8ToB64: utf8ToB64, b64ToUtf8: b64ToUtf8,
     getToken: getToken, setToken: setToken, probeTokenStorage: probeTokenStorage, TOKEN_KEY: TOKEN_KEY,
     renderMd: renderMd, gitBlobSha: gitBlobSha, sectionEmpty: sectionEmpty, dueInfo: dueInfo, dayTasks: dayTasks, dayMentions: dayMentions, isoWeek: isoWeek, weekMonday: weekMonday, periodTitle: periodTitle, parseNote: parseNote, serializeNote: serializeNote, noteMatches: noteMatches, parseAreas: parseAreas, areasHtml: areasHtml, parseBots: parseBots, botsSplit: botsSplit, botEdges: botEdges, botMatch: botMatch, BOTS_STARTER: BOTS_STARTER, parseInsights: parseInsights, parseResources: parseResources, renderDetailFeed: renderDetailFeed, datesInRange: datesInRange, splitTags: splitTags, resUrl: resUrl, keyEvents: keyEvents, truncLines: truncLines, dayPopHtml: dayPopHtml, relDayWord: relDayWord, firstLine: firstLine,
+    ann: { path: ANN_PATH, parse: annParse, serialize: annSerialize, findQuote: annFindQuote, paint: annPaintDoc, frame: annFrame, mutate: annMutate, items: function () { return (state.ann.data && state.ann.data.items) || []; } },
     excerpt: excerpt, addDays: addDays, metaText: metaText, API: API, state: state, dayNeedsLoad: dayNeedsLoad, dayInfo: dayInfo, loadDay: loadDay,
     shortDotDate: shortDotDate, defaultPreviewRange: defaultPreviewRange, previewDayBody: previewDayBody, renderSimplePreview: renderSimplePreview };
   function hydrateTokenFromKeychain() {
