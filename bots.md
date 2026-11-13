@@ -58,7 +58,7 @@
 - 仓库 `gaopfEditer/task-os` 和看板 `index.html`（GitHub Pages：https://gaopfediter.github.io/task-os/）
 - `tasks/`、`index.md`、`log.csv`：任务建档和状态。看板上现有 T-20260928-01 建立任务系统（in_progress）、T-20260930-01 国庆十天计划（planned）、T-20261012-01 文档变更触达（blocked）、T-20261016-01 接单通道本周唯一验收（planned）、T-20261018-01 批判思维每周工作状态审查（planned，recurring）
 - `daily/`、`weekly/`、`monthly/`：每日计划 / 实践 / 复盘，周 / 月总结
-- `areas.md`、`insights.md`、`bots.md`、`templates/`、`notes/量价案例/`
+- `behavior.md`、`areas.md`、`insights.md`、`bots.md`、`templates/`、`notes/量价案例/`
 - `docs/`、`docs/index.md`：专题协调入库和索引；不改 `/workspace/ops-master/` 正文
 - 本机 `/workspace/task-os/`（content-os README 里约定的任务管家目录）
 - 本机 `/workspace/vpa/`（量价案例分析脚本和图）、`/workspace/pending/insights.md`（提交受阻时暂存的灵感）
@@ -68,7 +68,7 @@
 
 - 每日计划、实践、复盘（`daily/YYYY-MM-DD.md`；有变更才更），周 / 月总结
 - 晚汇总：只报偏差 / 卡点 / 未勾验收
-- 看板各页：看板 / 日历 / 明细扩展 / 备忘清单 / 关注领域 / 资源 / Bot / 文档资源
+- 看板各页：看板 / 日历 / 行为模板 / 实践思路 / 明细扩展 / 文档资源 / 资源 / Bot / 备忘清单
 - 任务文件与状态变更（task.md + index.md + log.csv 同步改）
 - 群拍板后 15 分钟内改看板；每周五约 20:00（Asia/Shanghai）触发批判周检；周日约 21:00 周巡
 

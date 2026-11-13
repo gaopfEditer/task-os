@@ -456,7 +456,8 @@
 <nav class="tabs">
   <a href="#board" data-tab="board">看板</a>
   <a href="#calendar" data-tab="calendar">日历</a>
-  <a href="#areas" data-tab="areas">关注领域</a>
+  <a href="#behavior" data-tab="behavior">行为模板</a>
+  <a href="#areas" data-tab="areas">实践思路</a>
   <a href="#detail" data-tab="detail">明细扩展</a>
   <a href="#docs" data-tab="docs">文档资源</a>
   <a href="#resources" data-tab="resources">资源</a>
@@ -514,8 +515,13 @@
     </div>
   </section>
 
+  <section class="tab" id="tab-behavior">
+    <h2 class="pagetitle">行为模板</h2>
+    <div id="behavior"><div class="nodata">加载中…</div></div>
+  </section>
+
   <section class="tab" id="tab-areas">
-    <h2 class="pagetitle">关注领域</h2>
+    <h2 class="pagetitle">实践思路</h2>
     <div id="areas"><div class="nodata">加载中…</div></div>
   </section>
 
@@ -553,7 +559,7 @@
   </section>
 
   <footer>
-    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>areas.md</code>、<code>memo.md</code>、<code>insights.md</code>、<code>bots.md</code>、只读的 <code>docs/</code>（专题文档），以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
+    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>behavior.md</code>、<code>areas.md</code>、<code>memo.md</code>、<code>insights.md</code>、<code>bots.md</code>、只读的 <code>docs/</code>（专题文档），以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
   </footer>
 </main>
 <div id="dayPop" class="daypop" role="dialog" hidden></div>
@@ -779,6 +785,7 @@
     if (state.edit && state.edit.date === state.selected) setEditStatus('error', esc(text));
     if (state.pedit && !state.pedit.loading) setPStatus(state.pedit, 'error', esc(text));
     if (state.areas.edit) { state.areas.edit.status = { kind: 'error', text: esc(text) }; renderAreas(); }
+    if (state.behavior && state.behavior.edit) { state.behavior.edit.status = { kind: 'error', text: esc(text) }; renderBehavior(); }
     if (state.bots.edit) { state.bots.edit.status = { kind: 'error', text: esc(text) }; renderBots(); }
     if (state.memo.edit) { state.memo.edit.status = { kind: 'error', text: esc(text) }; renderMemo(); }
   }
@@ -797,6 +804,7 @@
     if (resume === 'period') savePeriod();
     else if (resume === 'monthMain') saveMonthMain();
     else if (resume === 'areas') saveAreas();
+    else if (resume === 'behavior') saveBehavior();
     else if (resume === 'bots') saveBots();
     else if (resume === 'memo') saveMemo();
     else if (resume) saveEdit();
@@ -2287,11 +2295,30 @@
 
 
 
-  // ---------- 领域: areas.md (one "## " section per area), whole-file editor ----------
+  // ---------- 实践思路 areas.md / 行为模板 behavior.md（各自的类型芯片只作用于当前页）----------
+  var AREA_TYPES = ['Web3 信号和单子', 'Web3 运营', '软件开发和海外需求', '成长', '系统与 bot 分工'];
+  var BEHAVIOR_DEFAULT = AREA_TYPES[0];
   var AREAS_PATH = 'areas.md';
-  var AREAS_TEMPLATE = '行为模板';
+  var BEHAVIOR_PATH = 'behavior.md';
   var AREAS_STARTER = '# 领域\n\n## 领域名\n\n### 目标\n\n### 正在做\n\n### 负责 bot / 工具\n\n### 缺口与待优化\n\n### 时间投入（周）\n\n待记录\n';
-  state.areas = { status: '', text: '', sha: null, error: '', edit: null, flash: null, closed: {}, focus: '', type: AREAS_TEMPLATE };
+  var BEHAVIOR_STARTER = '# 行为模板\n\n## Web3 信号和单子\n\n### 上午\n\n### 午后与间隙\n\n### 晚上\n\n## Web3 运营\n\n## 软件开发和海外需求\n\n## 成长\n\n## 系统与 bot 分工\n';
+  state.areas = { status: '', text: '', sha: null, error: '', edit: null, flash: null, closed: {}, focus: '', type: '' };
+  state.behavior = { status: '', text: '', sha: null, error: '', edit: null, flash: null, closed: {}, focus: '', type: BEHAVIOR_DEFAULT };
+  var SHEETS = {
+    areas: {
+      key: 'areas', path: AREAS_PATH, el: 'areas', textId: 'areaText', starter: AREAS_STARTER, mode: 'practice',
+      hint: '整个 areas.md 一起编辑：每个 <code>## </code> 是一个领域，下面用 <code>### 目标</code> / <code>### 正在做</code> / <code>### 负责 bot / 工具</code> / <code>### 缺口与待优化</code> / <code>### 时间投入（周）</code>。内容原样保存。',
+      missing: '仓库里还没有 areas.md。点「编辑」按模板新建：每个 <code>## </code> 一个领域。',
+      commit: function (e) { return '领域：' + (e.sha ? '更新' : '新建') + ' areas.md'; }
+    },
+    behavior: {
+      key: 'behavior', path: BEHAVIOR_PATH, el: 'behavior', textId: 'behaviorText', starter: BEHAVIOR_STARTER, mode: 'behavior',
+      hint: '整个 behavior.md 一起编辑：每个 <code>## </code> 与实践思路的领域同名。<code>### 上午</code> / <code>### 午后与间隙</code> / <code>### 晚上</code> 会分成三列。内容原样保存。',
+      missing: '仓库里还没有 behavior.md。点「编辑」按模板新建：每个 <code>## </code> 一个领域。',
+      commit: function (e) { return '行为模板：' + (e.sha ? '更新' : '新建') + ' behavior.md'; }
+    }
+  };
+  function sheetState(sh) { return state[sh.key]; }
   function parseAreas(text) {   // → { title, intro, areas: [{ name, body, time, gaps }] }
     var lines = String(text || '').replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').split('\n'), out = { title: '', intro: [], areas: [] }, cur = null, fence = false;
     lines.forEach(function (line) {
@@ -2314,27 +2341,6 @@
   function areasHtml(md) {
     return renderMd(md).replace(/<strong>建议<\/strong>/g, '<span class="sugg">建议</span>')
       .replace(/<h5>(缺口[^<]*)<\/h5>/g, '<h5 class="gaps">$1</h5>').replace(/<h5>(时间投入[^<]*)<\/h5>/g, '<h5 class="time">$1</h5>');
-  }
-  function loadAreas(force) {
-    var A = state.areas;
-    if (!force && (A.status === 'ok' || A.status === 'missing' || A.status === 'loading')) return Promise.resolve();
-    A.status = 'loading';
-    return loadFile(AREAS_PATH).then(function (res) { A.text = res.text; A.status = 'ok'; A.error = ''; }, function (e) {
-      if (e.status === 404) { A.text = ''; A.status = 'missing'; A.error = ''; } else { A.status = 'error'; A.error = e.message; }
-    }).then(function () { if (state.tab === 'areas' && !areasEditorActive()) renderAreas(); });
-  }
-  function areasEditorActive() { return !!(state.areas.edit && !state.areas.edit.loading && $('areaText')); }
-  function hasAreasDraft() { try { return localStorage.getItem(DRAFT_KEY + 'areas') != null; } catch (x) { return false; } }
-  function areaTypeList(p) {
-    var names = [AREAS_TEMPLATE];
-    (p && p.areas || []).forEach(function (a) { if (a.name && names.indexOf(a.name) < 0) names.push(a.name); });
-    return names;
-  }
-  function activeAreaType(p) {
-    var names = areaTypeList(p), t = state.areas.type;
-    if (!t || names.indexOf(t) < 0) t = AREAS_TEMPLATE;
-    state.areas.type = t;
-    return t;
   }
   function splitAreaColumns(body) {
     var lines = String(body || '').replace(/\r\n?/g, '\n').split('\n'), pre = [], cols = [], cur = null;
@@ -2362,129 +2368,199 @@
     h += '</div>';
     return h;
   }
-  function areaTypesHtml(p) {
-    var cur = activeAreaType(p), h = '<div class="dextra-filters area-types"><span>类型</span>';
-    areaTypeList(p).forEach(function (name) {
-      var on = name === cur;
-      h += '<button type="button" class="dxf' + (on ? ' on' : ' off') + '" data-atype="' + esc(name) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(name) + '</button>';
-    });
-    return h + '</div>';
-  }
   function areaCardHtml(a, i, A) {
     var meta = (a.gaps ? '<span class="ameta gap">待优化 ' + a.gaps + '</span>' : '') + (a.time ? '<span class="ameta">时间投入：' + esc(a.time) + '</span>' : '');
     return '<details class="area" id="area-' + i + '"' + (A.closed[a.name] ? '' : ' open') + ' data-name="' + esc(a.name) + '"><summary><b>' + esc(a.name) + '</b>' + meta + '</summary>' +
       '<div class="abody md">' + (a.body ? areasHtml(a.body) : '<div class="none">（空）</div>') + '</div></details>';
   }
-  function renderAreas() {
-    var A = state.areas, el = $('areas'), e = A.edit, h = '';
-    if (A.status === 'loading' || A.status === '') { el.innerHTML = '<div class="nodata">正在读取 areas.md…</div>'; return; }
-    var p = parseAreas(A.text);
-    if (A.focus && !e) A.type = A.focus;
-    if (!e) h += areaTypesHtml(p);
+  function sheetTypeNames(sh, p) {
+    if (sh.mode === 'behavior') return AREA_TYPES.slice();
+    var names = [];
+    (p && p.areas || []).forEach(function (a) { if (a.name && a.name !== '行为模板' && names.indexOf(a.name) < 0) names.push(a.name); });
+    return names;
+  }
+  function sheetActiveType(sh, p) {
+    var S = sheetState(sh), names = sheetTypeNames(sh, p), t = S.type;
+    var fallback = sh.mode === 'behavior' ? BEHAVIOR_DEFAULT : (names[0] || '');
+    if (!t || names.indexOf(t) < 0) t = names.indexOf(fallback) >= 0 ? fallback : (names[0] || '');
+    S.type = t;
+    return t;
+  }
+  function findSheetArea(p, name) {
+    var found = null;
+    (p.areas || []).forEach(function (a) { if (a.name === name) found = a; });
+    return found;
+  }
+  function behaviorSectionHtml(area) {
+    if (!area || !String(area.body || '').trim()) return '<div class="nodata">这一类还没有内容。</div>';
+    if (splitAreaColumns(area.body).cols.length) return areaTemplateHtml(area.body);
+    return '<div class="panel"><div class="md">' + areasHtml(area.body) + '</div></div>';
+  }
+  function sheetTypesHtml(sh, p) {
+    var cur = sheetActiveType(sh, p), h = '<div class="dextra-filters area-types"><span>类型</span>';
+    sheetTypeNames(sh, p).forEach(function (name) {
+      var on = name === cur;
+      h += '<button type="button" class="dxf' + (on ? ' on' : ' off') + '" data-atype="' + esc(name) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(name) + '</button>';
+    });
+    return h + '</div>';
+  }
+  function sheetEditorActive(sh) {
+    var S = sheetState(sh);
+    return !!(S.edit && !S.edit.loading && $(sh.textId));
+  }
+  function sheetHasDraft(sh) {
+    try { return localStorage.getItem(DRAFT_KEY + sh.key) != null; } catch (x) { return false; }
+  }
+  function renderSheet(sh) {
+    var S = sheetState(sh), el = $(sh.el), e = S.edit, h = '';
+    if (!el) return;
+    if (S.status === 'loading' || S.status === '') { el.innerHTML = '<div class="nodata">正在读取 ' + esc(sh.path) + '…</div>'; return; }
+    var p = parseAreas(S.text);
+    if (S.focus && !e) S.type = S.focus;
+    if (!e) h += sheetTypesHtml(sh, p);
     h += '<div class="area-bar"><span class="spacer"></span>';
     if (!e) h += '<button type="button" class="primary" data-aact="edit">编辑</button>' + tokenHint();
-    if (A.status === 'ok' || A.edit) h += '<a href="' + esc(fileUrl(AREAS_PATH)) + '" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 areas.md</a>';
+    if (S.status === 'ok' || S.edit) h += '<a href="' + esc(fileUrl(sh.path)) + '" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 ' + esc(sh.path) + '</a>';
     h += '</div>';
-    if (A.flash) h += '<div class="msg ' + A.flash.kind + '">' + A.flash.text + '</div>';
-    if (A.status === 'error') h += '<div class="msg error">读取 areas.md 失败：' + esc(A.error) + '</div>';
+    if (S.flash) h += '<div class="msg ' + S.flash.kind + '">' + S.flash.text + '</div>';
+    if (S.status === 'error') h += '<div class="msg error">读取 ' + esc(sh.path) + ' 失败：' + esc(S.error) + '</div>';
     if (e) {
       if (e.loading) h += '<div class="nodata">正在读取最新版本…</div>';
       else {
-        h += '<div class="panel area-editor"><div class="hint">整个 areas.md 一起编辑：每个 <code>## </code> 是一个领域，下面用 <code>### 目标</code> / <code>### 正在做</code> / <code>### 负责 bot / 工具</code> / <code>### 缺口与待优化</code> / <code>### 时间投入（周）</code>。「行为模板」用 <code>### 上午</code> / <code>### 午后与间隙</code> / <code>### 晚上</code> 分列。内容原样保存。</div>' +
-          '<textarea id="areaText" spellcheck="false">' + esc(e.value) + '</textarea>';
+        h += '<div class="panel area-editor"><div class="hint">' + sh.hint + '</div>' +
+          '<textarea id="' + sh.textId + '" spellcheck="false">' + esc(e.value) + '</textarea>';
         if (e.status) h += '<div class="msg ' + e.status.kind + '">' + e.status.text + '</div>';
         if (e.remote != null) h += '<details class="remote" open><summary>远端最新内容（' + (e.remote ? '已存在' : '文件不存在') + '）</summary><pre>' + esc(e.remote || '（空）') + '</pre></details>';
         h += '<div class="actions"><button type="button" class="primary" data-aact="save"' + (e.saving ? ' disabled' : '') + '>' + (e.saving ? '保存中…' : '保存') + '</button>' +
           '<button type="button" data-aact="cancel"' + (e.saving ? ' disabled' : '') + '>取消</button>' + tokenHint() + '</div></div>';
       }
-    } else if (A.status === 'missing') {
-      h += '<div class="nodata">仓库里还没有 areas.md。点「编辑」按模板新建：每个 <code>## </code> 一个领域。</div>';
-    } else if (A.status === 'ok') {
-      if (hasAreasDraft()) h += '<div class="msg info">有未保存的草稿，点「编辑」继续。</div>';
-      var type = activeAreaType(p);
-      if (type === AREAS_TEMPLATE) {
-        var tpl = null;
-        p.areas.forEach(function (a) { if (a.name === AREAS_TEMPLATE) tpl = a; });
-        if (!tpl) h += '<div class="nodata">areas.md 里还没有「' + esc(AREAS_TEMPLATE) + '」小节。</div>';
-        else h += areaTemplateHtml(tpl.body);
-      } else {
+    } else if (S.status === 'missing') {
+      h += '<div class="nodata">' + sh.missing + '</div>';
+    } else if (S.status === 'ok') {
+      if (sheetHasDraft(sh)) h += '<div class="msg info">有未保存的草稿，点「编辑」继续。</div>';
+      var type = sheetActiveType(sh, p);
+      if (sh.mode === 'behavior') h += behaviorSectionHtml(findSheetArea(p, type));
+      else {
         if (p.intro) h += '<div class="areas-intro md">' + areasHtml(p.intro) + '</div>';
         var shown = null, idx = -1;
         p.areas.forEach(function (a, i) { if (a.name === type) { shown = a; idx = i; } });
-        if (!shown) h += '<div class="nodata">没有这个领域。</div>';
-        else h += areaCardHtml(shown, idx, A);
+        if (!shown) h += '<div class="nodata">' + (p.areas.length ? '没有这个领域。' : esc(sh.path) + ' 里还没有 <code>## </code> 领域小节。') + '</div>';
+        else h += areaCardHtml(shown, idx, S);
       }
     }
     el.innerHTML = h;
-    if (A.focus && !e && A.status !== 'loading') {   // opened from a Bot card's area chip
-      var fd = null; el.querySelectorAll('details.area').forEach(function (d) { if (d.getAttribute('data-name') === A.focus) fd = d; });
-      A.focus = '';
-      if (fd) { fd.open = true; A.closed[fd.getAttribute('data-name')] = false; fd.scrollIntoView({ block: 'start' }); }
+    if (S.focus && !e && S.status !== 'loading') {   // opened from a Bot card's area chip
+      var fd = null; el.querySelectorAll('details.area').forEach(function (d) { if (d.getAttribute('data-name') === S.focus) fd = d; });
+      S.focus = '';
+      if (fd) { fd.open = true; S.closed[fd.getAttribute('data-name')] = false; fd.scrollIntoView({ block: 'start' }); }
     }
-    if (e && !e.loading && $('areaText')) {
-      $('areaText').addEventListener('input', function (ev) { e.value = ev.target.value; try { if (e.value !== e.baseText) localStorage.setItem(DRAFT_KEY + 'areas', e.value); else localStorage.removeItem(DRAFT_KEY + 'areas'); } catch (x) {} });
-      if (e.focus) { e.focus = false; $('areaText').focus(); }
+    if (e && !e.loading && $(sh.textId)) {
+      $(sh.textId).addEventListener('input', function (ev) {
+        e.value = ev.target.value;
+        try { if (e.value !== e.baseText) localStorage.setItem(DRAFT_KEY + sh.key, e.value); else localStorage.removeItem(DRAFT_KEY + sh.key); } catch (x) {}
+      });
+      if (e.focus) { e.focus = false; $(sh.textId).focus(); }
     }
   }
-  function fetchAreasLatest() {
-    return api('GET', repoPath + '/contents/' + AREAS_PATH + '?ref=' + BRANCH).then(function (res) {
+  function loadSheet(sh, force) {
+    var S = sheetState(sh);
+    if (!force && (S.status === 'ok' || S.status === 'missing' || S.status === 'loading')) return Promise.resolve();
+    S.status = 'loading';
+    return loadFile(sh.path).then(function (res) { S.text = res.text; S.status = 'ok'; S.error = ''; }, function (err) {
+      if (err.status === 404) { S.text = ''; S.status = 'missing'; S.error = ''; } else { S.status = 'error'; S.error = err.message; }
+    }).then(function () { if (state.tab === sh.key && !sheetEditorActive(sh)) renderSheet(sh); });
+  }
+  function fetchSheetLatest(sh) {
+    return api('GET', repoPath + '/contents/' + sh.path + '?ref=' + BRANCH).then(function (res) {
       if (res.status === 404) return { sha: null, text: '' };
       if (!res.ok || !res.json) throw new Error(apiErrText(res));
       return { sha: res.json.sha, text: b64ToUtf8(res.json.content) };
     });
   }
-  function startAreasEdit() {
-    var A = state.areas; A.flash = null; A.edit = { loading: true }; renderAreas();
-    fetchAreasLatest().then(function (latest) { return latest; }, function (err) {
+  function startSheetEdit(sh) {
+    var S = sheetState(sh); S.flash = null; S.edit = { loading: true }; renderSheet(sh);
+    fetchSheetLatest(sh).then(function (latest) { return latest; }, function (err) {
       // API unavailable (e.g. rate limit): edit the Pages copy; the save will report a conflict if it is stale
-      return { sha: undefined, text: A.text, warn: err.message };
+      return { sha: undefined, text: S.text, warn: err.message };
     }).then(function (latest) {
-      if (!A.edit || !A.edit.loading) return;
-      if (latest.sha !== undefined && latest.text !== A.text) { A.text = latest.text; A.status = latest.sha ? 'ok' : 'missing'; }
-      var base = latest.sha === null ? '' : latest.text, value = base || AREAS_STARTER, status = null, dr = null;
-      try { dr = localStorage.getItem(DRAFT_KEY + 'areas'); } catch (x) {}
+      if (!S.edit || !S.edit.loading) return;
+      if (latest.sha !== undefined && latest.text !== S.text) { S.text = latest.text; S.status = latest.sha ? 'ok' : 'missing'; }
+      var base = latest.sha === null ? '' : latest.text, value = base || sh.starter, status = null, dr = null;
+      try { dr = localStorage.getItem(DRAFT_KEY + sh.key); } catch (x) {}
       if (dr != null && dr !== base) { value = dr; status = { kind: 'info', text: '已恢复未保存的草稿（还没提交到仓库）。' }; }
       if (latest.warn) status = { kind: 'info', text: '暂时取不到 GitHub 上的最新版本（' + esc(latest.warn) + '），先按页面上的内容编辑。' };
-      A.edit = { value: value, baseText: base, sha: latest.sha === undefined ? null : latest.sha, unknownSha: latest.sha === undefined, status: status, remote: null, saving: false, focus: true };
-      renderAreas();
+      S.edit = { value: value, baseText: base, sha: latest.sha === undefined ? null : latest.sha, unknownSha: latest.sha === undefined, status: status, remote: null, saving: false, focus: true };
+      renderSheet(sh);
     });
   }
-  function saveAreas() {
-    var A = state.areas, e = A.edit; if (!e || e.loading || e.saving) return;
-    var ta = $('areaText'); if (ta) e.value = ta.value;
-    if (!requestTokenForSave('areas', '保存 areas.md 需要 GitHub 令牌，填好后会自动继续保存。')) return;
-    if (e.value === e.baseText) { e.status = { kind: 'info', text: '没有改动。' }; return renderAreas(); }
-    var go = e.unknownSha ? fetchAreasLatest().then(function (l) { e.unknownSha = false; e.sha = l.sha; if (l.text !== e.baseText) { e.baseText = l.text; e.remote = l.text; throw { conflict: true }; } }) : Promise.resolve();
-    e.saving = true; e.status = null; renderAreas();
+  function saveSheet(sh) {
+    var S = sheetState(sh), e = S.edit; if (!e || e.loading || e.saving) return;
+    var ta = $(sh.textId); if (ta) e.value = ta.value;
+    if (!requestTokenForSave(sh.key, '保存 ' + sh.path + ' 需要 GitHub 令牌，填好后会自动继续保存。')) return;
+    if (e.value === e.baseText) { e.status = { kind: 'info', text: '没有改动。' }; return renderSheet(sh); }
+    var go = e.unknownSha ? fetchSheetLatest(sh).then(function (l) { e.unknownSha = false; e.sha = l.sha; if (l.text !== e.baseText) { e.baseText = l.text; e.remote = l.text; throw { conflict: true }; } }) : Promise.resolve();
+    e.saving = true; e.status = null; renderSheet(sh);
     go.then(function () {
-      var body = { message: '领域：' + (e.sha ? '更新' : '新建') + ' areas.md', content: utf8ToB64(e.value), branch: BRANCH };
+      var body = { message: sh.commit(e), content: utf8ToB64(e.value), branch: BRANCH };
       if (e.sha) body.sha = e.sha;
-      return api('PUT', repoPath + '/contents/' + AREAS_PATH, body).then(function (res) {
+      return api('PUT', repoPath + '/contents/' + sh.path, body).then(function (res) {
         e.saving = false;
         if (res.ok && res.json && res.json.content) {
           var commit = res.json.commit && res.json.commit.sha ? res.json.commit.sha : '';
-          A.text = e.value; A.sha = res.json.content.sha; A.status = 'ok'; A.edit = null;
-          try { localStorage.removeItem(DRAFT_KEY + 'areas'); } catch (x) {}
-          A.flash = { kind: 'ok', text: '已保存' + (commit ? '（提交 <a target="_blank" rel="noopener" href="' + esc(REPO + '/commit/' + commit) + '">' + esc(commit.slice(0, 7)) + '</a>）' : '') + '。GitHub Pages 上的文件可能要 1–2 分钟才更新，这里已显示保存后的内容。' };
-          return renderAreas();
+          S.text = e.value; S.sha = res.json.content.sha; S.status = 'ok'; S.edit = null;
+          try { localStorage.removeItem(DRAFT_KEY + sh.key); } catch (x) {}
+          S.flash = { kind: 'ok', text: '已保存' + (commit ? '（提交 <a target="_blank" rel="noopener" href="' + esc(REPO + '/commit/' + commit) + '">' + esc(commit.slice(0, 7)) + '</a>）' : '') + '。GitHub Pages 上的文件可能要 1–2 分钟才更新，这里已显示保存后的内容。' };
+          return renderSheet(sh);
         }
         if (res.status === 409 || res.status === 422) {
-          return fetchAreasLatest().then(function (l) {
-            if (l.sha === e.sha) { e.status = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) }; return renderAreas(); }
-            e.sha = l.sha; e.baseText = l.text; e.remote = l.text; A.text = l.text;
-            e.status = { kind: 'error', text: '保存失败：areas.md 在别处被修改过（版本冲突）。已获取远端最新内容（见下方），你的输入仍保留在输入框里，请对照合并后再点「保存」。' };
-            renderAreas();
+          return fetchSheetLatest(sh).then(function (l) {
+            if (l.sha === e.sha) { e.status = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) }; return renderSheet(sh); }
+            e.sha = l.sha; e.baseText = l.text; e.remote = l.text; S.text = l.text;
+            e.status = { kind: 'error', text: '保存失败：' + esc(sh.path) + ' 在别处被修改过（版本冲突）。已获取远端最新内容（见下方），你的输入仍保留在输入框里，请对照合并后再点「保存」。' };
+            renderSheet(sh);
           });
         }
         e.status = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) + (res.status === 401 ? ' <button type="button" class="link" data-act="settings">打开设置</button>' : '') };
-        renderAreas();
+        renderSheet(sh);
       });
     }).catch(function (err) {
       e.saving = false;
-      e.status = { kind: 'error', text: err && err.conflict ? '保存前发现 areas.md 已在别处更新（见下方远端最新内容），你的输入仍保留，请对照合并后再点「保存」。' : '保存失败：' + esc(err && err.message || String(err)) };
-      renderAreas();
+      e.status = { kind: 'error', text: err && err.conflict ? '保存前发现 ' + esc(sh.path) + ' 已在别处更新（见下方远端最新内容），你的输入仍保留，请对照合并后再点「保存」。' : '保存失败：' + esc(err && err.message || String(err)) };
+      renderSheet(sh);
     });
   }
+  function bindSheet(sh) {
+    var el = $(sh.el); if (!el) return;
+    el.addEventListener('click', function (ev) {
+      var b = ev.target.closest('[data-aact],[data-area],[data-atype],[data-act="settings"]'); if (!b) return;
+      var S = sheetState(sh);
+      if (b.hasAttribute('data-atype')) {
+        var typeName = b.getAttribute('data-atype');
+        if (typeName) { S.type = typeName; S.focus = ''; renderSheet(sh); }
+        return;
+      }
+      if (b.hasAttribute('data-area')) { var d = $('area-' + b.getAttribute('data-area')); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
+      if (b.getAttribute('data-act') === 'settings') { state.pendingSave = false; openSettings(); return; }
+      var act = b.getAttribute('data-aact');
+      if (act === 'edit') startSheetEdit(sh);
+      else if (act === 'save') saveSheet(sh);
+      else if (act === 'cancel') { try { localStorage.removeItem(DRAFT_KEY + sh.key); } catch (x) {} S.edit = null; renderSheet(sh); }
+    });
+    el.addEventListener('toggle', function (ev) {
+      var d = ev.target; if (d.classList && d.classList.contains('area')) sheetState(sh).closed[d.getAttribute('data-name')] = !d.open;
+    }, true);
+  }
+  function loadAreas(force) { return loadSheet(SHEETS.areas, force); }
+  function renderAreas() { renderSheet(SHEETS.areas); }
+  function areasEditorActive() { return sheetEditorActive(SHEETS.areas); }
+  function saveAreas() { saveSheet(SHEETS.areas); }
+  function loadBehavior(force) { return loadSheet(SHEETS.behavior, force); }
+  function renderBehavior() { renderSheet(SHEETS.behavior); }
+  function behaviorEditorActive() { return sheetEditorActive(SHEETS.behavior); }
+  function saveBehavior() { saveSheet(SHEETS.behavior); }
+  bindSheet(SHEETS.areas);
+  bindSheet(SHEETS.behavior);
+
 
   // ---------- Bot: bots.md (one "## " section per bot, "### 字段" subsections), whole-file editor ----------
   var BOTS_PATH = 'bots.md';
@@ -2574,11 +2650,11 @@
   }
   function botAreaNames() {
     var A = state.areas, extra = [];
-    if (A.status === 'ok' && A.text) extra = parseAreas(A.text).areas.map(function (a) { return a.name; }).filter(function (n) { return n !== AREAS_TEMPLATE && !/分工/.test(n); });
+    if (A.status === 'ok' && A.text) extra = parseAreas(A.text).areas.map(function (a) { return a.name; }).filter(function (n) { return n !== '行为模板' && !/分工/.test(n); });
     return BOT_AREAS.concat(extra.filter(function (n) { return BOT_AREAS.indexOf(n) < 0; }));
   }
   function botTodoHtml(html) { return html.replace(/(^|>)([^<]+)/g, function (m, a, t) { return a + t.replace(/待补充/g, '<mark class="todo">待补充</mark>'); }); }
-  function botAreaChip(n) { var i = BOT_AREAS.indexOf(n); return '<button type="button" class="bachip ac' + (i < 0 ? 'x' : i) + '" data-goarea="' + esc(n) + '" title="去「领域」页看 ' + esc(n) + '">' + esc(n) + '</button>'; }
+  function botAreaChip(n) { var i = BOT_AREAS.indexOf(n); return '<button type="button" class="bachip ac' + (i < 0 ? 'x' : i) + '" data-goarea="' + esc(n) + '" title="去「实践思路」看 ' + esc(n) + '">' + esc(n) + '</button>'; }
   function botNode(item, bots, cls) {
     var j = botMatch(item, bots);
     return j >= 0 ? '<button type="button" class="bnode bot ' + cls + '" data-bot="' + j + '">' + esc(item) + '</button>' : '<span class="bnode ' + cls + '">' + esc(item) + '</span>';
@@ -3635,6 +3711,7 @@
     if (state.tab === 'bots') { var be = state.bots.edit, bt = $('botText'); if (be && bt) be.value = bt.value; renderBots(); }
     if (state.tab === 'memo') { var me = state.memo.edit, mt = $('memoText'); if (me && mt) me.value = mt.value; renderMemo(); }
     if (state.tab === 'areas') { var ae = state.areas.edit, at = $('areaText'); if (ae && at) ae.value = at.value; renderAreas(); }
+    if (state.tab === 'behavior') { var bhe = state.behavior.edit, bht = $('behaviorText'); if (bhe && bht) bhe.value = bht.value; renderBehavior(); }
     if (state.tab === 'calendar') {
       renderDetail();
       if (state.pedit && !state.pedit.loading) { readPInputs(state.pedit); renderPeriods(); }
@@ -3673,13 +3750,18 @@
       parts[0] = 'detail';
       history.replaceState(null, '', '#detail');
     }
-    var tab = ['board', 'calendar', 'detail', 'memo', 'areas', 'docs', 'resources', 'bots'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
+    var tab = ['board', 'calendar', 'behavior', 'areas', 'detail', 'memo', 'docs', 'resources', 'bots'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
     setTab(tab);
     if (tab === 'board') renderBoardTab();
     if (tab === 'calendar') selectDay(parseYmd(parts[1]) ? parts[1] : (state.selected || todayStr()), true);
+    if (tab === 'behavior') {
+      if (prevTab !== 'behavior') state.behavior.type = BEHAVIOR_DEFAULT;
+      if (!behaviorEditorActive()) renderBehavior();
+      loadBehavior();
+    }
     if (tab === 'areas') {
       if (state.areas.focus) state.areas.type = state.areas.focus;
-      else if (prevTab !== 'areas') state.areas.type = AREAS_TEMPLATE;
+      else if (prevTab !== 'areas') state.areas.type = '';
       if (!areasEditorActive()) renderAreas();
       loadAreas();
     }
@@ -3717,6 +3799,7 @@
     if (state.pedit && !state.pedit.saving) { if (!state.pedit.loading) { readPInputs(state.pedit); savePDraft(state.pedit); } state.pedit = null; }
     ['week', 'month'].forEach(function (k) { state.notes[k].cache = {}; state.notes[k].pending = {}; });
     if (!(state.areas.edit && state.areas.edit.saving)) { state.areas.edit = null; state.areas.flash = null; state.areas.status = ''; }   // unsaved areas text stays as a draft
+    if (!(state.behavior.edit && state.behavior.edit.saving)) { state.behavior.edit = null; state.behavior.flash = null; state.behavior.status = ''; }
     if (!(state.bots.edit && state.bots.edit.saving)) { state.bots.edit = null; state.bots.flash = null; state.bots.status = ''; }   // unsaved bots text stays as a draft
     if (!(state.memo.edit && state.memo.edit.saving)) { state.memo.edit = null; state.memo.flash = null; state.memo.status = ''; }
     state.insights.status = ''; state.insights.parsed = null;
@@ -3908,21 +3991,6 @@
     else if (act === 'cancel') { try { localStorage.removeItem(DRAFT_KEY + 'memo'); } catch (x) {} M.edit = null; renderMemo(); }
   });
   $('memo').addEventListener('toggle', function (ev) { var d = ev.target; if (d.classList && d.classList.contains('area')) state.memo.closed[d.getAttribute('data-name')] = !d.open; }, true);
-  $('areas').addEventListener('click', function (ev) {
-    var b = ev.target.closest('[data-aact],[data-area],[data-atype],[data-act="settings"]'); if (!b) return;
-    if (b.hasAttribute('data-atype')) {
-      var typeName = b.getAttribute('data-atype');
-      if (typeName) { state.areas.type = typeName; state.areas.focus = ''; renderAreas(); }
-      return;
-    }
-    if (b.hasAttribute('data-area')) { var d = $('area-' + b.getAttribute('data-area')); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
-    if (b.getAttribute('data-act') === 'settings') { state.pendingSave = false; openSettings(); return; }
-    var act = b.getAttribute('data-aact'), A = state.areas;
-    if (act === 'edit') startAreasEdit();
-    else if (act === 'save') saveAreas();
-    else if (act === 'cancel') { try { localStorage.removeItem(DRAFT_KEY + 'areas'); } catch (x) {} A.edit = null; renderAreas(); }
-  });
-  $('areas').addEventListener('toggle', function (ev) { var d = ev.target; if (d.classList && d.classList.contains('area')) state.areas.closed[d.getAttribute('data-name')] = !d.open; }, true);
   $('bots').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-bact],[data-bot],[data-goarea],[data-act="settings"]'); if (!b) return;
     if (b.hasAttribute('data-bot')) { var d = $('bot-' + b.getAttribute('data-bot')); if (d) { d.open = true; d.scrollIntoView({ block: 'start', behavior: 'smooth' }); } return; }
