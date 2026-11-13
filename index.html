@@ -150,6 +150,10 @@
   .dxf.on { background: #24292f; color: #fff; border-color: #24292f; }
   .dxf.off { opacity: .55; }
   .pagetitle { font-size: 18px; margin: 0 0 10px; font-weight: 700; }
+  .focus-tabs { display: flex; flex-wrap: wrap; gap: 0 4px; margin: 0 0 12px; border-bottom: 1px solid var(--border); }
+  .focus-tabs a { position: relative; top: 1px; padding: 7px 16px; text-decoration: none; color: var(--muted); font-weight: 600; font-size: 14px; border: 1px solid transparent; border-bottom: none; border-radius: 8px 8px 0 0; }
+  .focus-tabs a:hover { color: var(--text); background: #f6f8fa; }
+  .focus-tabs a.on { color: var(--text); background: var(--card); border-color: var(--border); box-shadow: inset 0 -1px 0 var(--card); }
   .det-bar { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 8px; }
   .det-bar input[type="search"] { flex: 1 1 200px; min-width: 0; }
   .det-range { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 10px; font-size: 13px; }
@@ -495,8 +499,7 @@
 <nav class="tabs">
   <a href="#board" data-tab="board">看板</a>
   <a href="#calendar" data-tab="calendar">日历</a>
-  <a href="#behavior" data-tab="behavior">行为模板</a>
-  <a href="#areas" data-tab="areas">实践思路</a>
+  <a href="#focus" data-tab="focus">关注领域</a>
   <a href="#detail" data-tab="detail">明细扩展</a>
   <a href="#docs" data-tab="docs">文档资源</a>
   <a href="#resources" data-tab="resources">资源</a>
@@ -554,14 +557,18 @@
     </div>
   </section>
 
-  <section class="tab" id="tab-behavior">
-    <h2 class="pagetitle">行为模板</h2>
-    <div id="behavior"><div class="nodata">加载中…</div></div>
-  </section>
-
-  <section class="tab" id="tab-areas">
-    <h2 class="pagetitle">实践思路</h2>
-    <div id="areas"><div class="nodata">加载中…</div></div>
+  <section class="tab" id="tab-focus">
+    <h2 class="pagetitle">关注领域</h2>
+    <div class="focus-tabs" role="tablist" aria-label="关注领域">
+      <a href="#behavior" role="tab" data-focus="behavior" aria-selected="true" class="on">行为模板</a>
+      <a href="#areas" role="tab" data-focus="areas" aria-selected="false">实践思路</a>
+    </div>
+    <div data-focus-pane="behavior">
+      <div id="behavior"><div class="nodata">加载中…</div></div>
+    </div>
+    <div data-focus-pane="areas" hidden>
+      <div id="areas"><div class="nodata">加载中…</div></div>
+    </div>
   </section>
 
   <section class="tab" id="tab-detail">
@@ -709,7 +716,7 @@
   var state = {
     tasks: [], logs: [], loadedAt: null, src: '',
     daily: { list: {}, status: 'idle', error: '', cache: {}, pending: {}, tried: {} },
-    tab: 'board', month: null, monthPrefetchGen: 0, selected: null, edit: null, flash: null,
+    tab: 'board', focusView: 'behavior', month: null, monthPrefetchGen: 0, selected: null, edit: null, flash: null,
     stat: '', mstatus: '', tlOpen: false, cq: '', kevOnly: false, dload: null, pendingSave: false,
     dextraShow: { ops: true, orders: true, overseas: true, dayidea: true },
     tokenStorageErr: '', tokenBanner: '',
@@ -2344,7 +2351,8 @@
 
 
 
-  // ---------- 实践思路 areas.md / 行为模板 behavior.md（各自的类型芯片只作用于当前页）----------
+  // ---------- 关注领域：页内「行为模板」behavior.md /「实践思路」areas.md，类型芯片只作用于当前内部 tab ----------
+  var FOCUS_VIEWS = { focus: 'behavior', behavior: 'behavior', areas: 'areas' };
   var AREA_TYPES = ['Web3 信号和单子', 'Web3 运营', '软件开发和海外需求', '成长', '系统与 bot 分工'];
   var BEHAVIOR_DEFAULT = AREA_TYPES[0];
   var AREAS_PATH = 'areas.md';
@@ -2524,7 +2532,7 @@
     S.status = 'loading';
     return loadFile(sh.path).then(function (res) { S.text = res.text; S.status = 'ok'; S.error = ''; }, function (err) {
       if (err.status === 404) { S.text = ''; S.status = 'missing'; S.error = ''; } else { S.status = 'error'; S.error = err.message; }
-    }).then(function () { if (state.tab === sh.key && !sheetEditorActive(sh)) renderSheet(sh); });
+    }).then(function () { if (sheetIsShown(sh) && !sheetEditorActive(sh)) renderSheet(sh); });
   }
   function fetchSheetLatest(sh) {
     return api('GET', repoPath + '/contents/' + sh.path + '?ref=' + BRANCH).then(function (res) {
@@ -2605,6 +2613,32 @@
     el.addEventListener('toggle', function (ev) {
       var d = ev.target; if (d.classList && d.classList.contains('area')) sheetState(sh).closed[d.getAttribute('data-name')] = !d.open;
     }, true);
+  }
+  function sheetIsShown(sh) { return state.tab === 'focus' && state.focusView === sh.key; }
+  function syncFocusChrome() {
+    var view = state.focusView === 'areas' ? 'areas' : 'behavior';
+    document.querySelectorAll('[data-focus]').forEach(function (a) {
+      var on = a.getAttribute('data-focus') === view;
+      a.classList.toggle('on', on);
+      a.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('[data-focus-pane]').forEach(function (p) {
+      p.hidden = p.getAttribute('data-focus-pane') !== view;
+    });
+  }
+  function openFocus(view, prevTab, prevView) {
+    var entered = prevTab !== 'focus' || prevView !== view;
+    state.focusView = view;
+    syncFocusChrome();
+    var sh = SHEETS[view], S = sheetState(sh);
+    if (entered) {
+      if (view === 'behavior') { if (!S.keepType) S.type = BEHAVIOR_DEFAULT; }
+      else if (S.focus) S.type = S.focus;
+      else if (!S.keepType) S.type = '';
+    }
+    S.keepType = false;
+    if (!sheetEditorActive(sh)) renderSheet(sh);
+    loadSheet(sh);
   }
   function loadAreas(force) { return loadSheet(SHEETS.areas, force); }
   function renderAreas() { renderSheet(SHEETS.areas); }
@@ -2895,7 +2929,7 @@
     if (!layout) return;
     annPaintDoc({ doc: sh.key, target: layout.getAttribute('data-ann-target') || '', layout: layout });
   }
-  function annPaintCurrent() { if (SHEETS[state.tab]) paintAnn(SHEETS[state.tab]); }
+  function annPaintCurrent() { if (state.tab === 'focus' && SHEETS[state.focusView]) paintAnn(SHEETS[state.focusView]); }
   function loadAnn(force) {
     var A = state.ann;
     if (!force && (A.status === 'ok' || A.status === 'missing' || A.status === 'loading')) return Promise.resolve();
@@ -2990,7 +3024,7 @@
     if (!sh) return;
     var S = sheetState(sh);
     S.type = target; S.focus = '';
-    if (state.tab !== doc) { S.keepType = true; location.hash = '#' + doc; }
+    if (state.tab !== 'focus' || state.focusView !== doc) { S.keepType = true; location.hash = '#' + doc; }
     else renderSheet(sh);
     annScrollActive();
   }
@@ -2999,7 +3033,7 @@
     if (!it) return;
     state.ann.activeId = id;
     state.ann.armDelete = '';
-    if (it.doc !== state.tab || !SHEETS[it.doc] || sheetState(SHEETS[it.doc]).type !== it.target) { annOpenTarget(it.doc, it.target); return; }
+    if (state.tab !== 'focus' || it.doc !== state.focusView || !SHEETS[it.doc] || sheetState(SHEETS[it.doc]).type !== it.target) { annOpenTarget(it.doc, it.target); return; }
     annPaintCurrent();
     annScrollActive();
   }
@@ -3041,6 +3075,8 @@
     if (t && t.closest && t.closest('.ann-rail, textarea, input, button') && !(root.contains && root.contains(t))) { hideAnnPop(); return; }
     var tab = root.closest('.tab');
     if (tab && !tab.classList.contains('active')) return;
+    var pane = root.closest('[data-focus-pane]');
+    if (pane && pane.hidden) return;
     var cap = annCapture(root);
     if (!cap) { hideAnnPop(); return; }
     var rect = window.getSelection().getRangeAt(0).getBoundingClientRect();
@@ -3210,7 +3246,7 @@
     return BOT_AREAS.concat(extra.filter(function (n) { return BOT_AREAS.indexOf(n) < 0; }));
   }
   function botTodoHtml(html) { return html.replace(/(^|>)([^<]+)/g, function (m, a, t) { return a + t.replace(/待补充/g, '<mark class="todo">待补充</mark>'); }); }
-  function botAreaChip(n) { var i = BOT_AREAS.indexOf(n); return '<button type="button" class="bachip ac' + (i < 0 ? 'x' : i) + '" data-goarea="' + esc(n) + '" title="去「实践思路」看 ' + esc(n) + '">' + esc(n) + '</button>'; }
+  function botAreaChip(n) { var i = BOT_AREAS.indexOf(n); return '<button type="button" class="bachip ac' + (i < 0 ? 'x' : i) + '" data-goarea="' + esc(n) + '" title="去「关注领域」的实践思路看 ' + esc(n) + '">' + esc(n) + '</button>'; }
   function botNode(item, bots, cls) {
     var j = botMatch(item, bots);
     return j >= 0 ? '<button type="button" class="bnode bot ' + cls + '" data-bot="' + j + '">' + esc(item) + '</button>' : '<span class="bnode ' + cls + '">' + esc(item) + '</span>';
@@ -4266,8 +4302,11 @@
   function refreshTokenHints() {
     if (state.tab === 'bots') { var be = state.bots.edit, bt = $('botText'); if (be && bt) be.value = bt.value; renderBots(); }
     if (state.tab === 'memo') { var me = state.memo.edit, mt = $('memoText'); if (me && mt) me.value = mt.value; renderMemo(); }
-    if (state.tab === 'areas') { var ae = state.areas.edit, at = $('areaText'); if (ae && at) ae.value = at.value; renderAreas(); }
-    if (state.tab === 'behavior') { var bhe = state.behavior.edit, bht = $('behaviorText'); if (bhe && bht) bhe.value = bht.value; renderBehavior(); }
+    if (state.tab === 'focus' && SHEETS[state.focusView]) {
+      var fsh = SHEETS[state.focusView], fS = sheetState(fsh), fta = $(fsh.textId);
+      if (fS.edit && fta) fS.edit.value = fta.value;
+      renderSheet(fsh);
+    }
     if (state.tab === 'calendar') {
       renderDetail();
       if (state.pedit && !state.pedit.loading) { readPInputs(state.pedit); renderPeriods(); }
@@ -4306,23 +4345,12 @@
       parts[0] = 'detail';
       history.replaceState(null, '', '#detail');
     }
-    var tab = ['board', 'calendar', 'behavior', 'areas', 'detail', 'memo', 'docs', 'resources', 'bots'].indexOf(parts[0]) >= 0 ? parts[0] : 'board';
+    var focusView = FOCUS_VIEWS[parts[0]];
+    var tab = focusView ? 'focus' : (['board', 'calendar', 'detail', 'memo', 'docs', 'resources', 'bots'].indexOf(parts[0]) >= 0 ? parts[0] : 'board');
     setTab(tab);
     if (tab === 'board') renderBoardTab();
     if (tab === 'calendar') selectDay(parseYmd(parts[1]) ? parts[1] : (state.selected || todayStr()), true);
-    if (tab === 'behavior') {
-      if (prevTab !== 'behavior' && !state.behavior.keepType) state.behavior.type = BEHAVIOR_DEFAULT;
-      state.behavior.keepType = false;
-      if (!behaviorEditorActive()) renderBehavior();
-      loadBehavior();
-    }
-    if (tab === 'areas') {
-      if (state.areas.focus) state.areas.type = state.areas.focus;
-      else if (prevTab !== 'areas' && !state.areas.keepType) state.areas.type = '';
-      state.areas.keepType = false;
-      if (!areasEditorActive()) renderAreas();
-      loadAreas();
-    }
+    if (tab === 'focus') openFocus(focusView, prevTab, state.focusView);
     if (tab === 'memo') { if (!memoEditorActive()) renderMemo(); loadMemo(); }
     if (tab === 'detail') { renderDetailFeed(); loadDetailFeed(); }
     if (tab === 'docs') {
