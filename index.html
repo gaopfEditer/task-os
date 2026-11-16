@@ -305,6 +305,19 @@
   .res-bar input { flex: 1 1 240px; min-width: 0; }
   .res-info { font-size: 12px; color: var(--muted); }
   .res-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .lw-bar { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 8px; }
+  .lw-bar input { flex: 1 1 240px; min-width: 0; }
+  .lw-list { list-style: none; margin: 0; padding: 0; }
+  .lw-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .lw-item .lw-top { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; margin-bottom: 4px; }
+  .lw-item .lw-ts { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .lw-item .lw-cat { font-size: 11px; font-weight: 600; padding: 0 6px; border-radius: 10px; background: #eef1f4; color: #57606a; }
+  .lw-item.cat-signal .lw-cat { background: #ddf4ff; color: #0550ae; }
+  .lw-item.cat-publish .lw-cat { background: #fff8c5; color: #7d4e00; }
+  .lw-item.cat-bitget .lw-cat { background: #dafbe1; color: var(--green); }
+  .lw-item.cat-vpn .lw-cat { background: #fbefff; color: #8250df; }
+  .lw-item .lw-title { font-weight: 600; flex: 1 1 200px; min-width: 0; word-break: break-word; }
+  .lw-item .lw-body { font-size: 13px; color: var(--text); white-space: pre-wrap; word-break: break-word; margin: 0; }
   .rtag-f { font-size: 12px; padding: 2px 9px; border-radius: 12px; max-width: 100%; overflow-wrap: anywhere; }
   .rtag-f i { font-style: normal; color: var(--faint); margin-left: 4px; }
   .rtag-f.pin { background: #ddf4ff; border-color: #54aeff; color: #0550ae; }
@@ -505,6 +518,7 @@
   <a href="#resources" data-tab="resources">资源</a>
   <a href="#bots" data-tab="bots">Bot</a>
   <a href="#memo" data-tab="memo">备忘清单</a>
+  <a href="#livewatch" data-tab="livewatch">实时关注</a>
 </nav>
 <main>
   <div id="msg"></div>
@@ -602,6 +616,14 @@
   <section class="tab" id="tab-memo">
     <h2 class="pagetitle">备忘清单：待额度充足时执行</h2>
     <div id="memo"><div class="nodata">加载中…</div></div>
+  </section>
+
+  <section class="tab" id="tab-livewatch">
+    <h2 class="pagetitle">实时关注</h2>
+    <p class="hint" style="margin:0 0 8px">由本机 <code>python-ai-operate</code> 在每天 0 / 8 / 12 / 16 / 20 点增量写入 <code>data/live_watch.json</code>（VPN 仅在 12 / 20 点）。信号、发布、Bitget 自动下单与 VPN 状态分栏筛选。</p>
+    <div class="lw-bar"><input id="lwq" type="search" placeholder="搜索标题 / 正文…" autocomplete="off" aria-label="搜索实时关注"><span id="lwInfo" class="res-info"></span><a href="https://github.com/gaopfEditer/task-os/blob/main/data/live_watch.json" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 live_watch.json</a></div>
+    <div id="lwTags" class="res-tags"></div>
+    <div id="liveWatchFeed"><div class="nodata">加载中…</div></div>
   </section>
 
   <footer>
@@ -722,7 +744,8 @@
     tokenStorageErr: '', tokenBanner: '',
     detail: { show: { ops: true, orders: true, overseas: true, dayidea: true }, from: '', to: '', q: '', loading: false, loadGen: 0 },
     preview: { from: '', to: '', showPlan: false, loading: false, loadGen: 0 },
-    insights: { status: '', text: '', parsed: null, error: '' }
+    insights: { status: '', text: '', parsed: null, error: '' },
+    liveWatch: { status: '', data: null, error: '', q: '', cat: '', gen: 0 }
   };
   var $ = function (id) { return document.getElementById(id); };
 
@@ -4314,6 +4337,61 @@
     }
   }
 
+  // ---------- 实时关注 data/live_watch.json ----------
+  var LIVE_WATCH_PATH = 'data/live_watch.json';
+  var LIVE_CATS = [['signal', '信号'], ['publish', '发布'], ['bitget', 'Bitget'], ['vpn', 'VPN']];
+  function liveCatOn(key) { return !state.liveWatch.cat || state.liveWatch.cat === key; }
+  function liveTagsHtml() {
+    var L = state.liveWatch, items = (L.data && L.data.items) || [], counts = {};
+    LIVE_CATS.forEach(function (c) { counts[c[0]] = 0; });
+    items.forEach(function (it) { if (it && it.category && counts[it.category] != null) counts[it.category]++; });
+    var h = '<span>类型</span>';
+    h += '<button type="button" class="rtag-f' + (!L.cat ? ' on' : ' zero') + '" data-lwcat="">全部</button>';
+    LIVE_CATS.forEach(function (c) {
+      var on = L.cat === c[0], n = counts[c[0]] || 0;
+      h += '<button type="button" class="rtag-f' + (on ? ' on' : (n ? '' : ' zero')) + '" data-lwcat="' + c[0] + '" aria-pressed="' + on + '">' + esc(c[1]) + (n ? ' <i>' + n + '</i>' : '') + '</button>';
+    });
+  return h;
+  }
+  function renderLiveWatch() {
+    var L = state.liveWatch, el = $('liveWatchFeed'), info = $('lwInfo'), tags = $('lwTags');
+    if (tags) tags.innerHTML = liveTagsHtml();
+    if (L.status === 'loading') { el.innerHTML = '<div class="nodata">加载中…</div>'; if (info) info.textContent = ''; return; }
+    if (L.status === 'error') { el.innerHTML = '<div class="msg error">' + esc(L.error) + '</div>'; if (info) info.textContent = ''; return; }
+    if (L.status === 'missing') { el.innerHTML = '<div class="nodata">尚无 <code>data/live_watch.json</code>。请在 python-ai-operate 运行 <code>scripts/task_os_live_watch_sync.py</code>。</div>'; if (info) info.textContent = ''; return; }
+    var items = (L.data && L.data.items) || [], q = (L.q || '').trim().toLowerCase(), shown = 0, h = '';
+    if (L.data && L.data.last_slot) h += '<p class="hint">最近同步档：' + esc(L.data.last_slot) + (L.data.updated_at ? ' · 更新 ' + esc(L.data.updated_at) : '') + '</p>';
+    items.forEach(function (it) {
+      if (!it || !liveCatOn(it.category)) return;
+      var blob = ((it.title || '') + '\n' + (it.body || '')).toLowerCase();
+      if (q && q.split(/\s+/).some(function (w) { return w && blob.indexOf(w) < 0; })) return;
+      shown++;
+      var cat = LIVE_CATS.find(function (c) { return c[0] === it.category; });
+      h += '<li class="lw-item cat-' + esc(it.category || '') + '"><div class="lw-top"><span class="lw-cat">' + esc(cat ? cat[1] : (it.category || '')) + '</span><span class="lw-title">' + esc(it.title || '（无标题）') + '</span><span class="lw-ts">' + esc(it.ts || '') + '</span></div>';
+      if (it.body) h += '<p class="lw-body">' + esc(it.body) + '</p>';
+      h += '</li>';
+    });
+    el.innerHTML = shown ? '<ul class="lw-list">' + h + '</ul>' : '<div class="nodata">没有匹配条目。</div>';
+    if (info) info.textContent = '显示 ' + shown + ' / ' + items.length + (q ? ' · 搜索「' + L.q + '」' : '');
+  }
+  function loadLiveWatch(force) {
+    var L = state.liveWatch;
+    if (!force && (L.status === 'ok' || L.status === 'missing' || L.status === 'loading')) return Promise.resolve();
+    L.status = 'loading'; L.gen++;
+    var gen = L.gen;
+    renderLiveWatch();
+    return loadFile(LIVE_WATCH_PATH).then(function (res) {
+      if (gen !== L.gen) return;
+      try { L.data = JSON.parse(res.text); } catch (e) { L.status = 'error'; L.error = 'JSON 解析失败'; renderLiveWatch(); return; }
+      L.status = 'ok'; L.error = ''; renderLiveWatch();
+    }, function (e) {
+      if (gen !== L.gen) return;
+      if (e.status === 404) { L.status = 'missing'; L.data = null; L.error = ''; }
+      else { L.status = 'error'; L.error = e.message; }
+      renderLiveWatch();
+    });
+  }
+
   // ---------- routing ----------
   function setTab(tab) {
     state.tab = tab;
@@ -4346,7 +4424,7 @@
       history.replaceState(null, '', '#detail');
     }
     var focusView = FOCUS_VIEWS[parts[0]];
-    var tab = focusView ? 'focus' : (['board', 'calendar', 'detail', 'memo', 'docs', 'resources', 'bots'].indexOf(parts[0]) >= 0 ? parts[0] : 'board');
+    var tab = focusView ? 'focus' : (['board', 'calendar', 'detail', 'memo', 'docs', 'resources', 'bots', 'livewatch'].indexOf(parts[0]) >= 0 ? parts[0] : 'board');
     setTab(tab);
     if (tab === 'board') renderBoardTab();
     if (tab === 'calendar') selectDay(parseYmd(parts[1]) ? parts[1] : (state.selected || todayStr()), true);
@@ -4371,6 +4449,7 @@
     }
     if (tab === 'resources') { renderResources(); loadResources(); }
     if (tab === 'bots') { if (!botsEditorActive()) renderBots(); loadBots(); if (state.areas.status === '') loadAreas().then(function () { if (state.tab === 'bots' && !botsEditorActive()) renderBots(); }); }
+    if (tab === 'livewatch') { renderLiveWatch(); loadLiveWatch(); }
   }
   function shiftMonth(n) {
     state.month = new Date(state.month.getFullYear(), state.month.getMonth() + n, 1);
@@ -4390,6 +4469,7 @@
     if (!(state.memo.edit && state.memo.edit.saving)) { state.memo.edit = null; state.memo.flash = null; state.memo.status = ''; }
     if (state.ann && !state.ann.saving) { state.ann.status = ''; state.ann.ops = []; state.ann.flash = null; state.ann.error = ''; state.ann.activeId = ''; state.ann.armDelete = ''; }
     state.insights.status = ''; state.insights.parsed = null;
+    state.liveWatch.status = ''; state.liveWatch.data = null; state.liveWatch.gen++;
     state.res.status = ''; state.res.parsed = null; state.res.gen++;   // re-read info/resources.md on 刷新
     state.docs.status = ''; state.docs.parsed = null; state.docs.gen++;
     if (!state.docs.view) state.docs.body = { status: '', text: '', error: '', path: '' };
@@ -4651,6 +4731,12 @@
     renderResources();
   });
   $('resources').addEventListener('toggle', function (ev) { var d = ev.target, R = state.res; if (d.classList && d.classList.contains('rgroup') && !R.q.trim() && !R.tag) R.closed[d.getAttribute('data-rname')] = !d.open; }, true);
+  $('lwq').addEventListener('input', function (ev) { state.liveWatch.q = ev.target.value; renderLiveWatch(); });
+  $('tab-livewatch').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-lwcat]'); if (!b) return;
+    state.liveWatch.cat = b.getAttribute('data-lwcat') || '';
+    renderLiveWatch();
+  });
   $('periods').addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-pact]'); if (!b) return;
     var act = b.getAttribute('data-pact'), pe = state.pedit;
