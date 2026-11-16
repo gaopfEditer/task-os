@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "updated_at": "2026-11-16T21:55:40+08:00",
+  "last_slot": "2026-11-16T00:00+08:00",
+  "items": [
+    {
+      "id": "meta:publish:gap:1794758400",
+      "category": "publish",
+      "ts": "2026-11-16T00:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-15.log",
+      "meta": {
+        "level": "info"
+      }
+    },
+    {
+      "id": "vpn:20:2026-11-16",
+      "category": "vpn",
+      "ts": "2026-11-16T20:00:00+08:00",
+      "title": "VPN Guard · OK · gsycloud",
+      "body": "健康: 正常\n出口归属: gsycloud",
+      "meta": {
+        "ok": true,
+        "owner": "gsycloud"
+      }
+    },
+    {
+      "id": "meta:publish:gap:1794830400",
+      "category": "publish",
+      "ts": "2026-11-16T20:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-16.log",
+      "meta": {
+        "level": "info"
+      }
+    },
+    {
+      "id": "sig:binance_square:366172473016786",
+      "category": "signal",
+      "ts": "2026-11-16T13:16:44+08:00",
+      "title": "币安广场 · btc7873 · ETH short",
+      "body": "Btc星辰 · 5小时 $ETH 开启回调，周五假突破之后，新一轮回调开启，反弹继续做空。下跌还有空间。 周五打了我止损，以太坊你害我😤 ETH -1.71% 76 1 116 140.2k\nhttps://www.binance.com/zh-CN/square/post/366172473016786",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "btc7873",
+        "profile": "btc7873",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:388146323993658",
+      "category": "signal",
+      "ts": "2026-11-16T18:16:10+08:00",
+      "title": "币安广场 · sanmageshuai · BTC,ETH,SOL short",
+      "body": "三马哥 · 11月14日 未来的行情震荡都算是好的，比如与1～6月行情类似，主线思路逢高做空。#BTC BTC -1.70% ETH -1.51% SOL -1.44% 5 8 11.9k\nhttps://www.binance.com/zh-CN/square/post/388146323993658",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "sanmageshuai",
+        "profile": "sanmageshuai",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:388147761596777",
+      "category": "signal",
+      "ts": "2026-11-16T18:16:01+08:00",
+      "title": "币安广场 · sanmageshuai · BTC,ETH short",
+      "body": "三马哥 · 11月14日 美联储持续且连续加息，历史几十年加息连美股都会腰斩，加密货币这只是跌的开始，所以不要再任何点位加仓任何现货，除非提到的那个极端点位才可以大胆进场。 未来的行情主要反弹空就可以，熊市才刚刚开始我们经历了牛市陷阱，就算…\n三马哥 · 11月14日 美联储持续且连续加息，历史几十年加息连美股都会腰斩，加密货币这只是跌的开始，所以不要再任何点位加仓任何现货，除非提到的那个极端点位才可以大胆进场。 未来的行情主要反弹空就可以，熊市才刚刚开始我们经历了牛市陷阱，就算不直接跌也不会单边上涨，就是震荡行情类似1～6月这种（乐观情况），只要你会做空就能赚多多的钱（屏蔽市场上的噪音） 让我们没想到的是，周六居然又在跌，都66开头了。#BTC 查看更多 BTC -1.70% ETH -1.51% 2.7k 8 141 16.7k\nhttps://www.binance.com/zh-CN/square/post/388147761596777",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "sanmageshuai",
+        "profile": "sanmageshuai",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:388337254868960",
+      "category": "signal",
+      "ts": "2026-11-14T18:15:52+08:00",
+      "title": "币安广场 · sanmageshuai · BTC short",
+      "body": "卧槽提前2天预判暴跌，兄弟们快到了，快来了。我不敢说极端点位了，极端点位是（60888？31888？）#BTC 👉[马前炮做空](https://app.binance.com/uni-qr/cpos/387864446909121?r=S…\n卧槽提前2天预判暴跌，兄弟们快到了，快来了。我不敢说极端点位了，极端点位是（60888？31888？）#BTC 👉[马前炮做空](https://app.binance.com/uni-qr/cpos/387864446909121?r=SDR9QGU2&l=zh-CN&uco=YlhI6nVWAwXtxF1K2b4Utg&uc=app_square_share_link&us=copylink)\nhttps://www.binance.com/zh-CN/square/post/388337254868960",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "sanmageshuai",
+        "profile": "sanmageshuai",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:388539098937164",
+      "category": "signal",
+      "ts": "2026-11-15T22:15:44+08:00",
+      "title": "币安广场 · sanmageshuai · BTC long",
+      "body": "可惜了咱们提前布局的60888多单差了1000U没有挂上，不过当时BTC的价格是71000我们就当是看到这里，虽然没有做空BTC但是做空了ETH。 ETH我们本来原计划是1938做多，但是一看那个垃圾走势果断反手再1940做空，而且我们在周…\n可惜了咱们提前布局的60888多单差了1000U没有挂上，不过当时BTC的价格是71000我们就当是看到这里，虽然没有做空BTC但是做空了ETH。 ETH我们本来原计划是1938做多，但是一看那个垃圾走势果断反手再1940做空，而且我们在周五、周六群里连续发了3个ETH的空，除了做空更告诉你不要高位做多，其中所有的空头目标策略都已经实现。👉[马前炮做空都实现了](https://app.binance.com/uni-qr/cpos/387864446909121?l=zh-CN&r=SDR9QGU2&uc=web_square_share_lin…\nhttps://www.binance.com/zh-CN/square/post/388539098937164",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "sanmageshuai",
+        "profile": "sanmageshuai",
+        "source_mode": "binance_square"
+      }
+    }
+  ]
+}
