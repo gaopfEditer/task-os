@@ -2,7 +2,8 @@
 
 > 来源：ChatGPT 对话归档（2026-10-23），分享链接：https://chatgpt.com/c/6adabaa7-45f4-83ec-abfe-5e9d71f098b1  
 > 特点：先宏观理解意图，再从更底层工作流解释；偏机制与心智模型。  
-> 相关：同日入库的 Grok Bot 版（更贴 Cursor / Hermes / Grok Bot 实际栈与可执行动作）。
+> 相关：同日入库的 Grok Bot 版（更贴 Cursor / Hermes / Grok Bot 实际栈与可执行动作）。  
+> 完整原文已于 2026-11-16 入库：`docs/介绍能力与Agent功能-ChatGPT原文-2026-10-23.md`（含前半段模型定位与 Agent 功能介绍）。
 
 ---
 
