@@ -3,10 +3,12 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 import {
+  DEFAULT_BASE_URL,
   DEFAULT_SOURCES,
   QUEUE_LIMIT,
   STORAGE_KEYS,
   describeItem,
+  displayBaseUrl,
   footerRows,
   formatTime,
   ingestPriorityFrame,
@@ -18,8 +20,10 @@ import {
   parseSources,
   queueUrl,
   replaceSourceItems,
+  resolvePriorityConfig,
   seenSet,
   sourceCounts,
+  sourceLabelText,
   sourcesUrl,
   toWebSocketUrl,
 } from './priority-footer.js';
@@ -191,4 +195,90 @@ test('formatTime uses the local calendar', () => {
   const local = new Date(2026, 10, 17, 7, 5);
   assert.equal(formatTime(local.toISOString()), '11-17 07:05');
   assert.equal(formatTime('not-a-date'), 'not-a-date');
+});
+
+test('source names are gray read-only labels', () => {
+  const css = readFileSync(new URL('./price-bubble.css', import.meta.url), 'utf8');
+  const panelCss = readFileSync(new URL('./taskos-desktop.css', import.meta.url), 'utf8');
+  const html = readFileSync(new URL('./price-bubble.html', import.meta.url), 'utf8');
+  const desktop = readFileSync(new URL('./taskos-desktop.js', import.meta.url), 'utf8');
+  const footer = readFileSync(new URL('./priority-footer.js', import.meta.url), 'utf8');
+
+  assert.match(css, /\.priority-name\s*,\s*\.priority-source-name\s*\{[^}]*color:\s*#8b949e/s);
+  assert.doesNotMatch(css, /\.priority-name\s*\{[^}]*#ffb86c/s);
+  assert.match(css, /\.priority-panel input\.priority-source-name:disabled\s*\{[^}]*color:\s*#8b949e/s);
+  assert.match(panelCss, /#tcRelaySources:disabled|input\.tc-source-name:disabled/);
+  assert.match(panelCss, /input\.tc-source-name:disabled\s*\{[^}]*color:\s*#8b949e/s);
+
+  assert.match(html, /id="prioritySourceNames"[^>]*value="胖猫社区"/);
+  assert.match(html, /id="prioritySourceNames"[^>]*\bdisabled\b/);
+  assert.match(html, /id="prioritySourceNames"[^>]*\breadonly\b/);
+  assert.doesNotMatch(html, /<input(?![^>]*\bdisabled\b)[^>]*胖猫社区/);
+
+  assert.match(desktop, /id="tcRelaySources"[^>]*value="胖猫社区"/);
+  assert.match(desktop, /id="tcRelaySources"[^>]*\bdisabled\b/);
+  assert.match(desktop, /id="tcRelaySources"[^>]*\breadonly\b/);
+  assert.match(desktop, /el\.disabled = true/);
+  assert.match(desktop, /el\.readOnly = true/);
+
+  assert.match(footer, /name\.className = 'priority-name priority-source-name'/);
+  assert.match(footer, /el\.disabled = true/);
+  assert.match(footer, /el\.readOnly = true/);
+  const saveFn = footer.slice(footer.indexOf('function onSave'), footer.indexOf('function closest'));
+  assert.doesNotMatch(saveFn, /prioritySourceNames|tcRelaySources/);
+
+  assert.equal(sourceLabelText(null), '胖猫社区');
+  assert.equal(sourceLabelText([]), '胖猫社区');
+  assert.equal(sourceLabelText(DEFAULT_SOURCES), '胖猫社区');
+  assert.equal(
+    sourceLabelText([
+      { id: 'pangmao', name: '胖猫社区' },
+      { id: 'vip', name: '会员群' },
+    ]),
+    '胖猫社区、会员群'
+  );
+});
+
+test('unset base URL defaults to the public relay and auto-connects when a secret is saved', () => {
+  assert.equal(DEFAULT_BASE_URL, 'https://op.g.ezcoin.ink');
+  assert.equal(displayBaseUrl(null), DEFAULT_BASE_URL);
+  assert.equal(displayBaseUrl(''), DEFAULT_BASE_URL);
+  assert.equal(displayBaseUrl(' https://example.com/relay/ '), 'https://example.com/relay');
+
+  const fresh = resolvePriorityConfig(null, '');
+  assert.equal(fresh.base, 'https://op.g.ezcoin.ink');
+  assert.equal(fresh.usedDefault, true);
+  assert.equal(fresh.connect, false);
+
+  const ready = resolvePriorityConfig(undefined, 'local-secret');
+  assert.equal(ready.base, 'https://op.g.ezcoin.ink');
+  assert.equal(ready.usedDefault, true);
+  assert.equal(ready.connect, true);
+  assert.equal(
+    toWebSocketUrl(ready.base, ready.secret),
+    'wss://op.g.ezcoin.ink/ws/priority?token=local-secret'
+  );
+
+  const saved = resolvePriorityConfig('https://example.com/relay/', 'local-secret');
+  assert.equal(saved.base, 'https://example.com/relay');
+  assert.equal(saved.usedDefault, false);
+  assert.equal(saved.connect, true);
+  assert.equal(saved.base.includes('op.g.ezcoin.ink'), false);
+
+  const blank = resolvePriorityConfig('   ', 'local-secret');
+  assert.equal(blank.base, DEFAULT_BASE_URL);
+  assert.equal(blank.connect, true);
+
+  const invalid = resolvePriorityConfig('javascript:alert(1)', 'local-secret');
+  assert.equal(invalid.connect, false);
+  assert.equal(invalid.usedDefault, false);
+
+  const footer = readFileSync(new URL('./priority-footer.js', import.meta.url), 'utf8');
+  const desktop = readFileSync(new URL('./taskos-desktop.js', import.meta.url), 'utf8');
+  assert.match(footer, /state\.networkConfigured = !!cfg\.connect/);
+  assert.match(desktop, /RELAY_DEFAULT_BASE = 'https:\/\/op\.g\.ezcoin\.ink'/);
+  assert.match(desktop, /if \(!raw\) return RELAY_DEFAULT_BASE/);
+  assert.doesNotMatch(footer, /149\.88\.80\.60/);
+  assert.doesNotMatch(desktop, /149\.88\.80\.60/);
+  assert.doesNotMatch(footer, /localStorage\.setItem\(STORAGE_KEYS\.baseUrl,\s*DEFAULT_BASE_URL\)/);
 });
