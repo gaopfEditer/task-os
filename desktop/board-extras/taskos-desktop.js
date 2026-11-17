@@ -6,6 +6,7 @@
   var ALERTS_KEY = 'taskos.desktop.alerts';
   var RELAY_BASE_KEY = 'taskos.desktop.priority.baseUrl';
   var RELAY_SECRET_KEY = 'taskos.desktop.priority.secret';
+  var RELAY_NOTIFY_KEY = 'taskos.desktop.priority.notify';
   var RELAY_DEFAULT_BASE = 'https://op.g.ezcoin.ink';
   var RELAY_DEFAULT_SOURCE = '胖猫社区';
   var DEFAULT_WATCH = 'BTC,ETH,SOL';
@@ -75,6 +76,9 @@
     }
   }
 
+  var relayMemory = null;
+  var relayHydrateGen = 0;
+
   function storedRelayBase() {
     try {
       return localStorage.getItem(RELAY_BASE_KEY);
@@ -89,6 +93,41 @@
     return normalizeRelayBase(raw) || raw;
   }
 
+  function readLocalRelay() {
+    var secret = '';
+    var notifyRaw = null;
+    try {
+      secret = localStorage.getItem(RELAY_SECRET_KEY) || '';
+      notifyRaw = localStorage.getItem(RELAY_NOTIFY_KEY);
+    } catch (e) {}
+    return {
+      baseUrl: storedRelayBase() || '',
+      secret: String(secret || '').trim(),
+      notifyRaw: notifyRaw
+    };
+  }
+
+  function writeRelayCache(bundle) {
+    try {
+      if (bundle.baseUrl) localStorage.setItem(RELAY_BASE_KEY, bundle.baseUrl);
+      else localStorage.removeItem(RELAY_BASE_KEY);
+      if (bundle.secret) localStorage.setItem(RELAY_SECRET_KEY, bundle.secret);
+      else localStorage.removeItem(RELAY_SECRET_KEY);
+      localStorage.setItem(RELAY_NOTIFY_KEY, bundle.notify === false ? '0' : '1');
+    } catch (e) {}
+  }
+
+  function relayBundlesEqual(a, b) {
+    if (!a || !b) return false;
+    return (a.baseUrl || '') === (b.baseUrl || '')
+      && (a.secret || '') === (b.secret || '')
+      && ((a.notify !== false) === (b.notify !== false));
+  }
+
+  function loadPriorityModule() {
+    return import('./priority-footer.js');
+  }
+
   function lockRelaySource() {
     var el = document.getElementById('tcRelaySources');
     if (!el) return;
@@ -101,14 +140,92 @@
 
   function fillRelayForm() {
     var secret = '';
-    try {
-      secret = localStorage.getItem(RELAY_SECRET_KEY) || '';
-    } catch (e) {}
+    var baseStored = storedRelayBase();
+    var notify = true;
+    if (relayMemory) {
+      secret = relayMemory.secret || '';
+      baseStored = relayMemory.baseUrl || '';
+      notify = relayMemory.notify !== false;
+    } else {
+      try {
+        secret = localStorage.getItem(RELAY_SECRET_KEY) || '';
+        var rawNotify = localStorage.getItem(RELAY_NOTIFY_KEY);
+        if (rawNotify === '0' || rawNotify === 'false' || rawNotify === 'off' || rawNotify === 'no') notify = false;
+      } catch (e) {}
+    }
     var baseInput = document.getElementById('tcRelayBase');
     var secretInput = document.getElementById('tcRelaySecret');
-    if (baseInput) baseInput.value = relayBaseForForm(storedRelayBase());
-    if (secretInput) secretInput.value = secret;
+    var notifyInput = document.getElementById('tcRelayNotify');
+    if (baseInput && document.activeElement !== baseInput) baseInput.value = relayBaseForForm(baseStored);
+    if (secretInput && document.activeElement !== secretInput) secretInput.value = secret;
+    if (notifyInput && document.activeElement !== notifyInput) notifyInput.checked = notify;
     lockRelaySource();
+  }
+
+  function persistRelay(bundle) {
+    relayMemory = {
+      baseUrl: bundle.baseUrl || '',
+      secret: bundle.secret || '',
+      notify: bundle.notify !== false,
+      storePresent: !!bundle.storePresent
+    };
+    return invoke('save_priority_config', {
+      baseUrl: relayMemory.baseUrl,
+      secret: relayMemory.secret,
+      notify: relayMemory.notify
+    }).then(function () {
+      relayMemory.storePresent = true;
+      writeRelayCache(relayMemory);
+    }, function (err) {
+      writeRelayCache(relayMemory);
+      throw err;
+    });
+  }
+
+  function hydrateRelay() {
+    var gen = ++relayHydrateGen;
+    var localRaw = readLocalRelay();
+    return loadPriorityModule().then(function (mod) {
+      var local = {
+        baseUrl: localRaw.baseUrl,
+        secret: localRaw.secret,
+        notify: mod.parseNotifyFlag(localRaw.notifyRaw)
+      };
+      return invoke('load_priority_config').then(function (shared) {
+        if (gen !== relayHydrateGen) return;
+        var next = mod.reconcilePriorityStore(shared, local);
+        var writing = next.migrate
+          ? persistRelay(next).then(function () { next.storePresent = true; }, function () { relayMemory = next; writeRelayCache(next); })
+          : Promise.resolve();
+        return writing.then(function () {
+          if (gen !== relayHydrateGen) return;
+          if (!relayMemory || !relayBundlesEqual(relayMemory, next)) {
+            relayMemory = {
+              baseUrl: next.baseUrl || '',
+              secret: next.secret || '',
+              notify: next.notify !== false,
+              storePresent: !!next.storePresent
+            };
+            writeRelayCache(relayMemory);
+          } else if (relayMemory) {
+            relayMemory.storePresent = !!next.storePresent;
+          }
+          fillRelayForm();
+        });
+      }, function () {
+        if (gen !== relayHydrateGen) return;
+        relayMemory = local;
+        fillRelayForm();
+      });
+    }, function () {
+      if (gen !== relayHydrateGen) return;
+      relayMemory = {
+        baseUrl: localRaw.baseUrl,
+        secret: localRaw.secret,
+        notify: true
+      };
+      fillRelayForm();
+    });
   }
 
   function uid() {
@@ -345,10 +462,11 @@
       '<input type="text" id="tcRelayBase" spellcheck="false" autocomplete="off" placeholder="https://op.g.ezcoin.ink">' +
       '<label for="tcRelaySecret">优先队列密钥（仅本机）</label>' +
       '<input type="password" id="tcRelaySecret" spellcheck="false" autocomplete="off">' +
+      '<label class="tc-check" for="tcRelayNotify"><input type="checkbox" id="tcRelayNotify" checked> 新卡片系统通知</label>' +
       '<div class="tc-row">' +
       '<button type="button" id="tcSaveRelay">保存优先队列</button>' +
       '</div>' +
-      '<p class="tc-note" id="tcRelayHint">来源名称由服务器提供，默认「胖猫社区」，不能在这里修改。未保存地址时使用 https://op.g.ezcoin.ink。地址与密钥只存在本机。</p>' +
+      '<p class="tc-note" id="tcRelayHint">来源名称由服务器提供，默认「胖猫社区」，不能在这里修改。未保存地址时使用 https://op.g.ezcoin.ink。地址与密钥保存在系统钥匙串，开发模式和安装包共用。新卡片默认弹出系统通知。</p>' +
       '<p class="tc-note">币种：Binance 现货→合约→Gate→CoinGecko。UAI 等新币 Binance 现货可能未上，会走合约/Gate。QQQ 等为美股 ETF，Binance 无 QQQUSDT，最后走东方财富。每 3 分钟刷新。</p>';
 
     header.insertAdjacentElement('afterend', panel);
@@ -388,6 +506,8 @@
     document.getElementById('tcSaveRelay').addEventListener('click', function () {
       var baseRaw = document.getElementById('tcRelayBase').value.trim();
       var secret = document.getElementById('tcRelaySecret').value.trim();
+      var notifyInput = document.getElementById('tcRelayNotify');
+      var notify = notifyInput ? !!notifyInput.checked : true;
       var hint = document.getElementById('tcRelayHint');
       lockRelaySource();
       if (baseRaw && !normalizeRelayBase(baseRaw)) {
@@ -396,33 +516,55 @@
       }
       var base = baseRaw ? normalizeRelayBase(baseRaw) : RELAY_DEFAULT_BASE;
       var keepCustom = !!(baseRaw && base !== RELAY_DEFAULT_BASE);
-      try {
-        if (!secret) {
-          if (keepCustom) localStorage.setItem(RELAY_BASE_KEY, base);
-          else localStorage.removeItem(RELAY_BASE_KEY);
-          localStorage.removeItem(RELAY_SECRET_KEY);
-        } else {
-          localStorage.setItem(RELAY_BASE_KEY, base);
-          localStorage.setItem(RELAY_SECRET_KEY, secret);
-        }
-      } catch (e) {
-        if (hint) hint.textContent = '无法写入本机存储。';
-        return;
-      }
+      var storedBase = !secret && !keepCustom ? '' : base;
       document.getElementById('tcRelayBase').value = !secret && !keepCustom ? RELAY_DEFAULT_BASE : base;
-      if (!secret) {
-        if (hint) hint.textContent = keepCustom
-          ? '已保留地址并清除密钥。'
-          : '已清除本机密钥。未保存地址时使用 https://op.g.ezcoin.ink。';
-        return;
-      }
-      if (hint) hint.textContent = '已保存。行情气泡会连接 ' + base + '。';
+      persistRelay({
+        baseUrl: storedBase,
+        secret: secret,
+        notify: notify,
+        storePresent: !!(relayMemory && relayMemory.storePresent)
+      }).then(function () {
+        if (!hint) return;
+        if (!secret) {
+          hint.textContent = keepCustom
+            ? '已保留地址并清除密钥。'
+            : '已清除本机密钥。未保存地址时使用 https://op.g.ezcoin.ink。';
+          return;
+        }
+        hint.textContent = '已保存。行情气泡会连接 ' + base + '。';
+      }, function () {
+        if (hint) hint.textContent = '钥匙串暂不可用，已写入本机缓存。';
+      });
     });
+    var relayNotify = document.getElementById('tcRelayNotify');
+    if (relayNotify) {
+      relayNotify.addEventListener('change', function () {
+        if (!relayMemory) {
+          relayNotify.checked = true;
+          return;
+        }
+        var nextNotify = {
+          baseUrl: relayMemory.baseUrl || '',
+          secret: relayMemory.secret || '',
+          notify: !!relayNotify.checked,
+          storePresent: !!relayMemory.storePresent
+        };
+        if (!nextNotify.storePresent && !nextNotify.secret && !nextNotify.baseUrl) {
+          relayMemory = nextNotify;
+          writeRelayCache(relayMemory);
+          return;
+        }
+        persistRelay(nextNotify).catch(function () {});
+      });
+    }
     window.addEventListener('storage', function (event) {
-      if (event.key === RELAY_BASE_KEY || event.key === RELAY_SECRET_KEY) fillRelayForm();
+      if (event.key === RELAY_BASE_KEY || event.key === RELAY_SECRET_KEY || event.key === RELAY_NOTIFY_KEY) {
+        hydrateRelay();
+      }
     });
 
     fillRelayForm();
+    hydrateRelay();
     renderAlertsList();
     startPolling();
   }

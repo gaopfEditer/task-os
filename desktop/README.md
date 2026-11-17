@@ -73,17 +73,20 @@ msg-relay 不返回 CORS 头，气泡页面直接 `fetch` 带密钥会被 WebVie
 
 ### 本机设置
 
-主窗口「关注 / 提醒」面板，或气泡页脚齿轮 / 列表里的「连接设置」，保存：
+主窗口「关注 / 提醒」面板和气泡页脚的「连接设置」读写同一份配置。地址与密钥放在系统钥匙串（服务名 `com.taskos.desktop`，账户 `taskos.priority_config`），所以 `tauri dev` 和安装包看到的是同一条记录。`localStorage` 仍是缓存：钥匙串还没有记录时，会把本页已有的地址或密钥迁进去；钥匙串里已经有记录时（包括用户清空密钥）以钥匙串为准。
 
 | localStorage 键 | 内容 |
 |-----------------|------|
-| `taskos.desktop.priority.baseUrl` | 中转根地址。未保存时使用 `https://op.g.ezcoin.ink`，已保存的自定义地址不会被覆盖 |
-| `taskos.desktop.priority.secret` | 中转密钥，仅本机，由用户自己填写 |
+| `taskos.desktop.priority.baseUrl` | 中转根地址的缓存。未保存时使用 `https://op.g.ezcoin.ink`，已保存的自定义地址不会被覆盖 |
+| `taskos.desktop.priority.secret` | 中转密钥的缓存，仅本机，由用户自己填写 |
+| `taskos.desktop.priority.notify` | `0` 关闭新卡片系统通知；缺省或其它值表示开启 |
 | `taskos.desktop.priority.seen` | 已打开的交易卡片 id |
 
 来源名称（默认 **胖猫社区**）在页脚和两处设置里都是灰色只读，服务器来源列表还没到时仍显示这个默认名。
 
 未保存地址、但本机已经有密钥时，启动后会按 `https://op.g.ezcoin.ink` 连接优先队列的 WebSocket。没有密钥时不发起连接，页脚保留「胖猫社区」，计数为 0，并标「未配置」。不要把真实密钥写进仓库。
+
+实时 WebSocket 帧 `priority_card` 在卡片第一次出现、且不在已读列表里时，会发一条系统通知（macOS 通知中心横幅、Windows 通知）。启动时的 HTTP 快照和历史回填不通知。标题用来源显示名，正文在有币种、方向时带上它们。通知正文不含密钥。设置里的「新卡片系统通知」默认勾选。第一次通知前若系统权限还没授予，会先请求权限。
 
 窗口变高之后，若上次保存的位置会超出屏幕，会夹回当前显示器，放不下时退回右下角。
 

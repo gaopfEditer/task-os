@@ -314,6 +314,17 @@ html, body {
   font-size: 12px;
   user-select: text;
 }
+.priority-panel label.priority-notify {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: #c9d1d9;
+}
+.priority-panel label.priority-notify input {
+  width: auto;
+  margin: 0;
+}
 .priority-panel input.priority-source-name:disabled {
   color: #8b949e;
   -webkit-text-fill-color: #8b949e;
