@@ -55,6 +55,42 @@ npm run tauri icon ../favicon.svg
 - **价格提醒**：为指定币种设置目标价与方向（涨到 ≥ / 跌到 ≤），触达后发送**系统桌面通知**（一次性，可在列表中删除）。
 - **本地持久化**：`localStorage` 键 `taskos.desktop.watchlist`、`taskos.desktop.alerts`，**不同步**到 GitHub 任务文件。
 
+## 行情气泡：优先消息页脚
+
+悬浮窗圆形行情核仍是 **132×168**。圆下方有一条优先消息页脚，是 [msg-relay-service](https://github.com/gaopfEditer/msg-relay-service) 优先队列的桌面端，不另起协议。当前来源只有 **胖猫社区**（`pangmao`）；`GET /queue/priority/sources` 以后如果返回更多来源，页脚会逐行显示。
+
+每一行依次是：**名称**、**消息数**（当前拉到的该来源消息）、**新交易卡片数**（带 `symbol` / `direction` / `yield`，或 `meta.via` 为 `ocr` / `text`，且还没在列表里打开过）。名称是来源显示标签，灰色、只读，不能在设置里改名。双击某一行或页脚，打开完整列表（时间、来源、币种、方向、收益、短文、`meta.via`）。打开后这些交易卡片不再算「新」，已读 id 记在本机。
+
+连接方式与中转站相同：
+
+- `GET {base}/queue/priority/sources`
+- `GET {base}/queue/priority?source=pangmao&limit=200`（服务端默认 50、最多 200，从旧到新；列表展示这批最近记录）
+- `WS {base 换成 ws/wss}/ws/priority?token=...`（不回放历史，只接之后的 `priority_card`）
+
+HTTP 使用 `Authorization: Bearer <secret>` 和 `X-Relay-Secret`。失败或 WebSocket 断开只在控制台记一行并退避重试，**不影响**行情轮询。
+
+msg-relay 不返回 CORS 头，气泡页面直接 `fetch` 带密钥会被 WebView 拦住。桌面壳因此用命令 `priority_http_get` 代发**同一个** GET，并且只允许路径以 `/queue/priority` 或 `/queue/priority/sources` 结尾。WebSocket 仍由气泡页面连接。若在普通浏览器里打开 `price-bubble.html`，需要中转站自己允许跨域，否则只能看到「未配置」或一直重试。
+
+### 本机设置
+
+主窗口「关注 / 提醒」面板，或气泡页脚齿轮 / 列表里的「连接设置」，保存：
+
+| localStorage 键 | 内容 |
+|-----------------|------|
+| `taskos.desktop.priority.baseUrl` | 中转根地址。未保存时使用 `https://op.g.ezcoin.ink`，已保存的自定义地址不会被覆盖 |
+| `taskos.desktop.priority.secret` | 中转密钥，仅本机，由用户自己填写 |
+| `taskos.desktop.priority.seen` | 已打开的交易卡片 id |
+
+来源名称（默认 **胖猫社区**）在页脚和两处设置里都是灰色只读，服务器来源列表还没到时仍显示这个默认名。
+
+未保存地址、但本机已经有密钥时，启动后会按 `https://op.g.ezcoin.ink` 连接优先队列的 WebSocket。没有密钥时不发起连接，页脚保留「胖猫社区」，计数为 0，并标「未配置」。不要把真实密钥写进仓库。
+
+窗口变高之后，若上次保存的位置会超出屏幕，会夹回当前显示器，放不下时退回右下角。
+
+### CSP
+
+`src-tauri/tauri.conf.json` 的 `connect-src` 在打包时写死，不能按用户刚保存的地址再收紧。因此除原有行情主机外，还允许 `http:` / `https:` / `ws:` / `wss:`，这样本机填写的中转地址可以连上。已知公网主机 `op.g.ezcoin.ink`（本仓库日记里的 `https://op.g.ezcoin.ink`，msg-relay 部署目录也在这台主机上）另外写明。密钥不会出现在 CSP 里。优先使用 `https` / `wss`；从应用页面连明文 `http` 中转时，个别 WebView 可能按混合内容拦截。
+
 ## 与 GitHub Pages 的关系
 
 - **不会**改动 Pages 发布方式；站点仍只发布仓库根目录静态文件。

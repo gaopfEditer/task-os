@@ -8,14 +8,46 @@
 </head>
 <body>
 <div id="bubbleRoot" class="bubble-root">
-  <div class="bubble-orbit" aria-hidden="true"></div>
-  <div class="bubble-core">
-    <div class="bubble-brand bubble-drag" id="bubbleDragHandle" title="按住拖动窗口">行情</div>
-    <div class="bubble-body" id="bubbleList"></div>
+  <div class="bubble-stage">
+    <div class="bubble-orbit" aria-hidden="true"></div>
+    <div class="bubble-core">
+      <div class="bubble-brand bubble-drag" id="bubbleDragHandle" title="按住拖动窗口">行情</div>
+      <div class="bubble-body" id="bubbleList"></div>
+    </div>
+    <button type="button" class="bubble-open" id="btnOpenMain" title="打开 Task OS 主窗口">↗</button>
   </div>
-  <button type="button" class="bubble-open" id="btnOpenMain" title="打开 Task OS 主窗口">↗</button>
+  <footer id="priorityFooter" class="priority-footer">
+    <div id="priorityRows" class="priority-rows" aria-live="polite"></div>
+    <button type="button" id="prioritySettingsBtn" class="priority-gear" title="优先队列设置" aria-label="优先队列设置">⚙</button>
+  </footer>
+  <section id="priorityPanel" class="priority-panel" hidden>
+    <div class="priority-panel-bar">
+      <strong id="priorityPanelTitle">消息</strong>
+      <button type="button" id="priorityPanelClose">关闭</button>
+    </div>
+    <div id="priorityPanelList" class="priority-panel-list"></div>
+    <details id="prioritySettingsDetails">
+      <summary>连接设置</summary>
+      <form id="prioritySettingsForm" autocomplete="off">
+        <label>来源（只读）
+          <input id="prioritySourceNames" class="priority-source-name" type="text" value="胖猫社区" disabled readonly tabindex="-1" aria-readonly="true" spellcheck="false" autocomplete="off">
+        </label>
+        <label>中转地址
+          <input id="priorityBaseUrl" type="url" inputmode="url" placeholder="https://op.g.ezcoin.ink" spellcheck="false" autocomplete="off">
+        </label>
+        <label>密钥（仅本机）
+          <input id="prioritySecret" type="password" spellcheck="false" autocomplete="off">
+        </label>
+        <div class="priority-settings-actions">
+          <button type="submit">保存</button>
+        </div>
+        <p id="prioritySettingsHint" class="priority-hint"></p>
+      </form>
+    </details>
+  </section>
 </div>
 <script src="market-symbols.js" defer></script>
 <script src="price-bubble.js" defer></script>
+<script type="module" src="priority-footer.js"></script>
 </body>
 </html>

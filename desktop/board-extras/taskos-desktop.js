@@ -4,6 +4,10 @@
 
   var WATCH_KEY = 'taskos.desktop.watchlist';
   var ALERTS_KEY = 'taskos.desktop.alerts';
+  var RELAY_BASE_KEY = 'taskos.desktop.priority.baseUrl';
+  var RELAY_SECRET_KEY = 'taskos.desktop.priority.secret';
+  var RELAY_DEFAULT_BASE = 'https://op.g.ezcoin.ink';
+  var RELAY_DEFAULT_SOURCE = '胖猫社区';
   var DEFAULT_WATCH = 'BTC,ETH,SOL';
   var Q = window.TaskOsQuotes;
   if (!Q) return;
@@ -54,6 +58,57 @@
 
   function saveAlerts(list) {
     try { localStorage.setItem(ALERTS_KEY, JSON.stringify(list)); } catch (e) {}
+  }
+
+  function normalizeRelayBase(raw) {
+    var s = String(raw || '').trim();
+    if (!s) return '';
+    try {
+      var u = new URL(s);
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') return '';
+      if (u.username || u.password) return '';
+      var path = u.pathname.replace(/\/+$/, '');
+      if (path === '/') path = '';
+      return u.origin + path;
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function storedRelayBase() {
+    try {
+      return localStorage.getItem(RELAY_BASE_KEY);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function relayBaseForForm(stored) {
+    var raw = stored == null ? '' : String(stored).trim();
+    if (!raw) return RELAY_DEFAULT_BASE;
+    return normalizeRelayBase(raw) || raw;
+  }
+
+  function lockRelaySource() {
+    var el = document.getElementById('tcRelaySources');
+    if (!el) return;
+    el.value = RELAY_DEFAULT_SOURCE;
+    el.disabled = true;
+    el.readOnly = true;
+    el.tabIndex = -1;
+    el.setAttribute('aria-readonly', 'true');
+  }
+
+  function fillRelayForm() {
+    var secret = '';
+    try {
+      secret = localStorage.getItem(RELAY_SECRET_KEY) || '';
+    } catch (e) {}
+    var baseInput = document.getElementById('tcRelayBase');
+    var secretInput = document.getElementById('tcRelaySecret');
+    if (baseInput) baseInput.value = relayBaseForForm(storedRelayBase());
+    if (secretInput) secretInput.value = secret;
+    lockRelaySource();
   }
 
   function uid() {
@@ -284,6 +339,16 @@
       '<button type="button" id="tcAddAlert">添加提醒</button>' +
       '</div>' +
       '<div class="tc-alerts"><ul id="tcAlertsList"></ul></div>' +
+      '<label for="tcRelaySources">来源（只读）</label>' +
+      '<input type="text" id="tcRelaySources" class="tc-source-name" value="胖猫社区" disabled readonly tabindex="-1" aria-readonly="true" spellcheck="false" autocomplete="off">' +
+      '<label for="tcRelayBase">优先队列地址</label>' +
+      '<input type="text" id="tcRelayBase" spellcheck="false" autocomplete="off" placeholder="https://op.g.ezcoin.ink">' +
+      '<label for="tcRelaySecret">优先队列密钥（仅本机）</label>' +
+      '<input type="password" id="tcRelaySecret" spellcheck="false" autocomplete="off">' +
+      '<div class="tc-row">' +
+      '<button type="button" id="tcSaveRelay">保存优先队列</button>' +
+      '</div>' +
+      '<p class="tc-note" id="tcRelayHint">来源名称由服务器提供，默认「胖猫社区」，不能在这里修改。未保存地址时使用 https://op.g.ezcoin.ink。地址与密钥只存在本机。</p>' +
       '<p class="tc-note">币种：Binance 现货→合约→Gate→CoinGecko。UAI 等新币 Binance 现货可能未上，会走合约/Gate。QQQ 等为美股 ETF，Binance 无 QQQUSDT，最后走东方财富。每 3 分钟刷新。</p>';
 
     header.insertAdjacentElement('afterend', panel);
@@ -320,6 +385,44 @@
       renderAlertsList();
     });
 
+    document.getElementById('tcSaveRelay').addEventListener('click', function () {
+      var baseRaw = document.getElementById('tcRelayBase').value.trim();
+      var secret = document.getElementById('tcRelaySecret').value.trim();
+      var hint = document.getElementById('tcRelayHint');
+      lockRelaySource();
+      if (baseRaw && !normalizeRelayBase(baseRaw)) {
+        if (hint) hint.textContent = '请填写 http(s) 地址。';
+        return;
+      }
+      var base = baseRaw ? normalizeRelayBase(baseRaw) : RELAY_DEFAULT_BASE;
+      var keepCustom = !!(baseRaw && base !== RELAY_DEFAULT_BASE);
+      try {
+        if (!secret) {
+          if (keepCustom) localStorage.setItem(RELAY_BASE_KEY, base);
+          else localStorage.removeItem(RELAY_BASE_KEY);
+          localStorage.removeItem(RELAY_SECRET_KEY);
+        } else {
+          localStorage.setItem(RELAY_BASE_KEY, base);
+          localStorage.setItem(RELAY_SECRET_KEY, secret);
+        }
+      } catch (e) {
+        if (hint) hint.textContent = '无法写入本机存储。';
+        return;
+      }
+      document.getElementById('tcRelayBase').value = !secret && !keepCustom ? RELAY_DEFAULT_BASE : base;
+      if (!secret) {
+        if (hint) hint.textContent = keepCustom
+          ? '已保留地址并清除密钥。'
+          : '已清除本机密钥。未保存地址时使用 https://op.g.ezcoin.ink。';
+        return;
+      }
+      if (hint) hint.textContent = '已保存。行情气泡会连接 ' + base + '。';
+    });
+    window.addEventListener('storage', function (event) {
+      if (event.key === RELAY_BASE_KEY || event.key === RELAY_SECRET_KEY) fillRelayForm();
+    });
+
+    fillRelayForm();
     renderAlertsList();
     startPolling();
   }

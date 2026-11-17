@@ -18,6 +18,7 @@ for (const name of [
   "price-bubble.html",
   "price-bubble.js",
   "price-bubble.css",
+  "priority-footer.js",
 ]) {
   copyFileSync(join(extrasDir, name), join(dist, name));
 }

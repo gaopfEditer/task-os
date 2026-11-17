@@ -82,6 +82,7 @@
 #taskosCryptoPanel.open { display: block; }
 #taskosCryptoPanel label { display: block; margin: 8px 0 4px; color: #8b949e; font-size: 12px; }
 #taskosCryptoPanel input[type=text],
+#taskosCryptoPanel input[type=password],
 #taskosCryptoPanel input[type=number],
 #taskosCryptoPanel select {
   width: 100%;
@@ -89,6 +90,14 @@
   background: #161b22;
   border: 1px solid #30363d;
   color: #c9d1d9;
+}
+#taskosCryptoPanel input.tc-source-name:disabled {
+  color: #8b949e;
+  -webkit-text-fill-color: #8b949e;
+  opacity: 1;
+  background: #0d1117;
+  border-color: #21262d;
+  cursor: default;
 }
 #taskosCryptoPanel .tc-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-top: 8px; }
 #taskosCryptoPanel .tc-row > * { flex: 0 0 auto; }
