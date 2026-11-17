@@ -4,6 +4,8 @@
 
   var WATCH_KEY = 'taskos.desktop.watchlist';
   var ALERTS_KEY = 'taskos.desktop.alerts';
+  var RELAY_BASE_KEY = 'taskos.desktop.priority.baseUrl';
+  var RELAY_SECRET_KEY = 'taskos.desktop.priority.secret';
   var DEFAULT_WATCH = 'BTC,ETH,SOL';
   var Q = window.TaskOsQuotes;
   if (!Q) return;
@@ -54,6 +56,34 @@
 
   function saveAlerts(list) {
     try { localStorage.setItem(ALERTS_KEY, JSON.stringify(list)); } catch (e) {}
+  }
+
+  function normalizeRelayBase(raw) {
+    var s = String(raw || '').trim();
+    if (!s) return '';
+    try {
+      var u = new URL(s);
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') return '';
+      if (u.username || u.password) return '';
+      var path = u.pathname.replace(/\/+$/, '');
+      if (path === '/') path = '';
+      return u.origin + path;
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function fillRelayForm() {
+    var base = '';
+    var secret = '';
+    try {
+      base = localStorage.getItem(RELAY_BASE_KEY) || '';
+      secret = localStorage.getItem(RELAY_SECRET_KEY) || '';
+    } catch (e) {}
+    var baseInput = document.getElementById('tcRelayBase');
+    var secretInput = document.getElementById('tcRelaySecret');
+    if (baseInput) baseInput.value = base;
+    if (secretInput) secretInput.value = secret;
   }
 
   function uid() {
@@ -284,6 +314,14 @@
       '<button type="button" id="tcAddAlert">添加提醒</button>' +
       '</div>' +
       '<div class="tc-alerts"><ul id="tcAlertsList"></ul></div>' +
+      '<label for="tcRelayBase">优先队列地址</label>' +
+      '<input type="text" id="tcRelayBase" spellcheck="false" autocomplete="off" placeholder="https://op.g.ezcoin.ink">' +
+      '<label for="tcRelaySecret">优先队列密钥（仅本机）</label>' +
+      '<input type="password" id="tcRelaySecret" spellcheck="false" autocomplete="off">' +
+      '<div class="tc-row">' +
+      '<button type="button" id="tcSaveRelay">保存优先队列</button>' +
+      '</div>' +
+      '<p class="tc-note" id="tcRelayHint">行情气泡底部显示来源、消息数和新交易卡片。地址与密钥只存在本机。</p>' +
       '<p class="tc-note">币种：Binance 现货→合约→Gate→CoinGecko。UAI 等新币 Binance 现货可能未上，会走合约/Gate。QQQ 等为美股 ETF，Binance 无 QQQUSDT，最后走东方财富。每 3 分钟刷新。</p>';
 
     header.insertAdjacentElement('afterend', panel);
@@ -320,6 +358,38 @@
       renderAlertsList();
     });
 
+    document.getElementById('tcSaveRelay').addEventListener('click', function () {
+      var baseRaw = document.getElementById('tcRelayBase').value.trim();
+      var secret = document.getElementById('tcRelaySecret').value.trim();
+      var hint = document.getElementById('tcRelayHint');
+      if (!baseRaw && !secret) {
+        try {
+          localStorage.removeItem(RELAY_BASE_KEY);
+          localStorage.removeItem(RELAY_SECRET_KEY);
+        } catch (e) {}
+        if (hint) hint.textContent = '已清除本机优先队列配置。';
+        return;
+      }
+      var base = normalizeRelayBase(baseRaw);
+      if (!base || !secret) {
+        if (hint) hint.textContent = '请同时填写 http(s) 地址和密钥。';
+        return;
+      }
+      try {
+        localStorage.setItem(RELAY_BASE_KEY, base);
+        localStorage.setItem(RELAY_SECRET_KEY, secret);
+      } catch (e) {
+        if (hint) hint.textContent = '无法写入本机存储。';
+        return;
+      }
+      document.getElementById('tcRelayBase').value = base;
+      if (hint) hint.textContent = '已保存。行情气泡会按这个地址连接优先队列。';
+    });
+    window.addEventListener('storage', function (event) {
+      if (event.key === RELAY_BASE_KEY || event.key === RELAY_SECRET_KEY) fillRelayForm();
+    });
+
+    fillRelayForm();
     renderAlertsList();
     startPolling();
   }

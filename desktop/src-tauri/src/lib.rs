@@ -2,7 +2,7 @@ use keyring::Entry;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
-use tauri::{Manager, PhysicalPosition, WebviewUrl, WebviewWindow, WebviewWindowBuilder, WindowEvent};
+use tauri::{LogicalSize, Manager, PhysicalPosition, WebviewUrl, WebviewWindow, WebviewWindowBuilder, WindowEvent};
 use tauri_utils::config::Color;
 use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_notification::NotificationExt;
@@ -10,6 +10,37 @@ use tauri_plugin_notification::NotificationExt;
 const KEYRING_SERVICE: &str = "com.taskos.desktop";
 const KEYRING_USER: &str = "taskos.github_token";
 const WINDOW_POS_FILE: &str = "window-positions.json";
+
+/// Circle stays 132×168. Extra width/height is the priority footer under it.
+const BUBBLE_COMPACT_W: f64 = 248.0;
+const BUBBLE_COMPACT_H: f64 = 236.0;
+const BUBBLE_LIST_W: f64 = 420.0;
+const BUBBLE_LIST_H: f64 = 600.0;
+const BUBBLE_SETTINGS_W: f64 = 360.0;
+const BUBBLE_SETTINGS_H: f64 = 440.0;
+
+/// Keep the top-left inside the monitor that contains it.
+/// `None` means the window cannot fit that monitor.
+fn clamp_point(
+    x: i32,
+    y: i32,
+    win_w: i32,
+    win_h: i32,
+    mon_x: i32,
+    mon_y: i32,
+    mon_w: i32,
+    mon_h: i32,
+) -> Option<(i32, i32)> {
+    if win_w <= 0 || win_h <= 0 || mon_w <= 0 || mon_h <= 0 {
+        return None;
+    }
+    if win_w > mon_w || win_h > mon_h {
+        return None;
+    }
+    let max_x = mon_x + mon_w - win_w;
+    let max_y = mon_y + mon_h - win_h;
+    Some((x.clamp(mon_x, max_x), y.clamp(mon_y, max_y)))
+}
 
 #[derive(Clone, Copy, Serialize, Deserialize)]
 struct PosEntry {
@@ -148,15 +179,150 @@ fn bubble_url() -> Result<WebviewUrl, String> {
 fn place_bubble_bottom_right(
     bubble: &tauri::WebviewWindow,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let monitor = bubble
-        .current_monitor()?
-        .ok_or("no monitor")?;
+    let monitor = bubble.current_monitor()?.ok_or("no monitor")?;
     let size = monitor.size();
     let pos = monitor.position();
     let outer = bubble.outer_size()?;
-    let x = pos.x + size.width as i32 - outer.width as i32 - 24;
-    let y = pos.y + size.height as i32 - outer.height as i32 - 72;
+    let mut x = pos.x + size.width as i32 - outer.width as i32 - 24;
+    let mut y = pos.y + size.height as i32 - outer.height as i32 - 72;
+    if x < pos.x {
+        x = pos.x;
+    }
+    if y < pos.y {
+        y = pos.y;
+    }
     bubble.set_position(PhysicalPosition::new(x, y))?;
+    Ok(())
+}
+
+fn monitor_for_point(win: &WebviewWindow, x: i32, y: i32) -> Option<tauri::Monitor> {
+    let monitors = win.available_monitors().ok()?;
+    if let Some(found) = monitors.iter().find(|monitor| {
+        let origin = monitor.position();
+        let size = monitor.size();
+        x >= origin.x
+            && y >= origin.y
+            && x < origin.x + size.width as i32
+            && y < origin.y + size.height as i32
+    }) {
+        return Some(found.clone());
+    }
+    monitors.into_iter().next()
+}
+
+fn clamp_xy(win: &WebviewWindow, x: i32, y: i32, logical_w: f64, logical_h: f64) {
+    let scale = match win.scale_factor() {
+        Ok(value) if value.is_finite() && value > 0.0 => value,
+        _ => 1.0,
+    };
+    let win_w = (logical_w * scale).round() as i32;
+    let win_h = (logical_h * scale).round() as i32;
+    let Some(monitor) = monitor_for_point(win, x, y) else {
+        return;
+    };
+    let origin = monitor.position();
+    let size = monitor.size();
+    match clamp_point(
+        x,
+        y,
+        win_w,
+        win_h,
+        origin.x,
+        origin.y,
+        size.width as i32,
+        size.height as i32,
+    ) {
+        Some((next_x, next_y)) => {
+            if next_x != x || next_y != y {
+                let _ = win.set_position(PhysicalPosition::new(next_x, next_y));
+            }
+        }
+        None => {
+            let _ = place_bubble_bottom_right(win);
+        }
+    }
+}
+
+fn clamp_bubble_window(win: &WebviewWindow, logical_w: f64, logical_h: f64) {
+    let Ok(pos) = win.outer_position() else {
+        return;
+    };
+    clamp_xy(win, pos.x, pos.y, logical_w, logical_h);
+}
+
+fn validate_priority_get_url(raw: &str) -> Result<reqwest::Url, String> {
+    let url = reqwest::Url::parse(raw.trim()).map_err(|_| "invalid priority url".to_string())?;
+    if url.scheme() != "http" && url.scheme() != "https" {
+        return Err("invalid priority url".into());
+    }
+    if !url.username().is_empty() || url.password().is_some() {
+        return Err("invalid priority url".into());
+    }
+    if url.host_str().unwrap_or("").is_empty() {
+        return Err("invalid priority url".into());
+    }
+    let path = url.path().trim_end_matches('/');
+    let allowed = path == "/queue/priority"
+        || path == "/queue/priority/sources"
+        || path.ends_with("/queue/priority")
+        || path.ends_with("/queue/priority/sources");
+    if !allowed {
+        return Err("invalid priority url".into());
+    }
+    Ok(url)
+}
+
+#[derive(Serialize)]
+struct PriorityHttpResponse {
+    status: u16,
+    body: String,
+}
+
+fn perform_priority_get(url: reqwest::Url, secret: String) -> Result<PriorityHttpResponse, String> {
+    let client = reqwest::blocking::Client::builder()
+        .timeout(std::time::Duration::from_secs(12))
+        .build()
+        .map_err(|err| err.to_string())?;
+    let response = client
+        .get(url)
+        .header("Authorization", format!("Bearer {secret}"))
+        .header("X-Relay-Secret", secret)
+        .header("Accept", "application/json")
+        .send()
+        .map_err(|err| format!("priority HTTP {err}"))?;
+    let status = response.status().as_u16();
+    let body = response.text().map_err(|err| err.to_string())?;
+    if body.len() > 1_048_576 {
+        return Err("priority response too large".into());
+    }
+    Ok(PriorityHttpResponse { status, body })
+}
+
+#[tauri::command]
+async fn priority_http_get(url: String, secret: String) -> Result<PriorityHttpResponse, String> {
+    let parsed = validate_priority_get_url(&url)?;
+    let secret = secret.trim().to_string();
+    if secret.is_empty() {
+        return Err("missing secret".into());
+    }
+    tauri::async_runtime::spawn_blocking(move || perform_priority_get(parsed, secret))
+        .await
+        .map_err(|err| err.to_string())?
+}
+
+#[tauri::command]
+fn set_price_bubble_layout(app: tauri::AppHandle, mode: String) -> Result<(), String> {
+    let win = app
+        .get_webview_window("price-bubble")
+        .ok_or_else(|| "price bubble not found".to_string())?;
+    let (width, height) = match mode.as_str() {
+        "list" => (BUBBLE_LIST_W, BUBBLE_LIST_H),
+        "settings" => (BUBBLE_SETTINGS_W, BUBBLE_SETTINGS_H),
+        _ => (BUBBLE_COMPACT_W, BUBBLE_COMPACT_H),
+    };
+    win.set_size(LogicalSize::new(width, height))
+        .map_err(|e| e.to_string())?;
+    clamp_bubble_window(&win, width, height);
     Ok(())
 }
 
@@ -168,7 +334,7 @@ fn ensure_price_bubble(app: &tauri::AppHandle) -> Result<(), String> {
     let url = bubble_url()?;
     let bubble = WebviewWindowBuilder::new(app, "price-bubble", url)
         .title("行情")
-        .inner_size(132.0, 168.0)
+        .inner_size(BUBBLE_COMPACT_W, BUBBLE_COMPACT_H)
         .decorations(false)
         .transparent(true)
         .shadow(false)
@@ -180,8 +346,9 @@ fn ensure_price_bubble(app: &tauri::AppHandle) -> Result<(), String> {
         .focused(false)
         .build()
         .map_err(|e| e.to_string())?;
-    if saved.price_bubble.is_some() {
-        apply_saved_position(&bubble, saved.price_bubble);
+    if let Some(entry) = saved.price_bubble {
+        apply_saved_position(&bubble, Some(entry));
+        clamp_xy(&bubble, entry.x, entry.y, BUBBLE_COMPACT_W, BUBBLE_COMPACT_H);
     } else {
         let _ = place_bubble_bottom_right(&bubble);
     }
@@ -221,8 +388,52 @@ pub fn run() {
             save_github_token,
             focus_main_window,
             focus_price_bubble,
-            show_price_alert
+            show_price_alert,
+            set_price_bubble_layout,
+            priority_http_get
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::clamp_point;
+
+    #[test]
+    fn keeps_position_inside_monitor() {
+        assert_eq!(clamp_point(10, 10, 100, 80, 0, 0, 200, 200), Some((10, 10)));
+    }
+
+    #[test]
+    fn pulls_grown_window_back_onto_screen() {
+        assert_eq!(
+            clamp_point(180, 190, 100, 80, 0, 0, 200, 200),
+            Some((100, 120))
+        );
+    }
+
+    #[test]
+    fn falls_back_when_window_cannot_fit() {
+        assert_eq!(clamp_point(0, 0, 300, 80, 0, 0, 200, 200), None);
+    }
+
+    #[test]
+    fn priority_get_url_allows_queue_paths_only() {
+        let page = super::validate_priority_get_url(
+            "https://op.g.ezcoin.ink/queue/priority?source=pangmao&limit=200",
+        )
+        .unwrap();
+        assert_eq!(page.path(), "/queue/priority");
+        assert!(super::validate_priority_get_url(
+            "https://example.com/relay/queue/priority/sources"
+        )
+        .is_ok());
+        assert!(super::validate_priority_get_url("https://example.com/admin").is_err());
+        assert!(super::validate_priority_get_url("javascript:alert(1)").is_err());
+        assert!(
+            super::validate_priority_get_url("https://user:secret@example.com/queue/priority")
+                .is_err()
+        );
+    }
 }
