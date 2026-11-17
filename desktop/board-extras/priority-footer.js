@@ -9,7 +9,8 @@
 export var STORAGE_KEYS = {
   baseUrl: 'taskos.desktop.priority.baseUrl',
   secret: 'taskos.desktop.priority.secret',
-  seen: 'taskos.desktop.priority.seen'
+  seen: 'taskos.desktop.priority.seen',
+  notify: 'taskos.desktop.priority.notify'
 };
 
 /** Public relay on the VPS. Used only when the user has not saved a base URL. */
@@ -76,6 +77,132 @@ export function resolvePriorityConfig(storedBase, storedSecret) {
     usedDefault: false,
     connect: !!secret
   };
+}
+
+/** Blank / missing means notifications stay on. */
+export function parseNotifyFlag(raw) {
+  if (raw == null || raw === '') return true;
+  var s = String(raw).trim().toLowerCase();
+  return !(s === '0' || s === 'false' || s === 'off' || s === 'no');
+}
+
+/**
+ * The OS keychain is authoritative once `present` is true (including a cleared secret).
+ * When nothing has been saved there yet, copy a secret or custom base out of localStorage.
+ */
+export function reconcilePriorityStore(shared, local) {
+  var localSecret = String(local && local.secret != null ? local.secret : '').trim();
+  var localBase = String(local && local.baseUrl != null ? local.baseUrl : '').trim();
+  var localNotify = !local || local.notify !== false;
+  var sharedOk = !!(shared && typeof shared === 'object');
+  var present = !!(sharedOk && shared.present);
+  if (present) {
+    return {
+      baseUrl: String(shared.baseUrl == null ? '' : shared.baseUrl).trim(),
+      secret: String(shared.secret == null ? '' : shared.secret).trim(),
+      notify: shared.notify !== false,
+      migrate: false,
+      storePresent: true
+    };
+  }
+  if (localSecret || localBase) {
+    return {
+      baseUrl: localBase,
+      secret: localSecret,
+      notify: localNotify,
+      migrate: true,
+      storePresent: false
+    };
+  }
+  return {
+    baseUrl: '',
+    secret: '',
+    notify: localNotify,
+    migrate: false,
+    storePresent: false
+  };
+}
+
+export function priorityNotice(item, sourceName) {
+  var view = describeItem(item, sourceName || '');
+  var name = view.sourceName || '优先队列';
+  var title = 'Task OS · ' + name;
+  var parts = [];
+  if (view.symbol) parts.push(view.symbol);
+  if (view.direction) parts.push(view.direction);
+  var body = parts.join(' ');
+  if (!body) body = view.text || '新优先卡片';
+  if (body.length > 180) body = body.slice(0, 180) + '…';
+  return { title: title, body: body };
+}
+
+/** Live frames only. Snapshot / backfill origins, known ids, and seen ids stay quiet. */
+export function noticeForPriorityArrival(origin, item, options) {
+  if (origin !== 'live') return null;
+  var opts = options || {};
+  if (opts.notify === false) return null;
+  if (!item || typeof item.id !== 'string' || !item.id) return null;
+  if (opts.knownIds && opts.knownIds[item.id]) return null;
+  if (opts.seenIds && opts.seenIds[item.id]) return null;
+  return priorityNotice(item, opts.sourceName || '');
+}
+
+export function noticesForPriorityItems(origin, items, options) {
+  if (origin !== 'live') return [];
+  var opts = options || {};
+  if (opts.notify === false) return [];
+  var known = Object.create(null);
+  var seed = opts.knownIds || {};
+  Object.keys(seed).forEach(function (id) {
+    if (id) known[id] = true;
+  });
+  var out = [];
+  (items || []).forEach(function (item) {
+    var seen = opts.seenIds || null;
+    if (!seen && typeof opts.seenFor === 'function') seen = opts.seenFor(item) || {};
+    var sourceName = opts.sourceName || '';
+    if (!sourceName && typeof opts.sourceNameFor === 'function') sourceName = opts.sourceNameFor(item) || '';
+    var note = noticeForPriorityArrival('live', item, {
+      notify: true,
+      knownIds: known,
+      seenIds: seen || {},
+      sourceName: sourceName
+    });
+    if (!note || !item || !item.id) return;
+    out.push({ id: item.id, title: note.title, body: note.body });
+    known[item.id] = true;
+  });
+  return out;
+}
+
+function itemIdSet(items) {
+  var set = Object.create(null);
+  (items || []).forEach(function (item) {
+    if (item && typeof item.id === 'string' && item.id) set[item.id] = true;
+  });
+  return set;
+}
+
+function requestNotificationPermission() {
+  return new Promise(function (resolve) {
+    try {
+      if (typeof Notification === 'undefined' || typeof Notification.requestPermission !== 'function') {
+        resolve(true);
+        return;
+      }
+      if (Notification.permission === 'granted') {
+        resolve(true);
+        return;
+      }
+      Promise.resolve(Notification.requestPermission()).then(function (state) {
+        resolve(state === 'granted' || (typeof Notification !== 'undefined' && Notification.permission === 'granted'));
+      }, function () {
+        resolve(false);
+      });
+    } catch (e) {
+      resolve(true);
+    }
+  });
 }
 
 /** Display labels from the server list. Not a setting the user can rename. */
@@ -404,6 +531,16 @@ function mountFooter(footer) {
     return state.networkConfigured || state.holdSnapshot;
   }
 
+  var memory = null;
+  var hydrateGen = 0;
+  var connectedOnce = false;
+
+  function tauriInvoke(cmd, payload) {
+    var tauri = window.__TAURI__;
+    if (!tauri || !tauri.core || !tauri.core.invoke) return null;
+    return tauri.core.invoke(cmd, payload || {});
+  }
+
   function readStoredBase() {
     try {
       return localStorage.getItem(STORAGE_KEYS.baseUrl);
@@ -412,21 +549,126 @@ function mountFooter(footer) {
     }
   }
 
-  function readConfig() {
-    var storedSecret = null;
+  function readNotifyRaw() {
     try {
-      storedSecret = localStorage.getItem(STORAGE_KEYS.secret);
-    } catch (e) {}
-    return resolvePriorityConfig(readStoredBase(), storedSecret);
+      return localStorage.getItem(STORAGE_KEYS.notify);
+    } catch (e) {
+      return null;
+    }
   }
 
-  function writeConfig(base, secret) {
+  function localBundle() {
+    var secret = '';
     try {
-      if (base) localStorage.setItem(STORAGE_KEYS.baseUrl, base);
-      else localStorage.removeItem(STORAGE_KEYS.baseUrl);
-      if (secret) localStorage.setItem(STORAGE_KEYS.secret, secret);
-      else localStorage.removeItem(STORAGE_KEYS.secret);
+      secret = localStorage.getItem(STORAGE_KEYS.secret) || '';
     } catch (e) {}
+    return {
+      baseUrl: readStoredBase() || '',
+      secret: String(secret).trim(),
+      notify: parseNotifyFlag(readNotifyRaw())
+    };
+  }
+
+  function bundlesEqual(a, b) {
+    if (!a || !b) return false;
+    return (a.baseUrl || '') === (b.baseUrl || '')
+      && (a.secret || '') === (b.secret || '')
+      && ((a.notify !== false) === (b.notify !== false));
+  }
+
+  function writeLocalCache(bundle) {
+    try {
+      if (bundle.baseUrl) localStorage.setItem(STORAGE_KEYS.baseUrl, bundle.baseUrl);
+      else localStorage.removeItem(STORAGE_KEYS.baseUrl);
+      if (bundle.secret) localStorage.setItem(STORAGE_KEYS.secret, bundle.secret);
+      else localStorage.removeItem(STORAGE_KEYS.secret);
+      localStorage.setItem(STORAGE_KEYS.notify, bundle.notify === false ? '0' : '1');
+    } catch (e) {}
+  }
+
+  function readConfig() {
+    if (memory) return resolvePriorityConfig(memory.baseUrl, memory.secret);
+    var local = localBundle();
+    return resolvePriorityConfig(local.baseUrl, local.secret);
+  }
+
+  function notificationsEnabled() {
+    if (memory) return memory.notify !== false;
+    return parseNotifyFlag(readNotifyRaw());
+  }
+
+  function persistBundle(bundle) {
+    memory = {
+      baseUrl: bundle.baseUrl || '',
+      secret: bundle.secret || '',
+      notify: bundle.notify !== false,
+      storePresent: !!bundle.storePresent
+    };
+    var pending = tauriInvoke('save_priority_config', {
+      baseUrl: memory.baseUrl,
+      secret: memory.secret,
+      notify: memory.notify
+    });
+    // Cache after the keychain write so the other window does not hydrate a stale entry.
+    if (!pending) {
+      writeLocalCache(memory);
+      return Promise.resolve();
+    }
+    return pending.then(function () {
+      memory.storePresent = true;
+      writeLocalCache(memory);
+    }, function (err) {
+      writeLocalCache(memory);
+      throw err;
+    });
+  }
+
+  function finishHydrate(gen, next) {
+    if (gen !== hydrateGen) return;
+    var prev = memory;
+    var same = !!(prev && bundlesEqual(prev, next));
+    if (!same) {
+      memory = {
+        baseUrl: next.baseUrl || '',
+        secret: next.secret || '',
+        notify: next.notify !== false,
+        storePresent: !!next.storePresent
+      };
+      writeLocalCache(memory);
+    }
+    fillSettingsForm();
+    var connectionSame = !!(prev && memory
+      && (prev.baseUrl || '') === (memory.baseUrl || '')
+      && (prev.secret || '') === (memory.secret || ''));
+    if (connectionSame && connectedOnce) return;
+    connectedOnce = true;
+    restart();
+  }
+
+  function hydrateConfig() {
+    var gen = ++hydrateGen;
+    var local = localBundle();
+    var pending = tauriInvoke('load_priority_config');
+    if (!pending) {
+      finishHydrate(gen, local);
+      return;
+    }
+    pending.then(function (shared) {
+      if (gen !== hydrateGen) return;
+      var next = reconcilePriorityStore(shared, local);
+      if (!next.migrate) {
+        finishHydrate(gen, next);
+        return;
+      }
+      persistBundle(next).then(function () {
+        next.storePresent = true;
+        finishHydrate(gen, next);
+      }, function () {
+        finishHydrate(gen, next);
+      });
+    }, function () {
+      finishHydrate(gen, local);
+    });
   }
 
   function loadSeen() {
@@ -634,8 +876,11 @@ function mountFooter(footer) {
     var cfg = readConfig();
     var baseInput = document.getElementById('priorityBaseUrl');
     var secretInput = document.getElementById('prioritySecret');
-    if (baseInput) baseInput.value = displayBaseUrl(readStoredBase());
-    if (secretInput) secretInput.value = cfg.secret;
+    var notifyInput = document.getElementById('priorityNotify');
+    var baseStored = memory ? memory.baseUrl : readStoredBase();
+    if (baseInput && document.activeElement !== baseInput) baseInput.value = displayBaseUrl(baseStored);
+    if (secretInput && document.activeElement !== secretInput) secretInput.value = cfg.secret;
+    if (notifyInput && document.activeElement !== notifyInput) notifyInput.checked = notificationsEnabled();
     renderSourceField();
   }
 
@@ -751,14 +996,45 @@ function mountFooter(footer) {
     return browserFetch(url, secret);
   }
 
+  function showSystemNotice(note) {
+    if (!note || !note.title) return;
+    var payload = { title: note.title, body: note.body || '' };
+    // Ask on first use, then show through the shell. The shell command asks again
+    // if permission is still missing. Only the title and body are sent.
+    requestNotificationPermission().then(function () {
+      var pending = tauriInvoke('show_price_alert', payload);
+      if (pending && pending.catch) pending.catch(function () {});
+    }, function () {
+      var pending = tauriInvoke('show_price_alert', payload);
+      if (pending && pending.catch) pending.catch(function () {});
+    });
+  }
+
+  function publishNotices(origin, items, knownIds) {
+    var notes = noticesForPriorityItems(origin, items, {
+      notify: notificationsEnabled(),
+      knownIds: knownIds || {},
+      seenFor: function (item) {
+        return seenSet(loadSeen(), item && item.source);
+      },
+      sourceNameFor: function (item) {
+        return sourceName(item && item.source);
+      }
+    });
+    notes.forEach(showSystemNotice);
+  }
+
   function rememberFrame(frame, token) {
     if (token !== session || !frame) return;
     if (syncing) {
       wsBuffer = ingestPriorityFrame(wsBuffer, frame);
       return;
     }
+    var known = itemIdSet(state.items);
+    var arrived = ingestPriorityFrame([], frame);
     state.items = ingestPriorityFrame(state.items, frame);
     if (frame.source) ensureSource(frame.source);
+    publishNotices('live', arrived, known);
     if (panelMode === 'list' && (!listSource || frame.source === listSource) && isTradeCard(frame) && frame.id) {
       if (!seenSet(loadSeen(), frame.source)[frame.id]) highlighted[frame.id] = true;
       saveSeen(markSeen(loadSeen(), frame.source, [frame.id]));
@@ -788,22 +1064,37 @@ function mountFooter(footer) {
       }));
     }).then(function () {
       if (token !== session || !nextSources) return;
-      if (wsBuffer.length) nextItems = mergeItems(nextItems, wsBuffer);
+      var previousIds = itemIdSet(state.items);
+      var snapshotItems = nextItems.slice();
+      var buffered = wsBuffer.slice();
+      if (buffered.length) nextItems = mergeItems(nextItems, buffered);
       wsBuffer = [];
       syncing = false;
       state.lastError = '';
       backoff = 1000;
-      var known = Object.create(null);
-      nextSources.forEach(function (source) { known[source.id] = true; });
+      var knownSources = Object.create(null);
+      nextSources.forEach(function (source) { knownSources[source.id] = true; });
       state.sources = nextSources;
-      state.items = nextItems.filter(function (item) { return item && known[item.source]; });
+      state.items = nextItems.filter(function (item) { return item && knownSources[item.source]; });
+      var snapshotIds = itemIdSet(snapshotItems);
+      // HTTP history is not a live arrival.
+      publishNotices('snapshot', snapshotItems, previousIds);
+      publishNotices('live', buffered.filter(function (item) {
+        return item && item.id && !snapshotIds[item.id];
+      }), previousIds);
       render();
     }, function (err) {
       if (token !== session) return;
       syncing = false;
       if (wsBuffer.length) {
-        state.items = mergeItems(state.items, wsBuffer);
+        var previousIds = itemIdSet(state.items);
+        var buffered = wsBuffer.slice();
+        state.items = mergeItems(state.items, buffered);
         wsBuffer = [];
+        buffered.forEach(function (item) {
+          if (item && item.source) ensureSource(item.source);
+        });
+        publishNotices('live', buffered, previousIds);
         render();
       }
       throw err;
@@ -920,19 +1211,34 @@ function mountFooter(footer) {
       }
       return;
     }
+    var notifyInput = document.getElementById('priorityNotify');
+    var notify = notifyInput ? !!notifyInput.checked : notificationsEnabled();
+    function afterPersist(ok) {
+      if (hint) {
+        if (!ok) hint.textContent = '钥匙串暂不可用，已写入本机缓存';
+        else if (!secret) hint.textContent = keepCustom ? '已保留地址并清除密钥' : '已清除本机密钥';
+        else hint.textContent = '已保存，正在连接';
+      }
+      restart();
+    }
     if (!secret) {
       var keepCustom = baseRaw && normalizeBaseUrl(baseRaw) !== DEFAULT_BASE_URL;
-      writeConfig(keepCustom ? normalizeBaseUrl(baseRaw) : '', '');
-      if (baseInput) baseInput.value = keepCustom ? normalizeBaseUrl(baseRaw) : DEFAULT_BASE_URL;
-      if (hint) hint.textContent = keepCustom ? '已保留地址并清除密钥' : '已清除本机密钥';
-      restart();
+      var clearedBase = keepCustom ? normalizeBaseUrl(baseRaw) : '';
+      if (baseInput) baseInput.value = keepCustom ? clearedBase : DEFAULT_BASE_URL;
+      persistBundle({ baseUrl: clearedBase, secret: '', notify: notify, storePresent: !!(memory && memory.storePresent) }).then(function () {
+        afterPersist(true);
+      }, function () {
+        afterPersist(false);
+      });
       return;
     }
     var base = baseRaw ? normalizeBaseUrl(baseRaw) : DEFAULT_BASE_URL;
-    writeConfig(base, secret);
     if (baseInput) baseInput.value = base;
-    if (hint) hint.textContent = '已保存，正在连接';
-    restart();
+    persistBundle({ baseUrl: base, secret: secret, notify: notify, storePresent: !!(memory && memory.storePresent) }).then(function () {
+      afterPersist(true);
+    }, function () {
+      afterPersist(false);
+    });
   }
 
   function closest(node, selector) {
@@ -974,17 +1280,40 @@ function mountFooter(footer) {
   });
   var form = document.getElementById('prioritySettingsForm');
   if (form) form.addEventListener('submit', onSave);
+  var notifyBox = document.getElementById('priorityNotify');
+  if (notifyBox) {
+    notifyBox.addEventListener('change', function () {
+      if (!memory) {
+        notifyBox.checked = notificationsEnabled();
+        return;
+      }
+      var nextNotify = {
+        baseUrl: memory.baseUrl || '',
+        secret: memory.secret || '',
+        notify: !!notifyBox.checked,
+        storePresent: !!memory.storePresent
+      };
+      // An empty keychain must stay empty so a secret saved on the other origin can still migrate.
+      if (!nextNotify.storePresent && !nextNotify.secret && !nextNotify.baseUrl) {
+        memory = nextNotify;
+        writeLocalCache(memory);
+        return;
+      }
+      persistBundle(nextNotify).catch(function () {});
+    });
+  }
   document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && panelMode) closePanel();
   });
   window.addEventListener('storage', function (event) {
     if (!event.key) return;
-    if (event.key === STORAGE_KEYS.baseUrl || event.key === STORAGE_KEYS.secret) restart();
-    else if (event.key === STORAGE_KEYS.seen) render();
+    if (event.key === STORAGE_KEYS.baseUrl || event.key === STORAGE_KEYS.secret || event.key === STORAGE_KEYS.notify) {
+      hydrateConfig();
+    } else if (event.key === STORAGE_KEYS.seen) render();
   });
 
   render();
-  restart();
+  hydrateConfig();
 }
 
 if (typeof document !== 'undefined') {

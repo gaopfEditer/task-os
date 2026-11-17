@@ -2,13 +2,18 @@ use keyring::Entry;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
-use tauri::{LogicalSize, Manager, PhysicalPosition, WebviewUrl, WebviewWindow, WebviewWindowBuilder, WindowEvent};
-use tauri_utils::config::Color;
+use tauri::{
+    LogicalSize, Manager, PhysicalPosition, WebviewUrl, WebviewWindow, WebviewWindowBuilder,
+    WindowEvent,
+};
 use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_notification::NotificationExt;
+use tauri_utils::config::Color;
 
 const KEYRING_SERVICE: &str = "com.taskos.desktop";
 const KEYRING_USER: &str = "taskos.github_token";
+/// Priority relay base URL + secret, shared by every webview origin of this app.
+const PRIORITY_KEYRING_USER: &str = "taskos.priority_config";
 const WINDOW_POS_FILE: &str = "window-positions.json";
 
 /// Circle stays 132×168. Extra width/height is the priority footer under it.
@@ -17,7 +22,7 @@ const BUBBLE_COMPACT_H: f64 = 236.0;
 const BUBBLE_LIST_W: f64 = 420.0;
 const BUBBLE_LIST_H: f64 = 600.0;
 const BUBBLE_SETTINGS_W: f64 = 360.0;
-const BUBBLE_SETTINGS_H: f64 = 440.0;
+const BUBBLE_SETTINGS_H: f64 = 500.0;
 
 /// Keep the top-left inside the monitor that contains it.
 /// `None` means the window cannot fit that monitor.
@@ -57,6 +62,60 @@ struct WindowPositions {
 
 fn keyring_entry() -> Result<Entry, String> {
     Entry::new(KEYRING_SERVICE, KEYRING_USER).map_err(|e| e.to_string())
+}
+
+fn priority_entry() -> Result<Entry, String> {
+    Entry::new(KEYRING_SERVICE, PRIORITY_KEYRING_USER).map_err(|e| e.to_string())
+}
+
+fn default_notify_on() -> bool {
+    true
+}
+
+/// OS-keychain copy of the priority relay settings. `present` is false only when
+/// nothing has been saved yet, so a later localStorage migration can run once.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct PrioritySharedConfig {
+    #[serde(default)]
+    base_url: String,
+    #[serde(default)]
+    secret: String,
+    #[serde(default = "default_notify_on")]
+    notify: bool,
+    #[serde(default)]
+    present: bool,
+}
+
+fn empty_priority_store() -> PrioritySharedConfig {
+    PrioritySharedConfig {
+        base_url: String::new(),
+        secret: String::new(),
+        notify: true,
+        present: false,
+    }
+}
+
+fn priority_store_to_save(base_url: &str, secret: &str, notify: bool) -> PrioritySharedConfig {
+    PrioritySharedConfig {
+        base_url: base_url.trim().to_string(),
+        secret: secret.trim().to_string(),
+        notify,
+        present: true,
+    }
+}
+
+fn encode_priority_store(config: &PrioritySharedConfig) -> Result<String, String> {
+    serde_json::to_string(config).map_err(|e| e.to_string())
+}
+
+fn parse_priority_store(raw: &str) -> Result<PrioritySharedConfig, String> {
+    let mut config: PrioritySharedConfig = serde_json::from_str(raw).map_err(|e| e.to_string())?;
+    config.base_url = config.base_url.trim().to_string();
+    config.secret = config.secret.trim().to_string();
+    // A readable keychain entry is authoritative, even when the secret was cleared.
+    config.present = true;
+    Ok(config)
 }
 
 fn positions_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
@@ -140,6 +199,28 @@ fn save_github_token(token: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn load_priority_config() -> Result<PrioritySharedConfig, String> {
+    let entry = priority_entry()?;
+    match entry.get_password() {
+        Ok(raw) => parse_priority_store(&raw),
+        Err(keyring::Error::NoEntry) => Ok(empty_priority_store()),
+        Err(err) => Err(err.to_string()),
+    }
+}
+
+#[tauri::command]
+fn save_priority_config(base_url: String, secret: String, notify: bool) -> Result<(), String> {
+    let entry = priority_entry()?;
+    let config = priority_store_to_save(&base_url, &secret, notify);
+    let raw = encode_priority_store(&config)?;
+    entry.set_password(&raw).map_err(|e| e.to_string())
+}
+
+fn needs_notification_permission(state: tauri_plugin_notification::PermissionState) -> bool {
+    !matches!(state, tauri_plugin_notification::PermissionState::Granted)
+}
+
+#[tauri::command]
 fn focus_main_window(app: tauri::AppHandle) -> Result<(), String> {
     let win = app
         .get_webview_window("main")
@@ -164,7 +245,19 @@ fn focus_price_bubble(app: tauri::AppHandle) -> Result<(), String> {
 
 #[tauri::command]
 fn show_price_alert(app: tauri::AppHandle, title: String, body: String) -> Result<(), String> {
-    app.notification()
+    let notifications = app.notification();
+    let state = notifications
+        .permission_state()
+        .map_err(|e| e.to_string())?;
+    if needs_notification_permission(state) {
+        let next = notifications
+            .request_permission()
+            .map_err(|e| e.to_string())?;
+        if needs_notification_permission(next) {
+            return Err("notification permission denied".into());
+        }
+    }
+    notifications
         .builder()
         .title(title)
         .body(body)
@@ -348,7 +441,13 @@ fn ensure_price_bubble(app: &tauri::AppHandle) -> Result<(), String> {
         .map_err(|e| e.to_string())?;
     if let Some(entry) = saved.price_bubble {
         apply_saved_position(&bubble, Some(entry));
-        clamp_xy(&bubble, entry.x, entry.y, BUBBLE_COMPACT_W, BUBBLE_COMPACT_H);
+        clamp_xy(
+            &bubble,
+            entry.x,
+            entry.y,
+            BUBBLE_COMPACT_W,
+            BUBBLE_COMPACT_H,
+        );
     } else {
         let _ = place_bubble_bottom_right(&bubble);
     }
@@ -386,6 +485,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             load_github_token,
             save_github_token,
+            load_priority_config,
+            save_priority_config,
             focus_main_window,
             focus_price_bubble,
             show_price_alert,
@@ -435,5 +536,57 @@ mod tests {
             super::validate_priority_get_url("https://user:secret@example.com/queue/priority")
                 .is_err()
         );
+    }
+
+    #[test]
+    fn priority_store_round_trip_trims_and_keeps_notify_off() {
+        let config =
+            super::priority_store_to_save(" https://example.com/relay ", " local-secret ", false);
+        assert_eq!(config.base_url, "https://example.com/relay");
+        assert_eq!(config.secret, "local-secret");
+        assert!(!config.notify);
+        assert!(config.present);
+        let raw = super::encode_priority_store(&config).unwrap();
+        let parsed = super::parse_priority_store(&raw).unwrap();
+        assert_eq!(parsed.base_url, config.base_url);
+        assert_eq!(parsed.secret, config.secret);
+        assert!(!parsed.notify);
+        assert!(parsed.present);
+    }
+
+    #[test]
+    fn priority_store_defaults_notify_on_and_marks_present() {
+        let parsed =
+            super::parse_priority_store(r#"{"baseUrl":"","secret":"local-secret"}"#).unwrap();
+        assert!(parsed.notify);
+        assert!(parsed.present);
+        assert_eq!(parsed.secret, "local-secret");
+        assert!(parsed.base_url.is_empty());
+    }
+
+    #[test]
+    fn missing_priority_store_is_not_present() {
+        let config = super::empty_priority_store();
+        assert!(!config.present);
+        assert!(config.notify);
+        assert!(config.secret.is_empty());
+        assert!(config.base_url.is_empty());
+    }
+
+    #[test]
+    fn notification_permission_is_requested_until_granted() {
+        use tauri_plugin_notification::PermissionState;
+        assert!(!super::needs_notification_permission(
+            PermissionState::Granted
+        ));
+        assert!(super::needs_notification_permission(
+            PermissionState::Denied
+        ));
+        assert!(super::needs_notification_permission(
+            PermissionState::Prompt
+        ));
+        assert!(super::needs_notification_permission(
+            PermissionState::PromptWithRationale
+        ));
     }
 }
