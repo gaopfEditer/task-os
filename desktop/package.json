@@ -8,7 +8,8 @@
     "dev:web": "npm run sync-board && serve dist -l 1420 --no-clipboard",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "test": "node --test board-extras/priority-footer.test.mjs"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",
