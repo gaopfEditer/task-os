@@ -91,6 +91,14 @@
   border: 1px solid #30363d;
   color: #c9d1d9;
 }
+#taskosCryptoPanel input.tc-source-name:disabled {
+  color: #8b949e;
+  -webkit-text-fill-color: #8b949e;
+  opacity: 1;
+  background: #0d1117;
+  border-color: #21262d;
+  cursor: default;
+}
 #taskosCryptoPanel .tc-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-top: 8px; }
 #taskosCryptoPanel .tc-row > * { flex: 0 0 auto; }
 #taskosCryptoPanel .tc-alerts { margin-top: 10px; }

@@ -12,6 +12,9 @@ export var STORAGE_KEYS = {
   seen: 'taskos.desktop.priority.seen'
 };
 
+/** Public relay on the VPS. Used only when the user has not saved a base URL. */
+export var DEFAULT_BASE_URL = 'https://op.g.ezcoin.ink';
+
 export var DEFAULT_SOURCES = Object.freeze([
   Object.freeze({ id: 'pangmao', name: '胖猫社区' })
 ]);
@@ -38,6 +41,53 @@ export function normalizeBaseUrl(raw) {
   } catch (e) {
     return '';
   }
+}
+
+/** What the settings field shows. Blank storage shows the public relay; a saved value is kept. */
+export function displayBaseUrl(storedBase) {
+  var raw = storedBase == null ? '' : String(storedBase).trim();
+  if (!raw) return DEFAULT_BASE_URL;
+  return normalizeBaseUrl(raw) || raw;
+}
+
+/**
+ * Connection config. A missing or blank saved base uses DEFAULT_BASE_URL and does not
+ * write storage. A saved custom URL is returned unchanged. Connect only when a secret
+ * is present — the secret is never defaulted.
+ */
+export function resolvePriorityConfig(storedBase, storedSecret) {
+  var secret = String(storedSecret == null ? '' : storedSecret).trim();
+  var raw = storedBase == null ? '' : String(storedBase).trim();
+  if (!raw) {
+    return {
+      base: DEFAULT_BASE_URL,
+      secret: secret,
+      usedDefault: true,
+      connect: !!secret
+    };
+  }
+  var normalized = normalizeBaseUrl(raw);
+  if (!normalized) {
+    return { base: '', secret: secret, usedDefault: false, connect: false };
+  }
+  return {
+    base: normalized,
+    secret: secret,
+    usedDefault: false,
+    connect: !!secret
+  };
+}
+
+/** Display labels from the server list. Not a setting the user can rename. */
+export function sourceLabelText(sources) {
+  var list = sources && sources.length ? sources : DEFAULT_SOURCES;
+  var names = [];
+  list.forEach(function (source) {
+    var name = source && source.name ? String(source.name).trim() : '';
+    if (!name && source && source.id) name = String(source.id).trim();
+    if (name) names.push(name);
+  });
+  return names.length ? names.join('、') : DEFAULT_SOURCES[0].name;
 }
 
 export function sourcesUrl(base) {
@@ -354,25 +404,28 @@ function mountFooter(footer) {
     return state.networkConfigured || state.holdSnapshot;
   }
 
-  function readConfig() {
-    var base = '';
-    var secret = '';
+  function readStoredBase() {
     try {
-      base = normalizeBaseUrl(localStorage.getItem(STORAGE_KEYS.baseUrl) || '');
-      secret = String(localStorage.getItem(STORAGE_KEYS.secret) || '').trim();
+      return localStorage.getItem(STORAGE_KEYS.baseUrl);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function readConfig() {
+    var storedSecret = null;
+    try {
+      storedSecret = localStorage.getItem(STORAGE_KEYS.secret);
     } catch (e) {}
-    return { base: base, secret: secret };
+    return resolvePriorityConfig(readStoredBase(), storedSecret);
   }
 
   function writeConfig(base, secret) {
     try {
-      if (!base && !secret) {
-        localStorage.removeItem(STORAGE_KEYS.baseUrl);
-        localStorage.removeItem(STORAGE_KEYS.secret);
-      } else {
-        localStorage.setItem(STORAGE_KEYS.baseUrl, base);
-        localStorage.setItem(STORAGE_KEYS.secret, secret);
-      }
+      if (base) localStorage.setItem(STORAGE_KEYS.baseUrl, base);
+      else localStorage.removeItem(STORAGE_KEYS.baseUrl);
+      if (secret) localStorage.setItem(STORAGE_KEYS.secret, secret);
+      else localStorage.removeItem(STORAGE_KEYS.secret);
     } catch (e) {}
   }
 
@@ -426,7 +479,8 @@ function mountFooter(footer) {
       el.title = '双击查看完整列表';
 
       var name = document.createElement('span');
-      name.className = 'priority-name';
+      name.className = 'priority-name priority-source-name';
+      name.setAttribute('aria-readonly', 'true');
       name.textContent = row.name;
       if (row.unconfigured) {
         var tag = document.createElement('small');
@@ -475,6 +529,8 @@ function mountFooter(footer) {
     var list = document.getElementById('priorityPanelList');
     var title = document.getElementById('priorityPanelTitle');
     if (title) {
+      var titleIsSource = panelMode === 'list' && !!listSource;
+      title.classList.toggle('priority-source-name', titleIsSource);
       if (panelMode === 'settings') title.textContent = '优先队列设置';
       else if (!listSource) title.textContent = '全部来源';
       else title.textContent = sourceName(listSource);
@@ -489,7 +545,7 @@ function mountFooter(footer) {
       empty.className = 'priority-empty';
       empty.textContent = displayConfigured()
         ? '暂无消息'
-        : '未配置中转地址。填写下方地址和密钥后即可拉取消息。';
+        : '填写本机密钥后即可拉取消息。未保存地址时使用 https://op.g.ezcoin.ink。';
       list.appendChild(empty);
       return;
     }
@@ -505,6 +561,8 @@ function mountFooter(footer) {
       time.dateTime = view.time || '';
       meta.appendChild(time);
       var src = document.createElement('span');
+      src.className = 'priority-source-name';
+      src.setAttribute('aria-readonly', 'true');
       src.textContent = view.sourceName || item.source || '';
       meta.appendChild(src);
       if (view.via) {
@@ -550,8 +608,19 @@ function mountFooter(footer) {
     });
   }
 
+  function renderSourceField() {
+    var el = document.getElementById('prioritySourceNames');
+    if (!el) return;
+    el.value = sourceLabelText(state.sources);
+    el.disabled = true;
+    el.readOnly = true;
+    el.tabIndex = -1;
+    el.setAttribute('aria-readonly', 'true');
+  }
+
   function render() {
     renderFooter();
+    renderSourceField();
     if (panelMode) renderList();
   }
 
@@ -562,15 +631,12 @@ function mountFooter(footer) {
   }
 
   function fillSettingsForm() {
-    var cfg = { base: '', secret: '' };
-    try {
-      cfg.base = localStorage.getItem(STORAGE_KEYS.baseUrl) || '';
-      cfg.secret = localStorage.getItem(STORAGE_KEYS.secret) || '';
-    } catch (e) {}
+    var cfg = readConfig();
     var baseInput = document.getElementById('priorityBaseUrl');
     var secretInput = document.getElementById('prioritySecret');
-    if (baseInput) baseInput.value = cfg.base;
+    if (baseInput) baseInput.value = displayBaseUrl(readStoredBase());
     if (secretInput) secretInput.value = cfg.secret;
+    renderSourceField();
   }
 
   function showPanel() {
@@ -819,7 +885,7 @@ function mountFooter(footer) {
     backoff = 1000;
     state.holdSnapshot = false;
     var cfg = readConfig();
-    state.networkConfigured = !!(cfg.base && cfg.secret);
+    state.networkConfigured = !!cfg.connect;
     state.lastError = '';
     if (!state.networkConfigured) {
       state.items = [];
@@ -847,20 +913,22 @@ function mountFooter(footer) {
     var baseRaw = baseInput ? baseInput.value.trim() : '';
     var secret = secretInput ? secretInput.value.trim() : '';
     if (hint) hint.classList.remove('is-error');
-    if (!baseRaw && !secret) {
-      writeConfig('', '');
-      if (hint) hint.textContent = '已清除本机配置';
-      restart();
-      return;
-    }
-    var base = normalizeBaseUrl(baseRaw);
-    if (!base || !secret) {
+    if (baseRaw && !normalizeBaseUrl(baseRaw)) {
       if (hint) {
         hint.classList.add('is-error');
-        hint.textContent = '请同时填写 http(s) 地址和密钥';
+        hint.textContent = '请填写 http(s) 地址';
       }
       return;
     }
+    if (!secret) {
+      var keepCustom = baseRaw && normalizeBaseUrl(baseRaw) !== DEFAULT_BASE_URL;
+      writeConfig(keepCustom ? normalizeBaseUrl(baseRaw) : '', '');
+      if (baseInput) baseInput.value = keepCustom ? normalizeBaseUrl(baseRaw) : DEFAULT_BASE_URL;
+      if (hint) hint.textContent = keepCustom ? '已保留地址并清除密钥' : '已清除本机密钥';
+      restart();
+      return;
+    }
+    var base = baseRaw ? normalizeBaseUrl(baseRaw) : DEFAULT_BASE_URL;
     writeConfig(base, secret);
     if (baseInput) baseInput.value = base;
     if (hint) hint.textContent = '已保存，正在连接';

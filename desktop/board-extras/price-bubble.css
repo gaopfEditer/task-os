@@ -162,13 +162,16 @@ html, body {
   border-radius: 6px;
 }
 .priority-row:hover { background: rgba(255, 255, 255, 0.06); }
+.priority-name,
+.priority-source-name {
+  color: #8b949e;
+}
 .priority-name {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #ffb86c;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 12px;
   line-height: 1.3;
 }
@@ -310,6 +313,19 @@ html, body {
   padding: 4px 6px;
   font-size: 12px;
   user-select: text;
+}
+.priority-panel input.priority-source-name:disabled {
+  color: #8b949e;
+  -webkit-text-fill-color: #8b949e;
+  opacity: 1;
+  background: #0d1117;
+  border-color: #21262d;
+  cursor: default;
+  user-select: none;
+}
+.priority-panel-bar strong.priority-source-name {
+  color: #8b949e;
+  font-weight: 500;
 }
 .priority-settings-actions { margin-top: 8px; }
 .priority-hint { margin-top: 6px; color: #8b949e; font-size: 11px; }

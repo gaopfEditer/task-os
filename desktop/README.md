@@ -59,7 +59,7 @@ npm run tauri icon ../favicon.svg
 
 悬浮窗圆形行情核仍是 **132×168**。圆下方有一条优先消息页脚，是 [msg-relay-service](https://github.com/gaopfEditer/msg-relay-service) 优先队列的桌面端，不另起协议。当前来源只有 **胖猫社区**（`pangmao`）；`GET /queue/priority/sources` 以后如果返回更多来源，页脚会逐行显示。
 
-每一行依次是：**名称**、**消息数**（当前拉到的该来源消息）、**新交易卡片数**（带 `symbol` / `direction` / `yield`，或 `meta.via` 为 `ocr` / `text`，且还没在列表里打开过）。双击某一行或页脚，打开完整列表（时间、来源、币种、方向、收益、短文、`meta.via`）。打开后这些交易卡片不再算「新」，已读 id 记在本机。
+每一行依次是：**名称**、**消息数**（当前拉到的该来源消息）、**新交易卡片数**（带 `symbol` / `direction` / `yield`，或 `meta.via` 为 `ocr` / `text`，且还没在列表里打开过）。名称是来源显示标签，灰色、只读，不能在设置里改名。双击某一行或页脚，打开完整列表（时间、来源、币种、方向、收益、短文、`meta.via`）。打开后这些交易卡片不再算「新」，已读 id 记在本机。
 
 连接方式与中转站相同：
 
@@ -77,11 +77,13 @@ msg-relay 不返回 CORS 头，气泡页面直接 `fetch` 带密钥会被 WebVie
 
 | localStorage 键 | 内容 |
 |-----------------|------|
-| `taskos.desktop.priority.baseUrl` | 中转根地址，如 `https://op.g.ezcoin.ink` |
-| `taskos.desktop.priority.secret` | 中转密钥，仅本机 |
+| `taskos.desktop.priority.baseUrl` | 中转根地址。未保存时使用 `https://op.g.ezcoin.ink`，已保存的自定义地址不会被覆盖 |
+| `taskos.desktop.priority.secret` | 中转密钥，仅本机，由用户自己填写 |
 | `taskos.desktop.priority.seen` | 已打开的交易卡片 id |
 
-未配置时气泡照常显示行情，页脚保留「胖猫社区」，计数为 0，并标「未配置」。不要把真实密钥写进仓库。
+来源名称（默认 **胖猫社区**）在页脚和两处设置里都是灰色只读，服务器来源列表还没到时仍显示这个默认名。
+
+未保存地址、但本机已经有密钥时，启动后会按 `https://op.g.ezcoin.ink` 连接优先队列的 WebSocket。没有密钥时不发起连接，页脚保留「胖猫社区」，计数为 0，并标「未配置」。不要把真实密钥写进仓库。
 
 窗口变高之后，若上次保存的位置会超出屏幕，会夹回当前显示器，放不下时退回右下角。
 
