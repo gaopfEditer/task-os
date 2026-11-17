@@ -307,17 +307,54 @@
   .res-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
   .lw-bar { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-bottom: 8px; }
   .lw-bar input { flex: 1 1 240px; min-width: 0; }
+  .lw-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-bottom: 10px; }
+  .lw-filters .res-tags { margin-bottom: 0; }
+  .lw-range { flex-wrap: nowrap; }
+  .lw-range .rtag-f { white-space: nowrap; }
   .lw-list { list-style: none; margin: 0; padding: 0; }
   .lw-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .lw-item.lw-summary { border-color: #b6e3ff; }
   .lw-item .lw-top { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; margin-bottom: 4px; }
-  .lw-item .lw-ts { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .lw-item .lw-ts { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; margin-left: auto; }
   .lw-item .lw-cat { font-size: 11px; font-weight: 600; padding: 0 6px; border-radius: 10px; background: #eef1f4; color: #57606a; }
   .lw-item.cat-signal .lw-cat { background: #ddf4ff; color: #0550ae; }
   .lw-item.cat-publish .lw-cat { background: #fff8c5; color: #7d4e00; }
   .lw-item.cat-bitget .lw-cat { background: #dafbe1; color: var(--green); }
   .lw-item.cat-vpn .lw-cat { background: #fbefff; color: #8250df; }
   .lw-item .lw-title { font-weight: 600; flex: 1 1 200px; min-width: 0; word-break: break-word; }
-  .lw-item .lw-body { font-size: 13px; color: var(--text); white-space: pre-wrap; word-break: break-word; margin: 0; }
+  .lw-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 2px 0 4px; }
+  .lw-chip { font-size: 11px; font-weight: 600; line-height: 18px; padding: 0 6px; border-radius: 10px; background: #eef1f4; color: #57606a; }
+  .lw-chip.ok { background: #dafbe1; color: var(--green); }
+  .lw-chip.bad { background: #ffebe9; color: var(--red); }
+  .lw-chip.warn { background: #fff8c5; color: #7d4e00; }
+  .lw-body { font-size: 13px; color: var(--text); margin-top: 4px; }
+  .lw-prose { white-space: pre-wrap; word-break: break-word; margin: 0 0 6px; }
+  .lw-stats { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+  .lw-stat { font-size: 12px; line-height: 1.45; background: #f6f8fa; border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; }
+  .lw-stat b { font-weight: 600; margin-right: 6px; color: var(--muted); }
+  .lw-sec-h { font-size: 12px; font-weight: 700; color: var(--muted); margin: 8px 0 2px; }
+  .lw-kline { font-size: 13px; line-height: 1.5; padding: 3px 8px; border-left: 3px solid var(--border); margin: 2px 0; white-space: pre-wrap; word-break: break-word; }
+  .lw-kline.ok { border-left-color: var(--green); background: #f6fef9; }
+  .lw-kline.bad { border-left-color: var(--red); background: #fff8f8; }
+  .lw-kline.warn { border-left-color: var(--orange); background: #fffaf5; }
+  .lw-more { margin-top: 4px; }
+  .lw-more > summary { cursor: pointer; color: var(--accent); font-size: 12px; }
+  .lw-sigs { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .lw-sig { background: #f6f8fa; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+  .lw-sig-top { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font-size: 12px; }
+  .lw-src { font-weight: 700; color: #0550ae; }
+  .lw-acct { font-weight: 600; }
+  .lw-coins { color: var(--muted); }
+  .lw-dir.long { color: var(--green); font-weight: 700; }
+  .lw-dir.short { color: var(--red); font-weight: 700; }
+  .lw-sum { margin-top: 2px; font-size: 13px; white-space: pre-wrap; word-break: break-word; }
+  .lw-empty-sig { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .lw-json { font-size: 12px; line-height: 1.45; background: #f6f8fa; border-radius: 6px; padding: 8px; margin: 6px 0 0; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  @media (max-width: 700px) {
+    .lw-range { flex-wrap: wrap; }
+    .lw-item .lw-title { flex: 1 1 100%; }
+    .lw-item .lw-ts { margin-left: 0; }
+  }
   .rtag-f { font-size: 12px; padding: 2px 9px; border-radius: 12px; max-width: 100%; overflow-wrap: anywhere; }
   .rtag-f i { font-style: normal; color: var(--faint); margin-left: 4px; }
   .rtag-f.pin { background: #ddf4ff; border-color: #54aeff; color: #0550ae; }
@@ -620,9 +657,12 @@
 
   <section class="tab" id="tab-livewatch">
     <h2 class="pagetitle">实时关注</h2>
-    <p class="hint" style="margin:0 0 8px">由本机 <code>python-ai-operate</code> 在每天 0 / 8 / 12 / 16 / 20 点增量写入 <code>data/live_watch.json</code>（VPN 仅在 12 / 20 点）。信号、发布、Bitget 自动下单与 VPN 状态分栏筛选。</p>
-    <div class="lw-bar"><input id="lwq" type="search" placeholder="搜索标题 / 正文…" autocomplete="off" aria-label="搜索实时关注"><span id="lwInfo" class="res-info"></span><a href="https://github.com/gaopfEditer/task-os/blob/main/data/live_watch.json" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 live_watch.json</a></div>
-    <div id="lwTags" class="res-tags"></div>
+    <p class="hint" style="margin:0 0 8px">由本机 <code>python-ai-operate</code> 在每天 0 / 8 / 12 / 16 / 20 点增量写入 <code>data/live_watch.json</code>（VPN 仅在 12 / 20 点）。可按类型（信号、发布、Bitget 自动下单、VPN）与时间（今天 / 最近 24h / 最近一周，上海时间）叠加筛选。</p>
+    <div class="lw-bar"><input id="lwq" type="search" placeholder="搜索标题 / 正文 / 账号…" autocomplete="off" aria-label="搜索实时关注"><span id="lwInfo" class="res-info"></span><a href="https://github.com/gaopfEditer/task-os/blob/main/data/live_watch.json" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 live_watch.json</a></div>
+    <div class="lw-filters">
+      <div id="lwRange" class="res-tags lw-range" role="group" aria-label="时间范围"></div>
+      <div id="lwTags" class="res-tags" role="group" aria-label="类型"></div>
+    </div>
     <div id="liveWatchFeed"><div class="nodata">加载中…</div></div>
   </section>
 
@@ -745,7 +785,7 @@
     detail: { show: { ops: true, orders: true, overseas: true, dayidea: true }, from: '', to: '', q: '', loading: false, loadGen: 0 },
     preview: { from: '', to: '', showPlan: false, loading: false, loadGen: 0 },
     insights: { status: '', text: '', parsed: null, error: '' },
-    liveWatch: { status: '', data: null, error: '', q: '', cat: '', gen: 0 }
+    liveWatch: { status: '', data: null, error: '', q: '', cat: '', range: 'today', gen: 0 }
   };
   var $ = function (id) { return document.getElementById(id); };
 
@@ -4340,39 +4380,339 @@
   // ---------- 实时关注 data/live_watch.json ----------
   var LIVE_WATCH_PATH = 'data/live_watch.json';
   var LIVE_CATS = [['signal', '信号'], ['publish', '发布'], ['bitget', 'Bitget'], ['vpn', 'VPN']];
+  var LIVE_RANGES = [['24h', '最近 24h'], ['today', '今天'], ['week', '最近一周']];
+  var LW_TZ = 'Asia/Shanghai';
+  function liveRangeKey() {
+    var r = state.liveWatch.range;
+    return r === '24h' || r === 'today' || r === 'week' ? r : 'today';
+  }
   function liveCatOn(key) { return !state.liveWatch.cat || state.liveWatch.cat === key; }
+  function lwParts(d) {
+    try {
+      var parts = new Intl.DateTimeFormat('en-GB', { timeZone: LW_TZ, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(d);
+      var g = {};
+      parts.forEach(function (p) { if (p.type !== 'literal') g[p.type] = p.value; });
+      if (g.hour === '24') g.hour = '00';
+      return g.year ? g : null;
+    } catch (e) { return null; }
+  }
+  function lwYmd(d) { var g = d ? lwParts(d) : null; return g ? g.year + '-' + g.month + '-' + g.day : ''; }
+  function lwParseTs(ts) {
+    if (ts == null || ts === '') return null;
+    if (typeof ts === 'number' && isFinite(ts)) { var dn = new Date(ts); return isNaN(dn.getTime()) ? null : dn; }
+    var s = String(ts).trim();
+    if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/.test(s)) s = s.replace(' ', 'T') + '+08:00';
+    var d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function lwWhen(ts) {
+    var d = lwParseTs(ts); if (!d) return String(ts || '');
+    var g = lwParts(d); if (!g) return String(ts || '');
+    return g.year + '-' + g.month + '-' + g.day + ' ' + g.hour + ':' + g.minute;
+  }
+  function lwClock(ts) { var d = lwParseTs(ts), g = d && lwParts(d); return g ? g.hour + ':' + g.minute : ''; }
+  function liveInRange(ts, range, now) {
+    var d = lwParseTs(ts); if (!d) return false;
+    now = now || new Date();
+    var t = d.getTime(), grace = 15 * 60 * 1000;
+    if (range === '24h') return t >= now.getTime() - 24 * 3600000 && t <= now.getTime() + grace;
+    if (range === 'week') return t >= now.getTime() - 7 * 24 * 3600000 && t <= now.getTime() + grace;
+    return lwYmd(d) === lwYmd(now);
+  }
+  function liveItems() {
+    var data = state.liveWatch.data;
+    return data && Array.isArray(data.items) ? data.items : [];
+  }
+  function liveRangeHtml() {
+    var cur = liveRangeKey(), h = '<span>时间</span>';
+    LIVE_RANGES.forEach(function (r) {
+      var on = cur === r[0];
+      h += '<button type="button" class="rtag-f' + (on ? ' on' : '') + '" data-lwrange="' + r[0] + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(r[1]) + '</button>';
+    });
+    return h;
+  }
   function liveTagsHtml() {
-    var L = state.liveWatch, items = (L.data && L.data.items) || [], counts = {};
+    var L = state.liveWatch, counts = {}, range = liveRangeKey();
     LIVE_CATS.forEach(function (c) { counts[c[0]] = 0; });
-    items.forEach(function (it) { if (it && it.category && counts[it.category] != null) counts[it.category]++; });
+    liveItems().forEach(function (it) {
+      if (!it || !it.category || counts[it.category] == null || !liveInRange(it.ts, range)) return;
+      counts[it.category]++;
+    });
     var h = '<span>类型</span>';
     h += '<button type="button" class="rtag-f' + (!L.cat ? ' on' : ' zero') + '" data-lwcat="">全部</button>';
     LIVE_CATS.forEach(function (c) {
       var on = L.cat === c[0], n = counts[c[0]] || 0;
-      h += '<button type="button" class="rtag-f' + (on ? ' on' : (n ? '' : ' zero')) + '" data-lwcat="' + c[0] + '" aria-pressed="' + on + '">' + esc(c[1]) + (n ? ' <i>' + n + '</i>' : '') + '</button>';
+      h += '<button type="button" class="rtag-f' + (on ? ' on' : (n ? '' : ' zero')) + '" data-lwcat="' + c[0] + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(c[1]) + (n ? ' <i>' + n + '</i>' : '') + '</button>';
     });
-  return h;
+    return h;
+  }
+  function linkifyEsc(s) {
+    var html = esc(s), links = [];
+    function put(url, label) {
+      links.push('<a href="' + url + '" target="_blank" rel="noopener">' + label + '</a>');
+      return '%%LW' + (links.length - 1) + '%%';
+    }
+    html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, function (_, label, url) { return put(url, label); });
+    html = html.replace(/https?:\/\/[^\s<]+/g, function (url) {
+      var clean = url.replace(/[),.;，。；、！？\]]+$/g, '');
+      if (!clean) return url;
+      return put(clean, clean) + url.slice(clean.length);
+    });
+    return html.replace(/%%LW(\d+)%%/g, function (_, i) { return links[+i] || ''; });
+  }
+  function liveLineKind(line) {
+    var t = String(line || '').trim();
+    if (!t) return 'blank';
+    if (/^https?:\/\/\S+$/.test(t)) return 'url';
+    if (/^#{1,3}\s+\S/.test(t) && t.length <= 40) return 'head';
+    if (/^\*\*[^*]{1,16}\*\*$/.test(t)) return 'head';
+    if (t.length <= 24 && /[:：]$/.test(t) && !/https?:/.test(t)) return 'head';
+    if (t.length <= 120 && /^.{1,18}[:：]\s*\S/.test(t)) return 'stat';
+    if (t.length <= 400 && /(成功|失败|断开|不稳定|节点|通断|轮换|屏蔽|对比|健康|出口)/.test(t)) return 'key';
+    return 'prose';
+  }
+  function liveHeadText(line) {
+    return String(line || '').trim().replace(/^\*\*([^*]+)\*\*$/, '$1').replace(/^#{1,3}\s*/, '').replace(/[:：]\s*$/, '');
+  }
+  function liveKeyTone(t) {
+    if (/^(失败|✗|×|FAIL|FAULT)\b/.test(t) || /^失败[:：\s·]/.test(t)) return 'bad';
+    if (/^(成功|✓|√|OK)\b/.test(t) || /^成功[:：\s·]/.test(t)) return 'ok';
+    if (/断开|不稳定|屏蔽/.test(t)) return 'warn';
+    return '';
+  }
+  function liveFormatLines(lines) {
+    var html = '', i = 0;
+    while (i < lines.length) {
+      var kind = liveLineKind(lines[i]);
+      if (kind === 'blank') { i++; continue; }
+      if (kind === 'head') { html += '<div class="lw-sec-h">' + esc(liveHeadText(lines[i])) + '</div>'; i++; continue; }
+      if (kind === 'stat') {
+        var stats = [];
+        while (i < lines.length && liveLineKind(lines[i]) === 'stat') {
+          var m = /^(.{1,18})[:：]\s*(.*)$/.exec(String(lines[i]).trim());
+          stats.push('<span class="lw-stat"><b>' + esc(m ? m[1] : String(lines[i]).trim()) + '</b>' + esc(m ? m[2] : '') + '</span>');
+          i++;
+        }
+        html += '<div class="lw-stats">' + stats.join('') + '</div>';
+        continue;
+      }
+      if (kind === 'key' || kind === 'url') {
+        while (i < lines.length && (liveLineKind(lines[i]) === 'key' || liveLineKind(lines[i]) === 'url')) {
+          var t = String(lines[i]).trim();
+          html += '<div class="lw-kline ' + liveKeyTone(t) + '">' + linkifyEsc(t) + '</div>';
+          i++;
+        }
+        continue;
+      }
+      var buf = [];
+      while (i < lines.length && liveLineKind(lines[i]) === 'prose') { buf.push(lines[i]); i++; }
+      html += '<div class="lw-prose">' + linkifyEsc(buf.join('\n')) + '</div>';
+    }
+    return html;
+  }
+  function liveRichBodyHtml(body) {
+    var text = String(body == null ? '' : body).replace(/\r\n/g, '\n');
+    if (!text.trim()) return '';
+    var lines = text.split('\n'), proseSeen = 0, chunks = [];
+    function push(hide, line) {
+      var last = chunks[chunks.length - 1];
+      if (!last || last.hide !== hide) chunks.push({ hide: hide, lines: [line] });
+      else last.lines.push(line);
+    }
+    lines.forEach(function (line) {
+      var kind = liveLineKind(line), hide = false;
+      if (kind === 'prose' && String(line).trim()) { proseSeen++; hide = proseSeen > 8; }
+      else if (!String(line).trim()) { var prev = chunks[chunks.length - 1]; hide = !!(prev && prev.hide); }
+      push(hide, line);
+    });
+    var hiddenN = 0;
+    chunks.forEach(function (ch) { if (ch.hide) ch.lines.forEach(function (l) { if (String(l).trim()) hiddenN++; }); });
+    if (hiddenN < 3) chunks.forEach(function (ch) { ch.hide = false; });
+    var html = '';
+    chunks.forEach(function (ch) {
+      if (!ch.lines.some(function (l) { return String(l).trim(); })) return;
+      if (!ch.hide) { html += '<div class="lw-body">' + liveFormatLines(ch.lines) + '</div>'; return; }
+      var n = ch.lines.filter(function (l) { return String(l).trim(); }).length;
+      html += '<details class="lw-more"><summary>展开这段正文（' + n + ' 行）</summary><div class="lw-body">' + liveFormatLines(ch.lines) + '</div></details>';
+    });
+    return html;
+  }
+  function liveMaybeJson(body) {
+    var t = String(body == null ? '' : body).trim();
+    if (!t || (t.charAt(0) !== '{' && t.charAt(0) !== '[')) return '';
+    try { return '<pre class="lw-json">' + esc(JSON.stringify(JSON.parse(t), null, 2)) + '</pre>'; } catch (e) { return ''; }
+  }
+  function liveTitleChips(title) {
+    var t = String(title || ''), chips = [];
+    if (/(?:^|[·•|\s])OK(?:$|[·•|\s])/i.test(t)) chips.push(['ok', '正常']);
+    if (/(?:^|[·•|\s])FAULT(?:$|[·•|\s])/i.test(t)) chips.push(['bad', '异常']);
+    return chips;
+  }
+  function livePick(row, keys) {
+    if (!row || typeof row !== 'object') return '';
+    var nests = [row];
+    ['signal', 'meta', 'extra'].forEach(function (k) { if (row[k] && typeof row[k] === 'object') nests.push(row[k]); });
+    for (var n = 0; n < nests.length; n++) {
+      for (var i = 0; i < keys.length; i++) {
+        var v = nests[n][keys[i]];
+        if (v == null || v === '') continue;
+        if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean' || Array.isArray(v)) return v;
+      }
+    }
+    return '';
+  }
+  function liveSrc(v) {
+    var s = String(v || '').trim(); if (!s) return '';
+    var map = { x: '推特', twitter: '推特', x_twitter: '推特', binance_square: '币安广场', binance: '币安广场' };
+    return map[s.toLowerCase()] || s;
+  }
+  function liveDir(v) {
+    var raw = String(v || '').trim(); if (!raw) return null;
+    var s = raw.toLowerCase();
+    var isLong = /^(long|buy|多|做多|看多)$/.test(s) || /\blong\b/.test(s) || /做多|看多/.test(raw);
+    var isShort = /^(short|sell|空|做空|看空)$/.test(s) || /\bshort\b/.test(s) || /做空|看空/.test(raw);
+    if (isLong && !isShort) return { cls: 'long', text: '做多' };
+    if (isShort && !isLong) return { cls: 'short', text: '做空' };
+    if (s === 'flat' || s === 'neutral' || raw === '中性' || raw === '观望') return { cls: '', text: '观望' };
+    return { cls: '', text: raw };
+  }
+  function liveCoins(row) {
+    var v = livePick(row, ['coins', 'symbols', 'coin', 'symbol']);
+    if (Array.isArray(v)) return v.map(function (x) { return String(x || '').trim(); }).filter(Boolean).slice(0, 6).join(', ');
+    return v ? String(v) : '';
+  }
+  function liveIsSignalSummary(it) {
+    if (!it || typeof it !== 'object') return false;
+    if (String(it.id || '').indexOf('sig:summary:') === 0) return true;
+    var meta = it.meta;
+    return it.category === 'signal' && !!(meta && typeof meta === 'object' && !Array.isArray(meta) && Array.isArray(meta.items));
+  }
+  function liveWindowLabel(meta) {
+    if (!meta || typeof meta !== 'object') return '';
+    var a = meta.window_start, b = meta.window_end;
+    if (!a && !b) return '';
+    var da = lwParseTs(a), db = lwParseTs(b);
+    if (da && db && lwYmd(da) === lwYmd(db)) return lwClock(a) + '–' + lwClock(b);
+    if (a && b) return lwWhen(a) + ' – ' + lwWhen(b);
+    return lwWhen(a || b);
+  }
+  function liveSigItemHtml(row) {
+    if (row == null) return '';
+    if (typeof row !== 'object') return '<li class="lw-sig"><div class="lw-sum">' + linkifyEsc(row) + '</div></li>';
+    var src = liveSrc(livePick(row, ['source', 'source_label', 'src', 'source_mode', 'platform']));
+    var acct = livePick(row, ['account', 'handle', 'user_handle', 'nick', 'name', 'profile', 'author']);
+    var dir = liveDir(livePick(row, ['direction', 'side', 'dir']));
+    var coins = liveCoins(row);
+    var summary = livePick(row, ['summary', 'text', 'body', 'content', 'title']);
+    var link = String(livePick(row, ['link', 'url', 'href']) || '').trim();
+    var important = row.important === true || row.important === 1 || row.important === 'true';
+    if (!src && !acct && !dir && !coins && !summary && !link) {
+      var raw = '';
+      try { raw = JSON.stringify(row); } catch (e) { raw = ''; }
+      return '<li class="lw-sig"><div class="lw-sum">' + esc(raw || '无法读取的信号') + '</div></li>';
+    }
+    var top = '<div class="lw-sig-top">';
+    if (src) top += '<span class="lw-src">' + esc(src) + '</span>';
+    if (acct) top += '<span class="lw-acct">' + esc(acct) + '</span>';
+    if (coins) top += '<span class="lw-coins">' + esc(coins) + '</span>';
+    if (dir) top += '<span class="lw-dir ' + dir.cls + '">' + esc(dir.text) + '</span>';
+    if (important) top += '<span class="lw-chip warn">重点</span>';
+    if (/^https?:\/\//i.test(link)) top += '<a class="lw-link" href="' + esc(link) + '" target="_blank" rel="noopener">链接</a>';
+    top += '</div>';
+    var showSum = summary && (!dir || String(summary).trim() !== dir.text);
+    return '<li class="lw-sig">' + top + (showSum ? '<div class="lw-sum">' + linkifyEsc(summary) + '</div>' : '') + '</li>';
+  }
+  function liveSummaryHtml(it) {
+    var meta = it.meta && typeof it.meta === 'object' && !Array.isArray(it.meta) ? it.meta : {};
+    var rows = Array.isArray(meta.items) ? meta.items : [];
+    var count = rows.length;
+    if (meta.count != null && meta.count !== '' && isFinite(Number(meta.count))) count = Number(meta.count);
+    var win = liveWindowLabel(meta);
+    var h = '<div class="lw-stats"><span class="lw-stat"><b>条数</b>' + esc(count) + '</span>';
+    if (win) h += '<span class="lw-stat"><b>时段</b>' + esc(win) + '</span>';
+    h += '</div>';
+    if (!rows.length) {
+      h += '<div class="lw-empty-sig">本时段没有信号明细。</div>';
+      if (it.body) h += liveRichBodyHtml(it.body);
+      return h;
+    }
+    h += '<ul class="lw-sigs">';
+    rows.forEach(function (row) { h += liveSigItemHtml(row); });
+    h += '</ul>';
+    if (it.body && String(it.body).trim()) {
+      var raw = String(it.body), nLines = raw.split(/\n/).filter(function (l) { return l.trim(); }).length;
+      if (nLines <= 4 && raw.length <= 280) h += liveRichBodyHtml(raw);
+      else h += '<details class="lw-more"><summary>补充说明</summary>' + liveRichBodyHtml(raw) + '</details>';
+    }
+    return h;
+  }
+  function liveSearchBlob(it) {
+    var parts = [it && it.title, it && it.body, it && it.category, it && it.id];
+    var meta = it && it.meta;
+    if (meta && typeof meta === 'object' && Array.isArray(meta.items)) {
+      meta.items.forEach(function (row) {
+        if (row == null) return;
+        if (typeof row !== 'object') { parts.push(row); return; }
+        var dir = liveDir(livePick(row, ['direction', 'side', 'dir']));
+        if (dir) parts.push(dir.text);
+        parts.push(liveSrc(livePick(row, ['source', 'source_label', 'src', 'source_mode', 'platform'])));
+        parts.push(livePick(row, ['account', 'handle', 'user_handle', 'nick', 'name', 'profile', 'author']));
+        parts.push(livePick(row, ['summary', 'text', 'body', 'content', 'title']));
+        parts.push(livePick(row, ['link', 'url', 'href']));
+        parts.push(liveCoins(row));
+      });
+    }
+    return parts.map(function (p) { return p == null ? '' : (Array.isArray(p) ? p.join(' ') : String(p)); }).join('\n').toLowerCase();
+  }
+  function liveItemHtml(it) {
+    var cat = LIVE_CATS.find(function (c) { return c[0] === it.category; });
+    var summary = liveIsSignalSummary(it);
+    var h = '<li class="lw-item cat-' + esc(it.category || '') + (summary ? ' lw-summary' : '') + '"><div class="lw-top">';
+    h += '<span class="lw-cat">' + esc(cat ? cat[1] : (it.category || '其他')) + '</span>';
+    h += '<span class="lw-title">' + esc(it.title || '（无标题）') + '</span>';
+    h += '<span class="lw-ts" title="' + esc(it.ts || '') + '">' + esc(lwWhen(it.ts)) + '</span></div>';
+    var chips = liveTitleChips(it.title);
+    if (chips.length) {
+      h += '<div class="lw-chips">';
+      chips.forEach(function (c) { h += '<span class="lw-chip ' + c[0] + '">' + esc(c[1]) + '</span>'; });
+      h += '</div>';
+    }
+    if (summary) h += liveSummaryHtml(it);
+    else if (it.category === 'bitget') { var j = liveMaybeJson(it.body); h += j || liveRichBodyHtml(it.body); }
+    else h += liveRichBodyHtml(it.body);
+    return h + '</li>';
   }
   function renderLiveWatch() {
-    var L = state.liveWatch, el = $('liveWatchFeed'), info = $('lwInfo'), tags = $('lwTags');
+    var L = state.liveWatch, el = $('liveWatchFeed'), info = $('lwInfo'), tags = $('lwTags'), rangeEl = $('lwRange');
+    if (!L.range) L.range = 'today';
+    if (rangeEl) rangeEl.innerHTML = liveRangeHtml();
     if (tags) tags.innerHTML = liveTagsHtml();
+    if (!el) return;
     if (L.status === 'loading') { el.innerHTML = '<div class="nodata">加载中…</div>'; if (info) info.textContent = ''; return; }
     if (L.status === 'error') { el.innerHTML = '<div class="msg error">' + esc(L.error) + '</div>'; if (info) info.textContent = ''; return; }
     if (L.status === 'missing') { el.innerHTML = '<div class="nodata">尚无 <code>data/live_watch.json</code>。请在 python-ai-operate 运行 <code>scripts/task_os_live_watch_sync.py</code>。</div>'; if (info) info.textContent = ''; return; }
-    var items = (L.data && L.data.items) || [], q = (L.q || '').trim().toLowerCase(), shown = 0, h = '';
-    if (L.data && L.data.last_slot) h += '<p class="hint">最近同步档：' + esc(L.data.last_slot) + (L.data.updated_at ? ' · 更新 ' + esc(L.data.updated_at) : '') + '</p>';
+    var items = liveItems(), q = (L.q || '').trim().toLowerCase(), words = q ? q.split(/\s+/).filter(Boolean) : [];
+    var range = liveRangeKey(), ranged = 0, shown = 0, h = '', head = '';
+    if (L.data && (L.data.last_slot || L.data.updated_at)) {
+      head += '<p class="hint">最近同步档：' + esc(lwWhen(L.data.last_slot) || L.data.last_slot || '') + (L.data.updated_at ? ' · 更新 ' + esc(lwWhen(L.data.updated_at)) : '') + '</p>';
+    }
     items.forEach(function (it) {
-      if (!it || !liveCatOn(it.category)) return;
-      var blob = ((it.title || '') + '\n' + (it.body || '')).toLowerCase();
-      if (q && q.split(/\s+/).some(function (w) { return w && blob.indexOf(w) < 0; })) return;
+      if (!it || typeof it !== 'object' || !liveInRange(it.ts, range)) return;
+      ranged++;
+      if (!liveCatOn(it.category)) return;
+      if (words.length && words.some(function (w) { return liveSearchBlob(it).indexOf(w) < 0; })) return;
       shown++;
-      var cat = LIVE_CATS.find(function (c) { return c[0] === it.category; });
-      h += '<li class="lw-item cat-' + esc(it.category || '') + '"><div class="lw-top"><span class="lw-cat">' + esc(cat ? cat[1] : (it.category || '')) + '</span><span class="lw-title">' + esc(it.title || '（无标题）') + '</span><span class="lw-ts">' + esc(it.ts || '') + '</span></div>';
-      if (it.body) h += '<p class="lw-body">' + esc(it.body) + '</p>';
-      h += '</li>';
+      try { h += liveItemHtml(it); }
+      catch (err) {
+        h += '<li class="lw-item"><div class="lw-top"><span class="lw-cat">条目</span><span class="lw-title">' + esc((it && it.title) || (it && it.id) || '无法展示') + '</span></div><div class="lw-prose">这条记录格式异常，已跳过详细渲染。</div></li>';
+      }
     });
-    el.innerHTML = shown ? '<ul class="lw-list">' + h + '</ul>' : '<div class="nodata">没有匹配条目。</div>';
-    if (info) info.textContent = '显示 ' + shown + ' / ' + items.length + (q ? ' · 搜索「' + L.q + '」' : '');
+    el.innerHTML = head + (shown ? '<ul class="lw-list">' + h + '</ul>' : '<div class="nodata">' + (ranged ? '没有匹配条目。' : '这个时间范围内没有条目。') + '</div>');
+    if (info) {
+      var rangeName = '今天';
+      LIVE_RANGES.forEach(function (r) { if (r[0] === range) rangeName = r[1]; });
+      info.textContent = '显示 ' + shown + ' 条 · ' + rangeName + '共 ' + ranged + ' 条' + (q ? ' · 搜索「' + q + '」' : '') + ' · 上海时区';
+    }
   }
   function loadLiveWatch(force) {
     var L = state.liveWatch;
@@ -4733,6 +5073,8 @@
   $('resources').addEventListener('toggle', function (ev) { var d = ev.target, R = state.res; if (d.classList && d.classList.contains('rgroup') && !R.q.trim() && !R.tag) R.closed[d.getAttribute('data-rname')] = !d.open; }, true);
   $('lwq').addEventListener('input', function (ev) { state.liveWatch.q = ev.target.value; renderLiveWatch(); });
   $('tab-livewatch').addEventListener('click', function (ev) {
+    var rangeBtn = ev.target.closest('[data-lwrange]');
+    if (rangeBtn) { state.liveWatch.range = rangeBtn.getAttribute('data-lwrange') || 'today'; renderLiveWatch(); return; }
     var b = ev.target.closest('[data-lwcat]'); if (!b) return;
     state.liveWatch.cat = b.getAttribute('data-lwcat') || '';
     renderLiveWatch();
