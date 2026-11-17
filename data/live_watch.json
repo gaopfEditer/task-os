@@ -1,8 +1,29 @@
 {
   "version": 1,
-  "updated_at": "2026-11-17T16:00:00+08:00",
-  "last_slot": "2026-11-17T16:00+08:00",
+  "updated_at": "2026-11-17T20:00:00+08:00",
+  "last_slot": "2026-11-17T20:00+08:00",
   "items": [
+    {
+      "id": "vpn:20:2026-11-17",
+      "category": "vpn",
+      "ts": "2026-11-17T20:00:00+08:00",
+      "title": "VPN Guard · OK · gsycloud",
+      "body": "健康: 正常\n出口归属: gsycloud",
+      "meta": {
+        "ok": true,
+        "owner": "gsycloud"
+      }
+    },
+    {
+      "id": "meta:publish:gap:1794916800",
+      "category": "publish",
+      "ts": "2026-11-17T20:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-17.log",
+      "meta": {
+        "level": "info"
+      }
+    },
     {
       "id": "meta:publish:gap:1794902400",
       "category": "publish",
