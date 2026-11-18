@@ -1,8 +1,73 @@
 {
   "version": 1,
-  "updated_at": "2026-11-18T08:00:00+08:00",
-  "last_slot": "2026-11-18T08:00+08:00",
+  "updated_at": "2026-11-18T12:00:00+08:00",
+  "last_slot": "2026-11-18T12:00+08:00",
   "items": [
+    {
+      "id": "vpn:12:2026-11-18",
+      "category": "vpn",
+      "ts": "2026-11-18T12:00:00+08:00",
+      "title": "VPN Guard · OK · clash",
+      "body": "健康: 正常\n出口归属: clash",
+      "meta": {
+        "ok": true,
+        "owner": "clash"
+      }
+    },
+    {
+      "id": "bitget:card:2663:tpsl_set",
+      "category": "bitget",
+      "ts": "2026-11-18T02:29:32+00:00",
+      "title": "Bitget 自动 · AKTUSDT · tpsl_set",
+      "body": "{\"holdSide\": \"long\", \"orderType\": null, \"size\": \"38\", \"stopLossPrice\": \"0.4996\", \"error\": null, \"reason\": null}",
+      "meta": {
+        "card_id": 2663,
+        "source": "collector_api"
+      }
+    },
+    {
+      "id": "bitget:card:2664:tpsl_set",
+      "category": "bitget",
+      "ts": "2026-11-18T02:32:06+00:00",
+      "title": "Bitget 自动 · AKTUSDT · tpsl_set",
+      "body": "{\"holdSide\": \"long\", \"orderType\": null, \"size\": \"38.1\", \"stopLossPrice\": \"0.5042\", \"error\": null, \"reason\": null}",
+      "meta": {
+        "card_id": 2664,
+        "source": "collector_api"
+      }
+    },
+    {
+      "id": "bitget:card:2666:tpsl_partial",
+      "category": "bitget",
+      "ts": "2026-11-18T03:49:58+00:00",
+      "title": "Bitget 自动 · NIGHTUSDT · tpsl_partial",
+      "body": "{\"holdSide\": \"long\", \"orderType\": null, \"size\": \"447\", \"stopLossPrice\": \"0.03935\", \"error\": null, \"reason\": null}",
+      "meta": {
+        "card_id": 2666,
+        "source": "collector_api"
+      }
+    },
+    {
+      "id": "bitget:card:2667:tpsl_partial",
+      "category": "bitget",
+      "ts": "2026-11-18T03:50:21+00:00",
+      "title": "Bitget 自动 · NIGHTUSDT · tpsl_partial",
+      "body": "{\"holdSide\": \"long\", \"orderType\": null, \"size\": \"447\", \"stopLossPrice\": \"0.03935\", \"error\": null, \"reason\": null}",
+      "meta": {
+        "card_id": 2667,
+        "source": "collector_api"
+      }
+    },
+    {
+      "id": "meta:publish:gap:1794974400",
+      "category": "publish",
+      "ts": "2026-11-18T12:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-18.log",
+      "meta": {
+        "level": "info"
+      }
+    },
     {
       "id": "meta:publish:gap:1794960000",
       "category": "publish",
