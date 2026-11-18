@@ -3,7 +3,7 @@
 
   var WATCH_KEY = 'taskos.desktop.watchlist';
   var DEFAULT_WATCH = 'BTC,ETH,SOL';
-  var POLL_MS = 3 * 60 * 1000;
+  var POLL_MS = 60 * 1000;
   var Q = window.TaskOsQuotes;
   if (!Q) return;
 

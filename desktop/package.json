@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "sync-board": "node scripts/sync-board.mjs",
-    "dev:web": "npm run sync-board && serve dist -l 1420 --no-clipboard",
+    "build:frontend": "node scripts/sync-board.mjs",
+    "serve:dist": "serve dist -l 1420 --no-clipboard",
+    "dev:web": "npm run build:frontend && npm run serve:dist",
     "tauri": "tauri",
-    "tauri:dev": "tauri dev",
+    "tauri:dev": "npm run build:frontend && tauri dev",
     "tauri:build": "tauri build",
     "test": "node --test board-extras/priority-footer.test.mjs"
   },

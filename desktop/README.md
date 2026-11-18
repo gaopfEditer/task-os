@@ -22,13 +22,14 @@
 ```bash
 cd desktop
 npm install
-npm run tauri:dev      # 开发：先 sync-board，再从 desktop/dist 内嵌加载（不依赖 localhost）
-npm run tauri:build    # 发布：产物在 src-tauri/target/release/bundle/
+npm run build:frontend   # 编译静态前端 → desktop/dist（必须先跑，否则壳里空白）
+npm run tauri:dev        # 开发：build:frontend + 本地静态服(1420) + 桌面窗口
+npm run tauri:build      # 发布：内嵌 dist，产物在 src-tauri/target/release/bundle/
 ```
 
-`npm run sync-board` 会把仓库根的 `index.html`、`favicon.svg` 及 `board-extras/` 复制到 `desktop/dist/`。**桌面壳默认始终读 `dist/`**，即使未单独启动 `npm run dev:web`，窗口也有内容。改根目录看板后重新 `tauri:dev` / `tauri:build` 即可同步。
+`build:frontend`（同 `sync-board`）把根目录 `index.html`、`favicon.svg` 与 `board-extras/` 打入 `desktop/dist/`。**没有 Vite/webpack**，看板是单文件 HTML，靠 sync 即「编译」。`tauri dev` 会通过 `beforeDevCommand` 自动 build 并启动 `serve dist`；**不要**直接双击 `target/debug/*.exe` 而不开 1420 端口。
 
-可选：另开终端 `npm run dev:web` 在浏览器预览 `http://localhost:1420`（与桌面内嵌页同源内容，非必须）。
+发布版 `tauri build` 将 dist 打进安装包，不依赖本地服务。
 
 ### 自定义图标（可选）
 
@@ -49,9 +50,9 @@ npm run tauri icon ../favicon.svg
 
 仅 Tauri 打包的 `dist/index.html` 会注入 `board-extras/` 脚本，**GitHub Pages 上的根 `index.html` 不含此功能**。
 
-- **关注列表**：顶栏「关注 / 提醒」面板，逗号分隔输入（如 `BTC,ETH,SOL`），默认 **`BTC,ETH,SOL`**；仅 **CoinGecko / Binance** 交易所公开 REST，每 **3 分钟**刷新。
+- **关注列表**：顶栏「配置」弹窗，逗号分隔输入（如 `BTC,ETH,SOL`），默认 **`BTC,ETH,SOL`**；仅 **CoinGecko / Binance** 交易所公开 REST，每 **1 分钟**刷新。
 - **独立悬浮窗**：额外原生小窗（无边框；顶栏拖动），与主窗口共用同一份关注列表；悬停点 ↗ 可聚焦主窗口。
-- **开机自启**：首次启动后会在 Windows「登录时启动项」注册 **Task OS**（开发模式 `tauri dev` 注册的是当前 debug 可执行文件；正式安装包用 `tauri:build` 产物）。
+- **开机自启**：首次启动后会在 Windows「登录时启动项」注册当前运行的 **Task OS** 可执行文件。**不依赖**后台 `serve`：若本机没有 `127.0.0.1:1420`（开机、直接双击 exe），会自动加载**内嵌的 `dist`**。日常开发仍用 `npm run tauri:dev`（会起 1420）。长期开机自用建议 `npm run tauri:build` 安装**正式发布包**再开自启。
 - **价格提醒**：为指定币种设置目标价与方向（涨到 ≥ / 跌到 ≤），触达后发送**系统桌面通知**（一次性，可在列表中删除）。
 - **本地持久化**：`localStorage` 键 `taskos.desktop.watchlist`、`taskos.desktop.alerts`，**不同步**到 GitHub 任务文件。
 
@@ -73,7 +74,7 @@ msg-relay 不返回 CORS 头，气泡页面直接 `fetch` 带密钥会被 WebVie
 
 ### 本机设置
 
-主窗口「关注 / 提醒」面板和气泡页脚的「连接设置」读写同一份配置。地址与密钥放在系统钥匙串（服务名 `com.taskos.desktop`，账户 `taskos.priority_config`），所以 `tauri dev` 和安装包看到的是同一条记录。`localStorage` 仍是缓存：钥匙串还没有记录时，会把本页已有的地址或密钥迁进去；钥匙串里已经有记录时（包括用户清空密钥）以钥匙串为准。
+主窗口「价格提醒」面板和气泡页脚的「连接设置」读写同一份配置。地址与密钥放在系统钥匙串（服务名 `com.taskos.desktop`，账户 `taskos.priority_config`），所以 `tauri dev` 和安装包看到的是同一条记录。`localStorage` 仍是缓存：钥匙串还没有记录时，会把本页已有的地址或密钥迁进去；钥匙串里已经有记录时（包括用户清空密钥）以钥匙串为准。
 
 | localStorage 键 | 内容 |
 |-----------------|------|

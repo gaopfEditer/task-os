@@ -12,7 +12,7 @@
   var DEFAULT_WATCH = 'BTC,ETH,SOL';
   var Q = window.TaskOsQuotes;
   if (!Q) return;
-  var POLL_MS = 3 * 60 * 1000;
+  var POLL_MS = 60 * 1000;
 
   var pollTimer = null;
   var pollGen = 0;
@@ -433,21 +433,35 @@
     var bar = document.createElement('div');
     bar.id = 'taskosCryptoBar';
     bar.innerHTML =
-      '<span class="tc-label">行情</span>' +
+      '<button type="button" class="tc-label tc-config-btn" id="tcOpenConfig" title="设置关注币种">配置</button>' +
       '<div class="tc-prices" id="tcPrices"></div>' +
       '<div class="tc-bar-actions">' +
       '<button type="button" id="tcShowBubble">行情气泡</button>' +
-      '<button type="button" id="tcTogglePanel">关注 / 提醒</button>' +
+      '<button type="button" id="tcTogglePanel">价格提醒</button>' +
+      '</div>';
+
+    var configModal = document.createElement('div');
+    configModal.id = 'taskosConfigModal';
+    configModal.className = 'tc-modal';
+    configModal.setAttribute('role', 'dialog');
+    configModal.setAttribute('aria-modal', 'true');
+    configModal.setAttribute('aria-labelledby', 'tcConfigModalTitle');
+    configModal.innerHTML =
+      '<div class="tc-modal-backdrop" id="tcConfigBackdrop"></div>' +
+      '<div class="tc-modal-dialog">' +
+      '<h2 class="tc-modal-title" id="tcConfigModalTitle">设置币种</h2>' +
+      '<label for="tcWatchInput">关注列表（逗号分隔，如 BTC,ETH,SOL,QQQ）</label>' +
+      '<input type="text" id="tcWatchInput" spellcheck="false" autocomplete="off">' +
+      '<p class="tc-modal-hint">币种：Binance 现货→合约→Gate→CoinGecko；QQQ 等美股走东方财富。每 1 分钟刷新。</p>' +
+      '<div class="tc-modal-actions">' +
+      '<button type="button" id="tcConfigCancel">取消</button>' +
+      '<button type="button" class="primary" id="tcSaveWatch">保存</button>' +
+      '</div>' +
       '</div>';
 
     var panel = document.createElement('div');
     panel.id = 'taskosCryptoPanel';
     panel.innerHTML =
-      '<label for="tcWatchInput">关注列表（逗号分隔，如 BTC,ETH,SOL）</label>' +
-      '<input type="text" id="tcWatchInput" spellcheck="false" autocomplete="off">' +
-      '<div class="tc-row">' +
-      '<button type="button" class="primary" id="tcSaveWatch">保存并订阅</button>' +
-      '</div>' +
       '<label>价格提醒</label>' +
       '<div class="tc-row">' +
       '<input type="text" id="tcAlertSym" placeholder="BTC" aria-label="提醒币种" style="width:5rem">' +
@@ -467,14 +481,32 @@
       '<button type="button" id="tcSaveRelay">保存优先队列</button>' +
       '</div>' +
       '<p class="tc-note" id="tcRelayHint">来源名称由服务器提供，默认「胖猫社区」，不能在这里修改。未保存地址时使用 https://op.g.ezcoin.ink。地址与密钥保存在系统钥匙串，开发模式和安装包共用。新卡片默认弹出系统通知。</p>' +
-      '<p class="tc-note">币种：Binance 现货→合约→Gate→CoinGecko。UAI 等新币 Binance 现货可能未上，会走合约/Gate。QQQ 等为美股 ETF，Binance 无 QQQUSDT，最后走东方财富。每 3 分钟刷新。</p>';
+      '<p class="tc-note">币种：Binance 现货→合约→Gate→CoinGecko。UAI 等新币 Binance 现货可能未上，会走合约/Gate。QQQ 等为美股 ETF，Binance 无 QQQUSDT，最后走东方财富。每 1 分钟刷新。</p>';
 
+    document.body.appendChild(configModal);
     header.insertAdjacentElement('afterend', panel);
     header.insertAdjacentElement('afterend', bar);
 
     var watchInput = document.getElementById('tcWatchInput');
-    watchInput.value = loadWatchlist();
+
+    function openConfigModal() {
+      watchInput.value = loadWatchlist();
+      configModal.classList.add('open');
+      watchInput.focus();
+    }
+
+    function closeConfigModal() {
+      configModal.classList.remove('open');
+    }
+
     setupPricesDragScroll(document.getElementById('tcPrices'));
+
+    document.getElementById('tcOpenConfig').addEventListener('click', openConfigModal);
+    document.getElementById('tcConfigBackdrop').addEventListener('click', closeConfigModal);
+    document.getElementById('tcConfigCancel').addEventListener('click', closeConfigModal);
+    configModal.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && configModal.classList.contains('open')) closeConfigModal();
+    });
 
     document.getElementById('tcShowBubble').addEventListener('click', function () {
       invoke('focus_price_bubble').catch(function () {
@@ -486,6 +518,7 @@
     });
     document.getElementById('tcSaveWatch').addEventListener('click', function () {
       saveWatchlist(watchInput.value.trim() || DEFAULT_WATCH);
+      closeConfigModal();
       startPolling();
     });
     document.getElementById('tcAddAlert').addEventListener('click', function () {

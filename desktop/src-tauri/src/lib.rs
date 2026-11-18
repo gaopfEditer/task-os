@@ -1,9 +1,11 @@
 use keyring::Entry;
 use serde::{Deserialize, Serialize};
 use std::fs;
+use std::net::{SocketAddr, TcpStream};
 use std::path::PathBuf;
+use std::time::Duration;
 use tauri::{
-    LogicalSize, Manager, PhysicalPosition, WebviewUrl, WebviewWindow, WebviewWindowBuilder,
+    LogicalSize, Manager, PhysicalPosition, Url, WebviewUrl, WebviewWindow, WebviewWindowBuilder,
     WindowEvent,
 };
 use tauri_plugin_autostart::ManagerExt;
@@ -15,6 +17,31 @@ const KEYRING_USER: &str = "taskos.github_token";
 /// Priority relay base URL + secret, shared by every webview origin of this app.
 const PRIORITY_KEYRING_USER: &str = "taskos.priority_config";
 const WINDOW_POS_FILE: &str = "window-positions.json";
+const DEV_STATIC_PORT: u16 = 1420;
+
+/// `tauri dev` 会起本地静态服；开机自启或双击 debug exe 时通常没有该服务，需改走内嵌 dist。
+fn dev_static_server_available() -> bool {
+    let Ok(addr) = format!("127.0.0.1:{DEV_STATIC_PORT}").parse::<SocketAddr>() else {
+        return false;
+    };
+    TcpStream::connect_timeout(&addr, Duration::from_millis(250)).is_ok()
+}
+
+fn bundled_asset_url(path: &str) -> Result<Url, String> {
+    let path = path.trim_start_matches('/');
+    Url::parse(&format!("http://tauri.localhost/{path}")).map_err(|e| e.to_string())
+}
+
+fn switch_main_to_bundled_frontend(app: &tauri::AppHandle) -> Result<(), String> {
+    if dev_static_server_available() {
+        return Ok(());
+    }
+    let main = app
+        .get_webview_window("main")
+        .ok_or_else(|| "main window not found".to_string())?;
+    main.navigate(bundled_asset_url("index.html")?)
+        .map_err(|e| e.to_string())
+}
 
 /// Circle stays 132×168. Extra width/height is the priority footer under it.
 const BUBBLE_COMPACT_W: f64 = 248.0;
@@ -266,7 +293,14 @@ fn show_price_alert(app: tauri::AppHandle, title: String, body: String) -> Resul
 }
 
 fn bubble_url() -> Result<WebviewUrl, String> {
-    Ok(WebviewUrl::App("price-bubble.html".into()))
+    if dev_static_server_available() {
+        format!("http://127.0.0.1:{DEV_STATIC_PORT}/price-bubble.html")
+            .parse()
+            .map(WebviewUrl::External)
+            .map_err(|e| e.to_string())
+    } else {
+        Ok(WebviewUrl::App("price-bubble.html".into()))
+    }
 }
 
 fn place_bubble_bottom_right(
@@ -476,7 +510,11 @@ pub fn run() {
         )
         .setup(|app| {
             restore_main_window(app.handle());
+            if let Err(err) = switch_main_to_bundled_frontend(app.handle()) {
+                eprintln!("主窗口切到内嵌前端失败: {err}");
+            }
             ensure_price_bubble(app.handle())?;
+            // 开发版自启会注册 debug exe，现已可无 1420 自举；正式环境建议用 release 安装包并自启。
             if let Err(err) = app.autolaunch().enable() {
                 eprintln!("开机自启注册失败: {err}");
             }

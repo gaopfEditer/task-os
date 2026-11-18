@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -9,7 +9,12 @@ const extrasDir = join(here, "../board-extras");
 
 mkdirSync(dist, { recursive: true });
 for (const name of ["index.html", "favicon.svg"]) {
-  copyFileSync(join(repoRoot, name), join(dist, name));
+  const src = join(repoRoot, name);
+  if (!existsSync(src)) {
+    console.error("Missing source:", src);
+    process.exit(1);
+  }
+  copyFileSync(src, join(dist, name));
 }
 for (const name of [
   "market-symbols.js",
@@ -20,7 +25,12 @@ for (const name of [
   "price-bubble.css",
   "priority-footer.js",
 ]) {
-  copyFileSync(join(extrasDir, name), join(dist, name));
+  const src = join(extrasDir, name);
+  if (!existsSync(src)) {
+    console.error("Missing extra:", src);
+    process.exit(1);
+  }
+  copyFileSync(src, join(dist, name));
 }
 
 let html = readFileSync(join(dist, "index.html"), "utf8");
@@ -39,4 +49,20 @@ if (!html.includes(marker)) {
 }
 writeFileSync(join(dist, "index.html"), html);
 
-console.log("Synced board UI + desktop extras to", dist);
+const required = [
+  "index.html",
+  "market-symbols.js",
+  "taskos-desktop.js",
+  "taskos-desktop.css",
+  "price-bubble.html",
+  "priority-footer.js",
+];
+for (const name of required) {
+  const p = join(dist, name);
+  if (!existsSync(p)) {
+    console.error("Build frontend failed, missing:", p);
+    process.exit(1);
+  }
+}
+
+console.log("Built static frontend at", dist);
