@@ -1,8 +1,40 @@
 {
   "version": 1,
-  "updated_at": "2026-11-18T12:00:00+08:00",
-  "last_slot": "2026-11-18T12:00+08:00",
+  "updated_at": "2026-11-18T16:00:00+08:00",
+  "last_slot": "2026-11-18T16:00+08:00",
   "items": [
+    {
+      "id": "bitget:card:2674:tpsl_set",
+      "category": "bitget",
+      "ts": "2026-11-18T07:03:32+00:00",
+      "title": "Bitget 自动 · BREVUSDT · tpsl_set",
+      "body": "{\"holdSide\": \"long\", \"orderType\": null, \"size\": \"197\", \"stopLossPrice\": \"0.09585\", \"error\": null, \"reason\": null}",
+      "meta": {
+        "card_id": 2674,
+        "source": "collector_api"
+      }
+    },
+    {
+      "id": "bitget:card:2675:tpsl_set",
+      "category": "bitget",
+      "ts": "2026-11-18T07:05:58+00:00",
+      "title": "Bitget 自动 · BREVUSDT · tpsl_set",
+      "body": "{\"holdSide\": \"long\", \"orderType\": null, \"size\": \"199\", \"stopLossPrice\": \"0.0922\", \"error\": null, \"reason\": null}",
+      "meta": {
+        "card_id": 2675,
+        "source": "collector_api"
+      }
+    },
+    {
+      "id": "meta:publish:gap:1794988800",
+      "category": "publish",
+      "ts": "2026-11-18T16:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-18.log",
+      "meta": {
+        "level": "info"
+      }
+    },
     {
       "id": "vpn:12:2026-11-18",
       "category": "vpn",
