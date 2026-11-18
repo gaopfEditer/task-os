@@ -1,8 +1,40 @@
 {
   "version": 1,
-  "updated_at": "2026-11-18T16:00:00+08:00",
-  "last_slot": "2026-11-18T16:00+08:00",
+  "updated_at": "2026-11-18T20:00:00+08:00",
+  "last_slot": "2026-11-18T20:00+08:00",
   "items": [
+    {
+      "id": "vpn:20:2026-11-18",
+      "category": "vpn",
+      "ts": "2026-11-18T20:00:00+08:00",
+      "title": "VPN Guard · OK · gsycloud",
+      "body": "健康: 正常\n出口归属: gsycloud",
+      "meta": {
+        "ok": true,
+        "owner": "gsycloud"
+      }
+    },
+    {
+      "id": "bitget:card:2678:tpsl_partial",
+      "category": "bitget",
+      "ts": "2026-11-18T09:10:02+00:00",
+      "title": "Bitget 自动 · MMTUSDT · tpsl_partial",
+      "body": "{\"holdSide\": \"long\", \"orderType\": null, \"size\": \"80\", \"stopLossPrice\": \"0.2508\", \"error\": null, \"reason\": null}",
+      "meta": {
+        "card_id": 2678,
+        "source": "collector_api"
+      }
+    },
+    {
+      "id": "meta:publish:gap:1795003200",
+      "category": "publish",
+      "ts": "2026-11-18T20:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-18.log",
+      "meta": {
+        "level": "info"
+      }
+    },
     {
       "id": "bitget:card:2674:tpsl_set",
       "category": "bitget",
