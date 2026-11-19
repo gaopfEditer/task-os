@@ -8,7 +8,7 @@ const dist = join(here, "../dist");
 const extrasDir = join(here, "../board-extras");
 
 mkdirSync(dist, { recursive: true });
-for (const name of ["index.html", "favicon.svg"]) {
+for (const name of ["index.html", "favicon.svg", "function-board.css", "function-board.js"]) {
   const src = join(repoRoot, name);
   if (!existsSync(src)) {
     console.error("Missing source:", src);

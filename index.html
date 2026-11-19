@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Task OS</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="function-board.css">
 <style>
   :root {
     --bg: #f5f6f8; --card: #fff; --text: #1f2328; --muted: #656d76; --faint: #8c959f; --border: #d0d7de; --line: #eaeef2; --foc: #bf8700; --idea: #bf3989; --gain: #1b7c83;
@@ -678,15 +679,15 @@
     </div>
     <div id="botsCollabPane" hidden>
       <p class="hint" style="margin:0 0 8px"><strong>base·</strong> 个人事业 10 职能 · <code>data/business-function-board.json</code>：角色侧栏筛选、重点/阶段、<strong>执行状态</strong>与备注（供 base· Bot 回写）。</p>
-      <div id="botCollab"><div class="nodata">加载中…</div></div>
+      <div id="botCollab"><div id="botCollabBar"></div><div id="botCollabHost"><div class="nodata">加载中…</div></div></div>
     </div>
     <div id="botsWorkPane" hidden>
       <p class="hint" style="margin:0 0 8px"><strong>work·</strong> 技术研究六角色 · <code>data/work-skills-board.json</code>：职能与工作事项、执行状态；与 base· / grow· 独立。</p>
-      <div id="botWork"><div class="nodata">加载中…</div></div>
+      <div id="botWork"><div id="botWorkBar"></div><div id="botWorkHost"><div class="nodata">加载中…</div></div></div>
     </div>
     <div id="botsCreativePane" hidden>
       <p class="hint" style="margin:0 0 8px"><strong>grow·</strong> 运营七角色 · <code>data/grow-operations-board.json</code>：通用方法 + 业务配置（币圈/游戏/软件）、机会池、执行状态。</p>
-      <div id="botCreative"><div class="nodata">加载中…</div></div>
+      <div id="botCreative"><div id="botCreativeBar"></div><div id="botCreativeHost"><div class="nodata">加载中…</div></div></div>
     </div>
   </section>
 
@@ -764,6 +765,7 @@
   <div id="simplePreviewBody" class="sp-grid" role="document"></div>
 </dialog>
 
+<script src="function-board.js"></script>
 <script>
 (function () {
   'use strict';
@@ -3559,66 +3561,47 @@
     state.botBoard.dirty = true;
     renderBotCollab();
   }
+  function renderBotBoardBar(barId, path, B, saveAttr) {
+    var bar = $(barId);
+    if (!bar) return;
+    var h = '<div class="area-bar">';
+    h += '<button type="button" class="primary" ' + saveAttr + '="save"' + (B.saving || !B.dirty ? ' disabled' : '') + '>' + (B.saving ? '保存中…' : '保存到 GitHub') + '</button>';
+    h += '<button type="button" ' + saveAttr + '="reload">重新加载</button>' + tokenHint();
+    h += '<a href="' + esc(fileUrl(path)) + '" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 JSON</a>';
+    h += '</div>';
+    if (B.flash && B.flash.kind !== 'ok') bar.innerHTML = h + '<div class="msg ' + B.flash.kind + '">' + B.flash.text + '</div>';
+    else if (B.flash) bar.innerHTML = h + '<div class="msg ' + B.flash.kind + '">' + B.flash.text + '</div>';
+    else bar.innerHTML = h;
+  }
+  function fboardShell(B, missingText) {
+    return {
+      loading: B.status === 'loading' || B.status === '',
+      error: B.status === 'error' ? B.error : '',
+      missing: B.status === 'missing',
+      missingText: missingText,
+      flash: null,
+      dirty: B.dirty,
+    };
+  }
   function renderBotCollab() {
-    var B = state.botBoard, el = $('botCollab');
-    if (!el) return;
-    var h = '';
-    if (B.status === 'loading' || B.status === '') { el.innerHTML = '<div class="nodata">正在读取职能看板…</div>'; return; }
-    h += '<div class="area-bar">';
-    h += '<button type="button" class="primary" data-bcact="save"' + (B.saving || !B.dirty ? ' disabled' : '') + '>' + (B.saving ? '保存中…' : '保存到 GitHub') + '</button>';
-    h += '<button type="button" data-bcact="reload">重新加载</button>' + tokenHint();
-    h += '<a href="' + esc(fileUrl(BOT_BOARD_PATH)) + '" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 JSON</a>';
-    h += '</div>';
-    if (B.flash) h += '<div class="msg ' + B.flash.kind + '">' + B.flash.text + '</div>';
-    if (B.status === 'error') { el.innerHTML = h + '<div class="msg error">读取失败：' + esc(B.error) + '</div>'; return; }
-    if (B.status === 'missing') { el.innerHTML = h + '<div class="nodata">尚无 <code>data/business-function-board.json</code>。可由 MausBot 运行 <code>scripts/sync-business-board.mjs</code> 从 OpenMausBot 同步。</div>'; return; }
-    if (!B.data) { el.innerHTML = h + '<div class="nodata">（空）</div>'; return; }
-    var duties = (B.data.duties || []).filter(function (d) { return !d.archived; });
-    var q = String(B.q || '').toLowerCase().trim();
-    h += '<div class="bcollab-stats">' +
-      [['角色', (B.data.roles || []).length], ['职能', duties.length], ['重点', duties.filter(function (d) { return d.priority === '重点'; }).length], ['执行中', duties.filter(function (d) { return d.exec_state === 'running'; }).length]]
-        .map(function (a) { return '<div class="stat"><small>' + esc(a[0]) + '</small><strong>' + a[1] + '</strong></div>'; }).join('') + '</div>';
-    h += '<div class="bcollab-filters"><input id="bcSearch" type="search" placeholder="搜索职能…" value="' + esc(B.q || '') + '">';
-    h += '<span class="res-tags">';
-    h += '<button type="button" class="rtag' + (BOT_BOARD_ROLE === '' ? ' on' : '') + '" data-bcrole="">全部角色</button>';
-    (B.data.roles || []).forEach(function (r) {
-      h += '<button type="button" class="rtag' + (BOT_BOARD_ROLE === r.id ? ' on' : '') + '" data-bcrole="' + esc(r.id) + '">' + esc(r.name) + '</button>';
+    var B = state.botBoard;
+    renderBotBoardBar('botCollabBar', BOT_BOARD_PATH, B, 'data-bcact');
+    var host = $('botCollabHost');
+    if (!host || !window.TaskFunctionBoard) return;
+    TaskFunctionBoard.mount('collab', {
+      host: host,
+      title: '个人事业 · 职能配置看板',
+      subtitle: 'base· Bot · 侧栏选角色、卡片编辑、导出/导入 JSON',
+      defaultRole: 'ops',
+      execMode: true,
+      allowRoleEdit: false,
+      roleBotName: roleBotName,
+      exportName: 'business-function-board',
+      getData: function () { return B.data; },
+      getShellState: function () { return fboardShell(B, '尚无 business-function-board.json'); },
+      onDirty: function () { B.dirty = true; renderBotBoardBar('botCollabBar', BOT_BOARD_PATH, B, 'data-bcact'); TaskFunctionBoard.get('collab').sync(); },
+      statRows: [['角色', (B.data && B.data.roles || []).length], ['职能', (B.data && (B.data.duties || []).filter(function (d) { return !d.archived; }) || []).length], ['重点', (B.data && (B.data.duties || []).filter(function (d) { return !d.archived && d.priority === '重点'; }) || []).length], ['执行中', (B.data && (B.data.duties || []).filter(function (d) { return d.exec_state === 'running'; }) || []).length]],
     });
-    h += '</span></div><div class="bcollab-filters res-tags">';
-    ['all', '重点', '进行中', '待尝试', '暂缓'].forEach(function (f) {
-      var lbl = f === 'all' ? '全部' : f;
-      h += '<button type="button" class="rtag' + (BOT_BOARD_FILTER === f ? ' on' : '') + '" data-bcfilter="' + esc(f) + '">' + esc(lbl) + '</button>';
-    });
-    h += '</div>';
-    var list = duties.slice();
-    if (BOT_BOARD_ROLE) list = list.filter(function (d) { return d.role_id === BOT_BOARD_ROLE; });
-    if (BOT_BOARD_FILTER === '重点') list = list.filter(function (d) { return d.priority === '重点'; });
-    else if (BOT_BOARD_FILTER !== 'all') list = list.filter(function (d) { return d.status === BOT_BOARD_FILTER; });
-    if (q) list = list.filter(function (d) {
-      var blob = (d.name + d.description + d.agent + roleName(B.data, d.role_id)).toLowerCase();
-      return blob.indexOf(q) >= 0;
-    });
-    if (!list.length) h += '<div class="nodata">没有符合条件的职能。</div>';
-    list.forEach(function (d) {
-      var rb = roleBotName(B.data, d.role_id);
-      h += '<article class="duty-card' + (d.priority === '重点' ? ' focus' : '') + '" data-duty="' + esc(d.id) + '"><h4>' + esc(d.name) +
-        (d.priority === '重点' ? ' <span class="dbadge">★ 重点</span>' : '') +
-        ' <span class="dbadge exec-' + esc(d.exec_state || 'idle') + '">' + esc(BOT_EXEC_LABEL[d.exec_state] || BOT_EXEC_LABEL.idle) + '</span></h4>';
-      h += '<div class="dmeta">' + esc(roleName(B.data, d.role_id)) + (rb ? ' · <b>' + esc(rb) + '</b>' : '') + (d.agent ? ' · 执行 ' + esc(d.agent) : '') + '</div>';
-      h += '<p class="hint" style="margin:0">' + esc(d.description) + '</p>';
-      h += '<div class="drow"><label>阶段</label><select data-df="status" data-duty="' + esc(d.id) + '"><option' + (d.status === '进行中' ? ' selected' : '') + '>进行中</option><option' + (d.status === '待尝试' ? ' selected' : '') + '>待尝试</option><option' + (d.status === '暂缓' ? ' selected' : '') + '>暂缓</option></select>';
-      h += '<label>优先级</label><select data-df="priority" data-duty="' + esc(d.id) + '"><option' + (d.priority === '普通' ? ' selected' : '') + '>普通</option><option' + (d.priority === '重点' ? ' selected' : '') + '>重点</option></select>';
-      h += '<label>执行</label><select data-df="exec_state" data-duty="' + esc(d.id) + '">';
-      Object.keys(BOT_EXEC_LABEL).forEach(function (k) { h += '<option value="' + k + '"' + ((d.exec_state || 'idle') === k ? ' selected' : '') + '>' + esc(BOT_EXEC_LABEL[k]) + '</option>'; });
-      h += '</select></div>';
-      h += '<label class="blbl">执行备注</label><textarea data-df="exec_note" data-duty="' + esc(d.id) + '" placeholder="Bot 回写：进展、阻塞、产出路径…">' + esc(d.exec_note || '') + '</textarea>';
-      if (d.exec_at) h += '<p class="hint" style="margin:4px 0 0;font-size:11px">执行更新 ' + esc(new Date(d.exec_at).toLocaleString('zh-CN', { hour12: false })) + '</p>';
-      h += '</article>';
-    });
-    if (B.dirty) h += '<div class="msg info">有未保存的改动，点「保存到 GitHub」写入仓库（需令牌）。</div>';
-    el.innerHTML = h;
-    var inp = $('bcSearch');
-    if (inp) inp.addEventListener('input', function (ev) { B.q = ev.target.value; renderBotCollab(); });
   }
   function saveBotCollab() {
     var B = state.botBoard;
@@ -3688,78 +3671,27 @@
     renderBotWork();
   }
   function renderBotWork() {
-    var W = state.workBoard, el = $('botWork');
-    if (!el) return;
-    var h = '';
-    if (W.status === 'loading' || W.status === '') { el.innerHTML = '<div class="nodata">正在读取工作技能看板…</div>'; return; }
-    h += '<div class="area-bar">';
-    h += '<button type="button" class="primary" data-bwact="save"' + (W.saving || !W.dirty ? ' disabled' : '') + '>' + (W.saving ? '保存中…' : '保存到 GitHub') + '</button>';
-    h += '<button type="button" data-bwact="reload">重新加载</button>' + tokenHint();
-    h += '<a href="' + esc(fileUrl(WORK_BOARD_PATH)) + '" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 JSON</a>';
-    h += '</div>';
-    if (W.flash) h += '<div class="msg ' + W.flash.kind + '">' + W.flash.text + '</div>';
-    if (W.status === 'error') { el.innerHTML = h + '<div class="msg error">读取失败：' + esc(W.error) + '</div>'; return; }
-    if (W.status === 'missing') { el.innerHTML = h + '<div class="nodata">尚无 <code>data/work-skills-board.json</code>。本地运行 <code>scripts/build-work-skills-board.mjs</code>。</div>'; return; }
-    if (!W.data) { el.innerHTML = h + '<div class="nodata">（空）</div>'; return; }
-    if (W.data.meta && W.data.meta.system) h += '<div class="msg info">' + esc(W.data.meta.system) + (W.data.meta.principle ? ' · ' + esc(W.data.meta.principle) : '') + '</div>';
-    var duties = (W.data.duties || []).filter(function (d) { return !d.archived; });
-    var q = String(W.q || '').toLowerCase().trim();
-    h += '<div class="bcollab-stats">' +
-      [['角色', (W.data.roles || []).length], ['职能', duties.length], ['工作事项', (W.data.items || []).length], ['执行中', duties.filter(function (d) { return d.exec_state === 'running'; }).length]]
-        .map(function (a) { return '<div class="stat"><small>' + esc(a[0]) + '</small><strong>' + a[1] + '</strong></div>'; }).join('') + '</div>';
-    h += '<details class="bot-edges" open><summary>角色目标（六角色）</summary><ul>' +
-      (W.data.roles || []).map(function (r) {
-        var rb = roleBotName(W.data, r.id);
-        return '<li><b>' + esc(r.name) + '</b>' + (rb ? ' → ' + esc(rb) : '') + '：' + esc(r.goal || r.desc || '') + '</li>';
-      }).join('') + '</ul></details>';
-    h += '<div class="bcollab-filters"><input id="bwSearch" type="search" placeholder="搜索职能…" value="' + esc(W.q || '') + '">';
-    h += '<span class="res-tags">';
-    h += '<button type="button" class="rtag' + (WORK_BOARD_ROLE === '' ? ' on' : '') + '" data-bwrole="">全部角色</button>';
-    (W.data.roles || []).forEach(function (r) {
-      h += '<button type="button" class="rtag' + (WORK_BOARD_ROLE === r.id ? ' on' : '') + '" data-bwrole="' + esc(r.id) + '">' + esc(r.name) + '</button>';
+    var W = state.workBoard;
+    renderBotBoardBar('botWorkBar', WORK_BOARD_PATH, W, 'data-bwact');
+    var host = $('botWorkHost');
+    if (!host || !window.TaskFunctionBoard) return;
+    var itemsN = W.data && (W.data.items || []).length;
+    TaskFunctionBoard.mount('work', {
+      host: host,
+      title: '技术研究 · 工作技能看板',
+      subtitle: (W.data && W.data.meta && W.data.meta.system ? W.data.meta.system + ' · ' : '') + 'work· 六角色 · 工作事项 ' + (itemsN || 0) + ' 条见 JSON items',
+      defaultRole: 'collector',
+      execMode: true,
+      allowRoleEdit: false,
+      statusOptions: ['进行中', '待研究', '待尝试', '暂缓'],
+      filters: ['all', '重点', '进行中', '待研究', '待尝试', '暂缓'],
+      roleBotName: roleBotName,
+      exportName: 'work-skills-board',
+      getData: function () { return W.data; },
+      getShellState: function () { return fboardShell(W, '尚无 work-skills-board.json'); },
+      onDirty: function () { W.dirty = true; renderBotBoardBar('botWorkBar', WORK_BOARD_PATH, W, 'data-bwact'); TaskFunctionBoard.get('work').sync(); },
+      statRows: [['角色', (W.data && W.data.roles || []).length], ['职能', (W.data && (W.data.duties || []).filter(function (d) { return !d.archived; }) || []).length], ['工作事项', itemsN || 0], ['执行中', (W.data && (W.data.duties || []).filter(function (d) { return d.exec_state === 'running'; }) || []).length]],
     });
-    h += '</span></div><div class="bcollab-filters res-tags">';
-    ['all', '重点', '进行中', '待研究', '待尝试', '暂缓'].forEach(function (f) {
-      var lbl = f === 'all' ? '全部' : f;
-      h += '<button type="button" class="rtag' + (WORK_BOARD_FILTER === f ? ' on' : '') + '" data-bwfilter="' + esc(f) + '">' + esc(lbl) + '</button>';
-    });
-    h += '</div>';
-    var list = duties.slice();
-    if (WORK_BOARD_ROLE) list = list.filter(function (d) { return d.role_id === WORK_BOARD_ROLE; });
-    if (WORK_BOARD_FILTER === '重点') list = list.filter(function (d) { return d.priority === '重点'; });
-    else if (WORK_BOARD_FILTER !== 'all') list = list.filter(function (d) { return d.status === WORK_BOARD_FILTER; });
-    if (q) list = list.filter(function (d) {
-      var blob = (d.name + d.description + roleName(W.data, d.role_id)).toLowerCase();
-      return blob.indexOf(q) >= 0;
-    });
-    if (!list.length) h += '<div class="nodata">没有符合条件的职能。</div>';
-    list.forEach(function (d) {
-      var rb = roleBotName(W.data, d.role_id);
-      h += '<article class="duty-card' + (d.priority === '重点' ? ' focus' : '') + '"><h4>' + esc(d.name) +
-        (d.priority === '重点' ? ' <span class="dbadge">★ 重点</span>' : '') +
-        ' <span class="dbadge exec-' + esc(d.exec_state || 'idle') + '">' + esc(BOT_EXEC_LABEL[d.exec_state] || BOT_EXEC_LABEL.idle) + '</span></h4>';
-      h += '<div class="dmeta">' + esc(roleName(W.data, d.role_id)) + (rb ? ' · <b>' + esc(rb) + '</b>' : '') + '</div>';
-      h += '<p class="hint" style="margin:0">' + esc(d.description) + '</p>';
-      h += '<div class="drow"><label>阶段</label><select data-wf="status" data-duty="' + esc(d.id) + '"><option' + (d.status === '进行中' ? ' selected' : '') + '>进行中</option><option' + (d.status === '待研究' ? ' selected' : '') + '>待研究</option><option' + (d.status === '待尝试' ? ' selected' : '') + '>待尝试</option><option' + (d.status === '暂缓' ? ' selected' : '') + '>暂缓</option></select>';
-      h += '<label>优先级</label><select data-wf="priority" data-duty="' + esc(d.id) + '"><option' + (d.priority === '普通' ? ' selected' : '') + '>普通</option><option' + (d.priority === '重点' ? ' selected' : '') + '>重点</option></select>';
-      h += '<label>执行</label><select data-wf="exec_state" data-duty="' + esc(d.id) + '">';
-      Object.keys(BOT_EXEC_LABEL).forEach(function (k) { h += '<option value="' + k + '"' + ((d.exec_state || 'idle') === k ? ' selected' : '') + '>' + esc(BOT_EXEC_LABEL[k]) + '</option>'; });
-      h += '</select></div>';
-      h += '<label class="blbl">执行备注</label><textarea data-wf="exec_note" data-duty="' + esc(d.id) + '">' + esc(d.exec_note || '') + '</textarea></article>';
-    });
-    var items = W.data.items || [];
-    if (items.length) {
-      h += '<details class="bot-edges" open><summary>工作事项（第三层 · ' + items.length + '）</summary><ul>';
-      items.forEach(function (it) {
-        h += '<li><b>' + esc(it.name) + '</b> · 主责 ' + esc(roleName(W.data, it.owner_role || it.role_id)) + ' · 产出 ' + esc(it.expected_output || '') +
-          ' <span class="dbadge exec-' + esc(it.exec_state || 'idle') + '">' + esc(BOT_EXEC_LABEL[it.exec_state] || '未启动') + '</span></li>';
-      });
-      h += '</ul></details>';
-    }
-    if (W.dirty) h += '<div class="msg info">有未保存的改动，点「保存到 GitHub」写入仓库（需令牌）。</div>';
-    el.innerHTML = h;
-    var inp = $('bwSearch');
-    if (inp) inp.addEventListener('input', function (ev) { W.q = ev.target.value; renderBotWork(); });
   }
   function saveBotWork() {
     var W = state.workBoard;
@@ -3832,91 +3764,29 @@
     renderBotCreative();
   }
   function renderBotCreative() {
-    var G = state.growBoard, el = $('botCreative');
-    if (!el) return;
-    var h = '';
-    if (G.status === 'loading' || G.status === '') { el.innerHTML = '<div class="nodata">正在读取内容创意看板…</div>'; return; }
-    h += '<div class="area-bar">';
-    h += '<button type="button" class="primary" data-bgact="save"' + (G.saving || !G.dirty ? ' disabled' : '') + '>' + (G.saving ? '保存中…' : '保存到 GitHub') + '</button>';
-    h += '<button type="button" data-bgact="reload">重新加载</button>' + tokenHint();
-    h += '<a href="' + esc(fileUrl(GROW_BOARD_PATH)) + '" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 JSON</a>';
-    h += '</div>';
-    if (G.flash) h += '<div class="msg ' + G.flash.kind + '">' + G.flash.text + '</div>';
-    if (G.status === 'error') { el.innerHTML = h + '<div class="msg error">读取失败：' + esc(G.error) + '</div>'; return; }
-    if (G.status === 'missing') { el.innerHTML = h + '<div class="nodata">尚无 <code>data/grow-operations-board.json</code>。运行 <code>scripts/build-grow-board.mjs</code>。</div>'; return; }
-    if (!G.data) { el.innerHTML = h + '<div class="nodata">（空）</div>'; return; }
-    if (G.data.meta && G.data.meta.system) h += '<div class="msg info">' + esc(G.data.meta.system) + (G.data.meta.principle ? ' · ' + esc(G.data.meta.principle) : '') + '</div>';
-    var duties = (G.data.duties || []).filter(function (d) { return !d.archived; });
-    var ops = G.data.opportunities || [];
-    h += '<div class="bcollab-stats">' +
-      [['角色', (G.data.roles || []).length], ['业务', (G.data.businesses || []).length], ['职能', duties.length], ['机会池', ops.length]]
-        .map(function (a) { return '<div class="stat"><small>' + esc(a[0]) + '</small><strong>' + a[1] + '</strong></div>'; }).join('') + '</div>';
-  h += '<details class="bot-edges" open><summary>业务配置</summary><ul>' +
-      (G.data.businesses || []).map(function (b) {
-        return '<li><b>' + esc(b.name) + '</b>（' + esc(b.id) + '）· ' + esc(b.stage || '') + ' · 目标 ' + esc(b.goal || '') + ' · 渠道 ' + esc(b.channels || '') + '</li>';
-      }).join('') + '</ul></details>';
-    h += '<details class="bot-edges" open><summary>七角色（grow·）</summary><ul>' +
-      (G.data.roles || []).map(function (r) {
-        var rb = roleBotName(G.data, r.id);
-        return '<li><b>' + esc(r.name) + '</b>' + (rb ? ' → ' + esc(rb) : '') + '：' + esc(r.goal || r.desc || '') + '</li>';
-      }).join('') + '</ul></details>';
-    h += '<div class="bcollab-filters"><span class="res-tags"><span style="font-size:12px;margin-right:6px">业务</span>';
-    h += '<button type="button" class="rtag' + (GROW_BUSINESS_FILTER === '' ? ' on' : '') + '" data-bgbiz="">全部</button>';
-    (G.data.businesses || []).forEach(function (b) {
-      h += '<button type="button" class="rtag' + (GROW_BUSINESS_FILTER === b.id ? ' on' : '') + '" data-bgbiz="' + esc(b.id) + '">' + esc(b.name) + '</button>';
+    var G = state.growBoard;
+    renderBotBoardBar('botCreativeBar', GROW_BOARD_PATH, G, 'data-bgact');
+    var host = $('botCreativeHost');
+    if (!host || !window.TaskFunctionBoard) return;
+    var opsN = G.data && (G.data.opportunities || []).length;
+    TaskFunctionBoard.mount('creative', {
+      host: host,
+      title: '运营增长 · 内容创意看板',
+      subtitle: (G.data && G.data.meta && G.data.meta.system ? G.data.meta.system + ' · ' : '') + 'grow· 七角色 · 通用方法 + 业务配置',
+      defaultRole: 'intel',
+      execMode: true,
+      allowRoleEdit: false,
+      showBusinesses: true,
+      showOpportunities: true,
+      statusOptions: ['进行中', '待研究', '待尝试', '暂缓'],
+      filters: ['all', '重点', '进行中', '待研究', '待尝试', '暂缓'],
+      roleBotName: roleBotName,
+      exportName: 'grow-operations-board',
+      getData: function () { return G.data; },
+      getShellState: function () { return fboardShell(G, '尚无 grow-operations-board.json'); },
+      onDirty: function () { G.dirty = true; renderBotBoardBar('botCreativeBar', GROW_BOARD_PATH, G, 'data-bgact'); TaskFunctionBoard.get('creative').sync(); },
+      statRows: [['角色', (G.data && G.data.roles || []).length], ['业务', (G.data && G.data.businesses || []).length], ['职能', (G.data && (G.data.duties || []).filter(function (d) { return !d.archived; }) || []).length], ['机会池', opsN || 0]],
     });
-    h += '</span></div>';
-    h += '<div class="bcollab-filters"><input id="bgSearch" type="search" placeholder="搜索职能…" value="' + esc(G.q || '') + '">';
-    h += '<span class="res-tags">';
-    h += '<button type="button" class="rtag' + (GROW_BOARD_ROLE === '' ? ' on' : '') + '" data-bgrole="">全部角色</button>';
-    (G.data.roles || []).forEach(function (r) {
-      h += '<button type="button" class="rtag' + (GROW_BOARD_ROLE === r.id ? ' on' : '') + '" data-bgrole="' + esc(r.id) + '">' + esc(r.name) + '</button>';
-    });
-    h += '</span></div><div class="bcollab-filters res-tags">';
-    ['all', '重点', '进行中', '待研究', '待尝试', '暂缓'].forEach(function (f) {
-      var lbl = f === 'all' ? '全部' : f;
-      h += '<button type="button" class="rtag' + (GROW_BOARD_FILTER === f ? ' on' : '') + '" data-bgfilter="' + esc(f) + '">' + esc(lbl) + '</button>';
-    });
-    h += '</div>';
-    var opList = ops.slice();
-    if (GROW_BUSINESS_FILTER) opList = opList.filter(function (o) { return o.business_id === GROW_BUSINESS_FILTER; });
-    if (opList.length) {
-      h += '<details class="bot-edges" open><summary>机会池（' + opList.length + '）</summary><ul>';
-      opList.forEach(function (o) {
-        h += '<li><b>' + esc(o.title) + '</b> · ' + esc(businessName(G.data, o.business_id)) + ' · ' + esc(o.kind || '') + ' · ' + esc(o.status || '') +
-          (o.priority === '重点' ? ' · ★' : '') + '</li>';
-      });
-      h += '</ul></details>';
-    }
-    var list = duties.slice();
-    if (GROW_BOARD_ROLE) list = list.filter(function (d) { return d.role_id === GROW_BOARD_ROLE; });
-    if (GROW_BUSINESS_FILTER) list = list.filter(function (d) { return !d.business_id || d.business_id === GROW_BUSINESS_FILTER; });
-    if (GROW_BOARD_FILTER === '重点') list = list.filter(function (d) { return d.priority === '重点'; });
-    else if (GROW_BOARD_FILTER !== 'all') list = list.filter(function (d) { return d.status === GROW_BOARD_FILTER; });
-    var q = String(G.q || '').toLowerCase().trim();
-    if (q) list = list.filter(function (d) {
-      var blob = (d.name + d.description + roleName(G.data, d.role_id) + businessName(G.data, d.business_id)).toLowerCase();
-      return blob.indexOf(q) >= 0;
-    });
-    if (!list.length) h += '<div class="nodata">没有符合条件的职能。</div>';
-    list.forEach(function (d) {
-      var rb = roleBotName(G.data, d.role_id);
-      h += '<article class="duty-card' + (d.priority === '重点' ? ' focus' : '') + '"><h4>' + esc(d.name) +
-        (d.priority === '重点' ? ' <span class="dbadge">★ 重点</span>' : '') +
-        ' <span class="dbadge exec-' + esc(d.exec_state || 'idle') + '">' + esc(BOT_EXEC_LABEL[d.exec_state] || BOT_EXEC_LABEL.idle) + '</span></h4>';
-      h += '<div class="dmeta">' + esc(roleName(G.data, d.role_id)) + (rb ? ' · <b>' + esc(rb) + '</b>' : '') + ' · ' + esc(businessName(G.data, d.business_id)) + '</div>';
-      h += '<p class="hint" style="margin:0">' + esc(d.description) + '</p>';
-      h += '<div class="drow"><label>阶段</label><select data-gf="status" data-duty="' + esc(d.id) + '"><option' + (d.status === '进行中' ? ' selected' : '') + '>进行中</option><option' + (d.status === '待研究' ? ' selected' : '') + '>待研究</option><option' + (d.status === '待尝试' ? ' selected' : '') + '>待尝试</option><option' + (d.status === '暂缓' ? ' selected' : '') + '>暂缓</option></select>';
-      h += '<label>优先级</label><select data-gf="priority" data-duty="' + esc(d.id) + '"><option' + (d.priority === '普通' ? ' selected' : '') + '>普通</option><option' + (d.priority === '重点' ? ' selected' : '') + '>重点</option></select>';
-      h += '<label>执行</label><select data-gf="exec_state" data-duty="' + esc(d.id) + '">';
-      Object.keys(BOT_EXEC_LABEL).forEach(function (k) { h += '<option value="' + k + '"' + ((d.exec_state || 'idle') === k ? ' selected' : '') + '>' + esc(BOT_EXEC_LABEL[k]) + '</option>'; });
-      h += '</select></div>';
-      h += '<label class="blbl">执行备注</label><textarea data-gf="exec_note" data-duty="' + esc(d.id) + '">' + esc(d.exec_note || '') + '</textarea></article>';
-    });
-    if (G.dirty) h += '<div class="msg info">有未保存的改动，点「保存到 GitHub」写入仓库（需令牌）。</div>';
-    el.innerHTML = h;
-    var inp = $('bgSearch');
-    if (inp) inp.addEventListener('input', function (ev) { G.q = ev.target.value; renderBotCreative(); });
   }
   function saveBotCreative() {
     var G = state.growBoard;
