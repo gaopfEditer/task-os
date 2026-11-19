@@ -1,8 +1,94 @@
 {
   "version": 1,
-  "updated_at": "2026-11-19T08:00:00+08:00",
-  "last_slot": "2026-11-19T08:00+08:00",
+  "updated_at": "2026-11-19T16:00:00+08:00",
+  "last_slot": "2026-11-19T16:00+08:00",
   "items": [
+    {
+      "id": "bitget:card:2700:failed",
+      "category": "bitget",
+      "ts": "2026-11-19T07:13:23+00:00",
+      "title": "Bitget 自动 · EVAA · failed",
+      "body": "{\"holdSide\": null, \"orderType\": null, \"size\": null, \"stopLossPrice\": null, \"error\": \"设置杠杆 20x 失败: Bitget HTTP 400: Exceeded the maximum settable leverage\", \"reason\": \"set_leverage_failed\"}",
+      "meta": {
+        "card_id": 2700,
+        "source": "collector_api"
+      }
+    },
+    {
+      "id": "bitget:card:2701:failed",
+      "category": "bitget",
+      "ts": "2026-11-19T07:20:08+00:00",
+      "title": "Bitget 自动 · EVAA · failed",
+      "body": "{\"holdSide\": null, \"orderType\": null, \"size\": null, \"stopLossPrice\": null, \"error\": \"设置杠杆 20x 失败: Bitget HTTP 400: Exceeded the maximum settable leverage\", \"reason\": \"set_leverage_failed\"}",
+      "meta": {
+        "card_id": 2701,
+        "source": "collector_api"
+      }
+    },
+    {
+      "id": "meta:publish:gap:1795075200",
+      "category": "publish",
+      "ts": "2026-11-19T16:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-19.log",
+      "meta": {
+        "level": "info"
+      }
+    },
+    {
+      "id": "vpn:12:2026-11-19",
+      "category": "vpn",
+      "ts": "2026-11-19T12:00:00+08:00",
+      "title": "VPN Guard · OK · clash",
+      "body": "健康: 正常\n出口归属: clash",
+      "meta": {
+        "ok": true,
+        "owner": "clash"
+      }
+    },
+    {
+      "id": "bitget:card:2692:tpsl_set",
+      "category": "bitget",
+      "ts": "2026-11-19T03:08:34+00:00",
+      "title": "Bitget 自动 · KAVAUSDT · tpsl_set",
+      "body": "{\"holdSide\": \"long\", \"orderType\": null, \"size\": \"659\", \"stopLossPrice\": \"0.02776\", \"error\": null, \"reason\": null}",
+      "meta": {
+        "card_id": 2692,
+        "source": "collector_api"
+      }
+    },
+    {
+      "id": "bitget:card:2693:open_placed",
+      "category": "bitget",
+      "ts": "2026-11-19T03:08:57+00:00",
+      "title": "Bitget 自动 · KAVAUSDT · open_placed",
+      "body": "{\"holdSide\": \"long\", \"orderType\": null, \"size\": \"656.8\", \"stopLossPrice\": \"0.026\", \"error\": null, \"reason\": null}",
+      "meta": {
+        "card_id": 2693,
+        "source": "collector_api"
+      }
+    },
+    {
+      "id": "bitget:card:2694:open_placed",
+      "category": "bitget",
+      "ts": "2026-11-19T03:09:19+00:00",
+      "title": "Bitget 自动 · KAVAUSDT · open_placed",
+      "body": "{\"holdSide\": \"long\", \"orderType\": null, \"size\": \"652.3\", \"stopLossPrice\": \"0.026\", \"error\": null, \"reason\": null}",
+      "meta": {
+        "card_id": 2694,
+        "source": "collector_api"
+      }
+    },
+    {
+      "id": "meta:publish:gap:1795060800",
+      "category": "publish",
+      "ts": "2026-11-19T12:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-19.log",
+      "meta": {
+        "level": "info"
+      }
+    },
     {
       "id": "meta:publish:gap:1795046400",
       "category": "publish",
