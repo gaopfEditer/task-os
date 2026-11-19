@@ -21,7 +21,7 @@ export var DEFAULT_SOURCES = Object.freeze([
 ]);
 
 export var OI_REPORT_SOURCE_ID = 'oi_report';
-export var OI_REPORT_SOURCE = Object.freeze({ id: 'oi_report', name: 'BTC/ETH 5m POP 试空' });
+export var OI_REPORT_SOURCE = Object.freeze({ id: 'oi_report', name: 'BTC/ETH 5m 放量影线' });
 export var DEFAULT_OI_WEB_BASE_URL = 'http://127.0.0.1:8765';
 export var OI_REPORT_POLL_MS = 15000;
 
@@ -243,7 +243,7 @@ export function queueUrl(base, source, limit) {
 export function oiReportQueueUrl(base) {
   var root = normalizeBaseUrl(base || DEFAULT_OI_WEB_BASE_URL);
   if (!root) return '';
-  return root + '/api/report-queue?kind=st_pop_short&symbols=BTCUSDT,ETHUSDT';
+  return root + '/api/report-queue?kind=st_vol_wick&symbols=BTCUSDT,ETHUSDT';
 }
 
 export function normalizeOiPopSymbol(raw) {
@@ -254,13 +254,17 @@ export function normalizeOiPopSymbol(raw) {
 }
 
 export function isOiPopShortItem(item) {
+  return isOiVolWickItem(item);
+}
+
+export function isOiVolWickItem(item) {
   if (!item || typeof item !== 'object') return false;
   var sym = normalizeOiPopSymbol(item.symbol);
   if (sym !== 'BTCUSDT' && sym !== 'ETHUSDT') return false;
   var kind = String(item.kind || '').trim();
   var pattern = String(item.pattern || '').trim();
-  if (kind === 'st_pop_short') return true;
-  return pattern === '短空' || pattern === '5m POP 试空';
+  if (kind === 'st_vol_wick') return true;
+  return pattern === '放量射击之星' || pattern === '放量倒锤子' || pattern === '放量上影' || pattern === '放量下影';
 }
 
 export function isoFromMillis(ms) {
@@ -284,10 +288,13 @@ export function mapOiReportItem(item, sourceId, report) {
     else volume = '未知';
   }
   var side = String(item.sideLabel || item.side || '').trim();
+  if (side === 'bull' || side === 'long' || side === 'buy') side = '多';
+  if (side === 'bear' || side === 'short' || side === 'sell') side = '空';
   var parts = [];
   if (interval) parts.push('周期 ' + interval);
   parts.push('放量 ' + volume);
   if (pattern) parts.push('形态 ' + pattern);
+  if (side) parts.push('方向 ' + side);
   if (item.oiAnomaly) parts.push('OI异常');
   var created = isoFromMillis(item.timeMs) || isoFromMillis(report && report.windowEndMs) || '';
   return {
@@ -323,7 +330,7 @@ export function parseOiReportQueue(body, sourceId) {
   var seen = Object.create(null);
   reports.forEach(function (report) {
     ((report && report.items) || []).forEach(function (item) {
-      if (!isOiPopShortItem(item)) return;
+      if (!isOiVolWickItem(item)) return;
       var mapped = mapOiReportItem(item, sid, report);
       if (mapped && !seen[mapped.id]) {
         seen[mapped.id] = true;
@@ -911,7 +918,7 @@ function mountFooter(footer) {
       var empty = document.createElement('p');
       empty.className = 'priority-empty';
       if (listSource === OI_REPORT_SOURCE_ID) {
-        empty.textContent = state.oiConfigured ? '暂无 BTC/ETH 5m POP 试空' : '未连接到本机 /oi（127.0.0.1:8765）';
+        empty.textContent = state.oiConfigured ? '暂无 BTC/ETH 5m 放量影线' : '未连接到本机 /oi（127.0.0.1:8765）';
       } else {
         empty.textContent = displayConfigured()
           ? '暂无消息'

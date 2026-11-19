@@ -403,10 +403,10 @@ test('live priority cards notify; snapshot and historical rows do not', () => {
 test('oi report queue sits above channel sources', () => {
   const sources = withOiReportSource(DEFAULT_SOURCES);
   assert.deepEqual(sources.map((row) => row.id), ['oi_report', 'pangmao']);
-  assert.equal(sources[0].name, 'BTC/ETH 5m POP 试空');
+  assert.equal(sources[0].name, 'BTC/ETH 5m 放量影线');
   const again = withOiReportSource(sources);
   assert.deepEqual(again.map((row) => row.id), ['oi_report', 'pangmao']);
-  assert.equal(oiReportQueueUrl('http://127.0.0.1:8765/'), 'http://127.0.0.1:8765/api/report-queue?kind=st_pop_short&symbols=BTCUSDT,ETHUSDT');
+  assert.equal(oiReportQueueUrl('http://127.0.0.1:8765/'), 'http://127.0.0.1:8765/api/report-queue?kind=st_vol_wick&symbols=BTCUSDT,ETHUSDT');
 });
 
 test('oi report items expose interval, volume and pattern', () => {
@@ -414,12 +414,12 @@ test('oi report items expose interval, volume and pattern', () => {
     pending: {
       windowEndMs: 1795005600000,
       items: [{
-        id: 'st_pop_short:BTCUSDT:5m:1',
-        kind: 'st_pop_short',
+        id: 'st_vol_wick:BTCUSDT:5m:1',
+        kind: 'st_vol_wick',
         symbol: 'BTCUSDT',
         interval: '5m',
         sideLabel: '空',
-        pattern: '短空',
+        pattern: '放量射击之星',
         volumeSurgeLabel: '是',
         volumeSurge: 'yes',
         timeMs: 1795005300000,
@@ -440,12 +440,12 @@ test('oi report items expose interval, volume and pattern', () => {
         timeMs: 1795005000000,
         oiAnomaly: false,
       }, {
-        id: 'st_pop_short:ETHUSDT:5m:2',
-        kind: 'st_pop_short',
+        id: 'st_vol_wick:ETHUSDT:5m:2',
+        kind: 'st_vol_wick',
         symbol: 'ETHUSDT',
         interval: '5m',
         sideLabel: '空',
-        pattern: '短空',
+        pattern: '放量射击之星',
         volumeSurgeLabel: '否',
         volumeSurge: 'no',
         timeMs: 1795005000000,
@@ -463,7 +463,7 @@ test('oi report items expose interval, volume and pattern', () => {
   assert.equal(view.direction, '空');
   assert.equal(view.interval, '5m');
   assert.equal(view.volumeSurge, '是');
-  assert.equal(view.pattern, '短空');
+  assert.equal(view.pattern, '放量射击之星');
   const rows = footerRows(
     withOiReportSource(DEFAULT_SOURCES),
     items,

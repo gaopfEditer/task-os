@@ -634,6 +634,9 @@ mod tests {
         .is_ok());
         assert!(super::validate_oi_report_queue_url(
             "http://127.0.0.1:8765/api/report-queue?kind=st_pop_short&symbols=BTCUSDT,ETHUSDT"
+        ));
+        assert!(super::validate_oi_report_queue_url(
+            "http://127.0.0.1:8765/api/report-queue?kind=st_vol_wick&symbols=BTCUSDT,ETHUSDT"
         )
         .is_ok());
         assert!(super::validate_oi_report_queue_url("http://127.0.0.1:8765/api/health").is_err());
