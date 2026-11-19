@@ -1,8 +1,40 @@
 {
   "version": 1,
-  "updated_at": "2026-11-19T16:00:00+08:00",
-  "last_slot": "2026-11-19T16:00+08:00",
+  "updated_at": "2026-11-19T20:00:00+08:00",
+  "last_slot": "2026-11-19T20:00+08:00",
   "items": [
+    {
+      "id": "vpn:20:2026-11-19",
+      "category": "vpn",
+      "ts": "2026-11-19T20:00:00+08:00",
+      "title": "VPN Guard · OK · clash",
+      "body": "健康: 正常\n出口归属: clash",
+      "meta": {
+        "ok": true,
+        "owner": "clash"
+      }
+    },
+    {
+      "id": "bitget:card:2702:tpsl_partial",
+      "category": "bitget",
+      "ts": "2026-11-19T09:00:18+00:00",
+      "title": "Bitget 自动 · ICNTUSDT · tpsl_partial",
+      "body": "{\"holdSide\": \"short\", \"orderType\": null, \"size\": \"52\", \"stopLossPrice\": \"0.3902\", \"error\": null, \"reason\": null}",
+      "meta": {
+        "card_id": 2702,
+        "source": "collector_api"
+      }
+    },
+    {
+      "id": "meta:publish:gap:1795089600",
+      "category": "publish",
+      "ts": "2026-11-19T20:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-19.log",
+      "meta": {
+        "level": "info"
+      }
+    },
     {
       "id": "bitget:card:2700:failed",
       "category": "bitget",
