@@ -291,8 +291,28 @@
   details.bot-edges li { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
   .earrow { color: var(--faint); }
   .enote { color: var(--faint); font-size: 12px; }
+  .bcollab-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; max-width: 720px; }
+  .bcollab-stats .stat { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+  .bcollab-stats .stat small { color: var(--muted); font-size: 11px; }
+  .bcollab-stats .stat strong { font-size: 20px; display: block; }
+  .bcollab-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; align-items: center; }
+  .bcollab-filters input { flex: 1 1 200px; min-width: 0; }
+  .rtag { font-size: 12px; padding: 4px 10px; border-radius: 18px; border: 1px solid var(--border); background: #fff; color: var(--muted); cursor: pointer; }
+  .rtag.on { background: #edf3ff; border-color: #b8cdfb; color: #2858b5; font-weight: 600; }
+  .duty-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .duty-card.focus { border-color: #a9c1fa; background: #f9fbff; }
+  .duty-card h4 { margin: 0 0 4px; font-size: 14px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .duty-card .dmeta { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .duty-card .dbadge { font-size: 11px; padding: 1px 6px; border-radius: 4px; background: #f0f1f3; color: #626b78; }
+  .duty-card .dbadge.exec-running { background: #ddf4ff; color: #0550ae; }
+  .duty-card .dbadge.exec-blocked { background: #ffebe9; color: #cf222e; }
+  .duty-card .dbadge.exec-done { background: #dafbe1; color: #116329; }
+  .duty-card .drow { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-top: 6px; font-size: 12px; }
+  .duty-card select, .duty-card textarea { font-size: 12px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 6px; }
+  .duty-card textarea { width: 100%; min-height: 48px; margin-top: 4px; resize: vertical; }
   @media (max-width: 700px) {
     .bfields { grid-template-columns: minmax(0, 1fr); }
+    .bcollab-stats { grid-template-columns: repeat(2, 1fr); }
     .bflow { flex-direction: column; }
     .bcolw.self .blbl { display: none; }
     .bcolw.self .bcol { align-items: flex-start; }
@@ -647,7 +667,17 @@
   </section>
 
   <section class="tab" id="tab-bots">
-    <div id="bots"><div class="nodata">加载中…</div></div>
+    <div class="focus-tabs" role="tablist" aria-label="Bot">
+      <a href="#bots" role="tab" data-botpane="roles" class="on" aria-selected="true">分工说明</a>
+      <a href="#bots/collab" role="tab" data-botpane="collab" aria-selected="false">Bot 协作</a>
+    </div>
+    <div id="botsRolesPane">
+      <div id="bots"><div class="nodata">加载中…</div></div>
+    </div>
+    <div id="botsCollabPane" hidden>
+      <p class="hint" style="margin:0 0 8px">个人事业职能看板 · 与 <code>data/business-function-board.json</code> 同步；可改阶段重点与每条职能的<strong>执行状态</strong>（供 base· Bot / MausBot 回写）。OpenMausBot 镜像路径写在 JSON <code>meta.openmausbot_mirror</code>。</p>
+      <div id="botCollab"><div class="nodata">加载中…</div></div>
+    </div>
   </section>
 
   <section class="tab" id="tab-memo">
@@ -667,7 +697,7 @@
   </section>
 
   <footer>
-    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>behavior.md</code>、<code>areas.md</code>、<code>annotations.json</code>、<code>memo.md</code>、<code>insights.md</code>、<code>bots.md</code>、只读的 <code>docs/</code>（专题文档），以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
+    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>behavior.md</code>、<code>areas.md</code>、<code>annotations.json</code>、<code>memo.md</code>、<code>insights.md</code>、<code>bots.md</code>、<code>data/business-function-board.json</code>（Bot 协作页）、只读的 <code>docs/</code>（专题文档），以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
   </footer>
 </main>
 <div id="dayPop" class="daypop" role="dialog" hidden></div>
@@ -778,7 +808,7 @@
   var state = {
     tasks: [], logs: [], loadedAt: null, src: '',
     daily: { list: {}, status: 'idle', error: '', cache: {}, pending: {}, tried: {} },
-    tab: 'board', focusView: 'behavior', month: null, monthPrefetchGen: 0, selected: null, edit: null, flash: null,
+    tab: 'board', focusView: 'behavior', botsPane: 'roles', month: null, monthPrefetchGen: 0, selected: null, edit: null, flash: null,
     stat: '', mstatus: '', tlOpen: false, cq: '', kevOnly: false, dload: null, pendingSave: false,
     dextraShow: { ops: true, orders: true, overseas: true, dayidea: true },
     tokenStorageErr: '', tokenBanner: '',
@@ -924,6 +954,7 @@
     else if (resume === 'areas') saveAreas();
     else if (resume === 'behavior') saveBehavior();
     else if (resume === 'bots') saveBots();
+    else if (resume === 'botboard') saveBotCollab();
     else if (resume === 'memo') saveMemo();
     else if (resume === 'ann') saveAnn();
     else if (resume) saveEdit();
@@ -3449,6 +3480,160 @@
     });
   }
 
+  // ---------- Bot 协作: data/business-function-board.json ----------
+  var BOT_BOARD_PATH = 'data/business-function-board.json';
+  var BOT_EXEC_LABEL = { idle: '未启动', running: '执行中', blocked: '阻塞', done: '已交付' };
+  var BOT_BOARD_FILTER = 'all';
+  var BOT_BOARD_ROLE = '';
+  state.botBoard = { status: '', data: null, sha: null, error: '', flash: null, saving: false, dirty: false, gen: 0 };
+  function roleBotName(data, roleId) {
+    var m = data && data.meta && data.meta.role_bots;
+    return (m && m[roleId]) || '';
+  }
+  function roleName(data, roleId) {
+    var r = (data.roles || []).find(function (x) { return x.id === roleId; });
+    return r ? r.name : roleId;
+  }
+  function openBotsPane(pane) {
+    state.botsPane = pane === 'collab' ? 'collab' : 'roles';
+    document.querySelectorAll('[data-botpane]').forEach(function (a) {
+      var on = a.getAttribute('data-botpane') === state.botsPane;
+      a.classList.toggle('on', on);
+      a.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    var rp = $('botsRolesPane'), cp = $('botsCollabPane');
+    if (rp) rp.hidden = state.botsPane !== 'roles';
+    if (cp) cp.hidden = state.botsPane !== 'collab';
+    if (state.botsPane === 'collab') { renderBotCollab(); loadBotCollab(); }
+    else { if (!botsEditorActive()) renderBots(); loadBots(); if (state.areas.status === '') loadAreas().then(function () { if (state.tab === 'bots' && state.botsPane === 'roles' && !botsEditorActive()) renderBots(); }); }
+  }
+  function loadBotCollab(force) {
+    var B = state.botBoard;
+    if (!force && (B.status === 'ok' || B.status === 'missing' || B.status === 'loading')) return Promise.resolve();
+    B.status = 'loading'; B.gen++;
+    var gen = B.gen;
+    renderBotCollab();
+  return loadFile(BOT_BOARD_PATH).then(function (res) {
+      if (gen !== B.gen) return;
+      try {
+        B.data = JSON.parse(res.text);
+        B.status = 'ok'; B.error = ''; B.dirty = false;
+      } catch (e) {
+        B.status = 'error'; B.error = 'JSON 解析失败'; B.data = null;
+      }
+      renderBotCollab();
+    }, function (e) {
+      if (gen !== B.gen) return;
+      if (e.status === 404) { B.status = 'missing'; B.data = null; B.error = ''; }
+      else { B.status = 'error'; B.error = e.message; }
+      renderBotCollab();
+    });
+  }
+  function fetchBotBoardLatest() {
+    return api('GET', repoPath + '/contents/' + BOT_BOARD_PATH + '?ref=' + BRANCH).then(function (res) {
+      if (res.status === 404) return { sha: null, text: '' };
+      if (!res.ok || !res.json) throw new Error(apiErrText(res));
+      return { sha: res.json.sha, text: b64ToUtf8(res.json.content) };
+    });
+  }
+  function botBoardText() { return JSON.stringify(state.botBoard.data, null, 2) + '\n'; }
+  function touchDuty(d, patch) {
+    Object.assign(d, patch);
+    d.exec_at = new Date().toISOString();
+    state.botBoard.dirty = true;
+    renderBotCollab();
+  }
+  function renderBotCollab() {
+    var B = state.botBoard, el = $('botCollab');
+    if (!el) return;
+    var h = '';
+    if (B.status === 'loading' || B.status === '') { el.innerHTML = '<div class="nodata">正在读取职能看板…</div>'; return; }
+    h += '<div class="area-bar">';
+    h += '<button type="button" class="primary" data-bcact="save"' + (B.saving || !B.dirty ? ' disabled' : '') + '>' + (B.saving ? '保存中…' : '保存到 GitHub') + '</button>';
+    h += '<button type="button" data-bcact="reload">重新加载</button>' + tokenHint();
+    h += '<a href="' + esc(fileUrl(BOT_BOARD_PATH)) + '" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 JSON</a>';
+    h += '</div>';
+    if (B.flash) h += '<div class="msg ' + B.flash.kind + '">' + B.flash.text + '</div>';
+    if (B.status === 'error') { el.innerHTML = h + '<div class="msg error">读取失败：' + esc(B.error) + '</div>'; return; }
+    if (B.status === 'missing') { el.innerHTML = h + '<div class="nodata">尚无 <code>data/business-function-board.json</code>。可由 MausBot 运行 <code>scripts/sync-business-board.mjs</code> 从 OpenMausBot 同步。</div>'; return; }
+    if (!B.data) { el.innerHTML = h + '<div class="nodata">（空）</div>'; return; }
+    var duties = (B.data.duties || []).filter(function (d) { return !d.archived; });
+    var q = String(B.q || '').toLowerCase().trim();
+    h += '<div class="bcollab-stats">' +
+      [['角色', (B.data.roles || []).length], ['职能', duties.length], ['重点', duties.filter(function (d) { return d.priority === '重点'; }).length], ['执行中', duties.filter(function (d) { return d.exec_state === 'running'; }).length]]
+        .map(function (a) { return '<div class="stat"><small>' + esc(a[0]) + '</small><strong>' + a[1] + '</strong></div>'; }).join('') + '</div>';
+    h += '<div class="bcollab-filters"><input id="bcSearch" type="search" placeholder="搜索职能…" value="' + esc(B.q || '') + '">';
+    h += '<span class="res-tags">';
+    h += '<button type="button" class="rtag' + (BOT_BOARD_ROLE === '' ? ' on' : '') + '" data-bcrole="">全部角色</button>';
+    (B.data.roles || []).forEach(function (r) {
+      h += '<button type="button" class="rtag' + (BOT_BOARD_ROLE === r.id ? ' on' : '') + '" data-bcrole="' + esc(r.id) + '">' + esc(r.name) + '</button>';
+    });
+    h += '</span></div><div class="bcollab-filters res-tags">';
+    ['all', '重点', '进行中', '待尝试', '暂缓'].forEach(function (f) {
+      var lbl = f === 'all' ? '全部' : f;
+      h += '<button type="button" class="rtag' + (BOT_BOARD_FILTER === f ? ' on' : '') + '" data-bcfilter="' + esc(f) + '">' + esc(lbl) + '</button>';
+    });
+    h += '</div>';
+    var list = duties.slice();
+    if (BOT_BOARD_ROLE) list = list.filter(function (d) { return d.role_id === BOT_BOARD_ROLE; });
+    if (BOT_BOARD_FILTER === '重点') list = list.filter(function (d) { return d.priority === '重点'; });
+    else if (BOT_BOARD_FILTER !== 'all') list = list.filter(function (d) { return d.status === BOT_BOARD_FILTER; });
+    if (q) list = list.filter(function (d) {
+      var blob = (d.name + d.description + d.agent + roleName(B.data, d.role_id)).toLowerCase();
+      return blob.indexOf(q) >= 0;
+    });
+    if (!list.length) h += '<div class="nodata">没有符合条件的职能。</div>';
+    list.forEach(function (d) {
+      var rb = roleBotName(B.data, d.role_id);
+      h += '<article class="duty-card' + (d.priority === '重点' ? ' focus' : '') + '" data-duty="' + esc(d.id) + '"><h4>' + esc(d.name) +
+        (d.priority === '重点' ? ' <span class="dbadge">★ 重点</span>' : '') +
+        ' <span class="dbadge exec-' + esc(d.exec_state || 'idle') + '">' + esc(BOT_EXEC_LABEL[d.exec_state] || BOT_EXEC_LABEL.idle) + '</span></h4>';
+      h += '<div class="dmeta">' + esc(roleName(B.data, d.role_id)) + (rb ? ' · <b>' + esc(rb) + '</b>' : '') + (d.agent ? ' · 执行 ' + esc(d.agent) : '') + '</div>';
+      h += '<p class="hint" style="margin:0">' + esc(d.description) + '</p>';
+      h += '<div class="drow"><label>阶段</label><select data-df="status" data-duty="' + esc(d.id) + '"><option' + (d.status === '进行中' ? ' selected' : '') + '>进行中</option><option' + (d.status === '待尝试' ? ' selected' : '') + '>待尝试</option><option' + (d.status === '暂缓' ? ' selected' : '') + '>暂缓</option></select>';
+      h += '<label>优先级</label><select data-df="priority" data-duty="' + esc(d.id) + '"><option' + (d.priority === '普通' ? ' selected' : '') + '>普通</option><option' + (d.priority === '重点' ? ' selected' : '') + '>重点</option></select>';
+      h += '<label>执行</label><select data-df="exec_state" data-duty="' + esc(d.id) + '">';
+      Object.keys(BOT_EXEC_LABEL).forEach(function (k) { h += '<option value="' + k + '"' + ((d.exec_state || 'idle') === k ? ' selected' : '') + '>' + esc(BOT_EXEC_LABEL[k]) + '</option>'; });
+      h += '</select></div>';
+      h += '<label class="blbl">执行备注</label><textarea data-df="exec_note" data-duty="' + esc(d.id) + '" placeholder="Bot 回写：进展、阻塞、产出路径…">' + esc(d.exec_note || '') + '</textarea>';
+      if (d.exec_at) h += '<p class="hint" style="margin:4px 0 0;font-size:11px">执行更新 ' + esc(new Date(d.exec_at).toLocaleString('zh-CN', { hour12: false })) + '</p>';
+      h += '</article>';
+    });
+    if (B.dirty) h += '<div class="msg info">有未保存的改动，点「保存到 GitHub」写入仓库（需令牌）。</div>';
+    el.innerHTML = h;
+    var inp = $('bcSearch');
+    if (inp) inp.addEventListener('input', function (ev) { B.q = ev.target.value; renderBotCollab(); });
+  }
+  function saveBotCollab() {
+    var B = state.botBoard;
+    if (!B.data || B.saving) return;
+    if (!requestTokenForSave('botboard', '保存职能看板需要 GitHub 令牌，填好后会自动继续保存。')) return;
+    B.saving = true; B.flash = null; renderBotCollab();
+    fetchBotBoardLatest().then(function (latest) {
+      B.sha = latest.sha;
+      var body = { message: 'Bot 协作：更新 business-function-board.json', content: utf8ToB64(botBoardText()), branch: BRANCH };
+      if (latest.sha) body.sha = latest.sha;
+      return api('PUT', repoPath + '/contents/' + BOT_BOARD_PATH, body);
+    }).then(function (res) {
+      B.saving = false;
+      if (res.ok && res.json && res.json.content) {
+        B.sha = res.json.content.sha; B.dirty = false;
+        var commit = res.json.commit && res.json.commit.sha ? res.json.commit.sha : '';
+        B.flash = { kind: 'ok', text: '已保存' + (commit ? '（提交 ' + esc(commit.slice(0, 7)) + '）' : '') + '。' };
+        renderBotCollab();
+        return;
+      }
+      if (res.status === 409 || res.status === 422) {
+        B.flash = { kind: 'error', text: '版本冲突：请点「重新加载」后再改。' };
+      } else B.flash = { kind: 'error', text: '保存失败：' + esc(apiErrText(res)) };
+      renderBotCollab();
+    }).catch(function (err) {
+      B.saving = false;
+      B.flash = { kind: 'error', text: '保存失败：' + esc(err && err.message || String(err)) };
+      renderBotCollab();
+    });
+  }
+
   // ---------- 备忘清单: memo.md (one "## " per backlog item), whole-file editor ----------
   var MEMO_PATH = 'memo.md';
   var MEMO_STARTER = '# 备忘清单：待额度充足时执行\n\n以后想到要点或点子就记到这里；课测/算力额度宽裕时再从这里挑出来执行。\n\n看板「备忘清单」页（`#memo`）读取并编辑此文件。每条备忘一个 `## ` 标题，正文可写背景、触发条件或预估成本。\n';
@@ -4788,7 +4973,10 @@
       });
     }
     if (tab === 'resources') { renderResources(); loadResources(); }
-    if (tab === 'bots') { if (!botsEditorActive()) renderBots(); loadBots(); if (state.areas.status === '') loadAreas().then(function () { if (state.tab === 'bots' && !botsEditorActive()) renderBots(); }); }
+    if (tab === 'bots') {
+      state.botsPane = parts[1] === 'collab' ? 'collab' : 'roles';
+      openBotsPane(state.botsPane);
+    }
     if (tab === 'livewatch') { renderLiveWatch(); loadLiveWatch(); }
   }
   function shiftMonth(n) {
@@ -4806,6 +4994,7 @@
     if (!(state.areas.edit && state.areas.edit.saving)) { state.areas.edit = null; state.areas.flash = null; state.areas.status = ''; }   // unsaved areas text stays as a draft
     if (!(state.behavior.edit && state.behavior.edit.saving)) { state.behavior.edit = null; state.behavior.flash = null; state.behavior.status = ''; }
     if (!(state.bots.edit && state.bots.edit.saving)) { state.bots.edit = null; state.bots.flash = null; state.bots.status = ''; }   // unsaved bots text stays as a draft
+    if (!state.botBoard.saving) { state.botBoard.status = ''; state.botBoard.data = null; state.botBoard.gen++; state.botBoard.flash = null; }
     if (!(state.memo.edit && state.memo.edit.saving)) { state.memo.edit = null; state.memo.flash = null; state.memo.status = ''; }
     if (state.ann && !state.ann.saving) { state.ann.status = ''; state.ann.ops = []; state.ann.flash = null; state.ann.error = ''; state.ann.activeId = ''; state.ann.armDelete = ''; }
     state.insights.status = ''; state.insights.parsed = null;
@@ -5019,6 +5208,36 @@
     else if (act === 'cancel') { try { localStorage.removeItem(DRAFT_KEY + 'bots'); } catch (x) {} B.edit = null; renderBots(); }
   });
   $('bots').addEventListener('toggle', function (ev) { var d = ev.target; if (d.classList && (d.classList.contains('bot') || d.classList.contains('bot-edges'))) state.bots.closed[d.getAttribute('data-name')] = !d.open; }, true);
+  $('tab-bots').addEventListener('click', function (ev) {
+    var pane = ev.target.closest('[data-botpane]');
+    if (pane) { ev.preventDefault(); openBotsPane(pane.getAttribute('data-botpane')); return; }
+    var b = ev.target.closest('[data-bcact],[data-bcrole],[data-bcfilter]');
+    if (!b) return;
+    var B = state.botBoard;
+    var act = b.getAttribute('data-bcact');
+    if (act === 'save') saveBotCollab();
+    else if (act === 'reload') { B.status = ''; B.dirty = false; loadBotCollab(true); }
+    else if (b.hasAttribute('data-bcrole')) { BOT_BOARD_ROLE = b.getAttribute('data-bcrole') || ''; renderBotCollab(); }
+    else if (b.hasAttribute('data-bcfilter')) { BOT_BOARD_FILTER = b.getAttribute('data-bcfilter') || 'all'; renderBotCollab(); }
+  });
+  $('tab-bots').addEventListener('change', function (ev) {
+    var sel = ev.target.closest('select[data-df][data-duty]');
+    if (!sel) return;
+    var B = state.botBoard; if (!B.data) return;
+    var id = sel.getAttribute('data-duty'), key = sel.getAttribute('data-df');
+    var d = (B.data.duties || []).find(function (x) { return x.id === id; });
+    if (!d) return;
+    var patch = {}; patch[key] = sel.value;
+    touchDuty(d, patch);
+  });
+  $('tab-bots').addEventListener('blur', function (ev) {
+    var ta = ev.target.closest('textarea[data-df="exec_note"][data-duty]');
+    if (!ta) return;
+    var B = state.botBoard; if (!B.data) return;
+    var d = (B.data.duties || []).find(function (x) { return x.id === ta.getAttribute('data-duty'); });
+    if (!d || d.exec_note === ta.value) return;
+    touchDuty(d, { exec_note: ta.value });
+  }, true);
   $('dq').addEventListener('input', function (ev) { state.detail.q = ev.target.value; renderDetailFeed(); });
   $('detApply').addEventListener('click', applyDetailRangeFromInputs);
   $('detMonth').addEventListener('click', function () {
