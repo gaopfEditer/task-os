@@ -4,8 +4,9 @@
   "version": "0.1.0",
   "identifier": "com.taskos.desktop",
   "build": {
-    "beforeDevCommand": "npm run sync-board",
-    "beforeBuildCommand": "npm run sync-board",
+    "beforeDevCommand": "npm run build:frontend && npm run serve:dist",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run build:frontend",
     "frontendDist": "../dist"
   },
   "app": {
@@ -21,7 +22,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' ipc: http://ipc.localhost; connect-src 'self' http://localhost:1420 https://api.github.com https://raw.githubusercontent.com https://github.com https://api.binance.com https://data-api.binance.vision https://fapi.binance.com https://api.gateio.ws https://api.coingecko.com https://push2.eastmoney.com wss://stream.binance.com:9443 wss://stream.binance.com https://op.g.ezcoin.ink https://op.g.ezcoin.ink:* wss://op.g.ezcoin.ink wss://op.g.ezcoin.ink:* http: https: ws: wss:; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'"
+      "csp": "default-src 'self' asset: http://asset.localhost https://asset.localhost http://tauri.localhost https://tauri.localhost http://127.0.0.1:1420 ipc: http://ipc.localhost; connect-src 'self' asset: http://asset.localhost https://asset.localhost http://tauri.localhost https://tauri.localhost http://127.0.0.1:1420 http://localhost:1420 ipc: http://ipc.localhost https://api.github.com https://raw.githubusercontent.com https://github.com https://api.binance.com https://data-api.binance.vision https://fapi.binance.com https://api.gateio.ws https://api.coingecko.com https://push2.eastmoney.com wss://stream.binance.com:9443 wss://stream.binance.com https://op.g.ezcoin.ink https://op.g.ezcoin.ink:* wss://op.g.ezcoin.ink wss://op.g.ezcoin.ink:* http: https: ws: wss:; img-src 'self' asset: http://asset.localhost https://asset.localhost data: https: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'"
     }
   },
   "bundle": {

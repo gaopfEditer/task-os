@@ -16,6 +16,19 @@
   font-weight: 600;
   letter-spacing: 0.02em;
 }
+#taskosCryptoBar .tc-config-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font: inherit;
+}
+#taskosCryptoBar .tc-config-btn:hover {
+  color: #c9d1d9;
+  background: #373e47;
+  border-color: #444c56;
+}
 #taskosCryptoBar .tc-prices {
   flex: 1 1 auto;
   min-width: 0;
@@ -81,6 +94,13 @@
 }
 #taskosCryptoPanel.open { display: block; }
 #taskosCryptoPanel label { display: block; margin: 8px 0 4px; color: #8b949e; font-size: 12px; }
+#taskosCryptoPanel label.tc-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #c9d1d9;
+}
+#taskosCryptoPanel label.tc-check input { width: auto; margin: 0; }
 #taskosCryptoPanel input[type=text],
 #taskosCryptoPanel input[type=password],
 #taskosCryptoPanel input[type=number],
@@ -105,3 +125,87 @@
 #taskosCryptoPanel .tc-alerts ul { margin: 6px 0 0; padding-left: 18px; }
 #taskosCryptoPanel .tc-alerts li { margin: 4px 0; }
 #taskosCryptoPanel .tc-note { color: #8b949e; font-size: 11px; margin-top: 8px; }
+
+.tc-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.tc-modal.open {
+  display: flex;
+}
+.tc-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(1, 4, 9, 0.65);
+}
+.tc-modal-dialog {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 18px 20px 16px;
+  color: #c9d1d9;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+.tc-modal-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #f0f6fc;
+}
+.tc-modal label {
+  display: block;
+  margin: 0 0 6px;
+  color: #8b949e;
+  font-size: 12px;
+}
+.tc-modal input[type=text] {
+  width: 100%;
+  box-sizing: border-box;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.tc-modal-hint {
+  margin: 10px 0 0;
+  color: #8b949e;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.tc-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+.tc-modal-actions button {
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.tc-modal-actions button:hover {
+  background: #30363d;
+}
+.tc-modal-actions button.primary {
+  background: #238636;
+  border-color: #2ea043;
+  color: #fff;
+}
+.tc-modal-actions button.primary:hover {
+  background: #2ea043;
+}

@@ -16,9 +16,14 @@ import {
   markSeen,
   mergeItems,
   normalizeBaseUrl,
+  noticeForPriorityArrival,
+  noticesForPriorityItems,
+  parseNotifyFlag,
   parseQueueItems,
   parseSources,
+  priorityNotice,
   queueUrl,
+  reconcilePriorityStore,
   replaceSourceItems,
   resolvePriorityConfig,
   seenSet,
@@ -281,4 +286,111 @@ test('unset base URL defaults to the public relay and auto-connects when a secre
   assert.doesNotMatch(footer, /149\.88\.80\.60/);
   assert.doesNotMatch(desktop, /149\.88\.80\.60/);
   assert.doesNotMatch(footer, /localStorage\.setItem\(STORAGE_KEYS\.baseUrl,\s*DEFAULT_BASE_URL\)/);
+});
+
+test('shared keychain config wins; localStorage migrates only while the store is empty', () => {
+  assert.equal(STORAGE_KEYS.notify, 'taskos.desktop.priority.notify');
+  assert.equal(parseNotifyFlag(null), true);
+  assert.equal(parseNotifyFlag(''), true);
+  assert.equal(parseNotifyFlag('1'), true);
+  assert.equal(parseNotifyFlag('0'), false);
+  assert.equal(parseNotifyFlag('off'), false);
+
+  const migrated = reconcilePriorityStore(
+    { present: false, baseUrl: '', secret: '', notify: true },
+    { baseUrl: 'https://example.com/relay', secret: 'local-secret', notify: true }
+  );
+  assert.equal(migrated.migrate, true);
+  assert.equal(migrated.storePresent, false);
+  assert.equal(migrated.secret, 'local-secret');
+  assert.equal(migrated.baseUrl, 'https://example.com/relay');
+  assert.equal(migrated.notify, true);
+
+  const shared = reconcilePriorityStore(
+    { present: true, baseUrl: '', secret: 'shared-secret', notify: false },
+    { baseUrl: 'https://stale.example', secret: 'stale-secret', notify: true }
+  );
+  assert.equal(shared.migrate, false);
+  assert.equal(shared.storePresent, true);
+  assert.equal(shared.secret, 'shared-secret');
+  assert.equal(shared.baseUrl, '');
+  assert.equal(shared.notify, false);
+
+  const cleared = reconcilePriorityStore(
+    { present: true, baseUrl: '', secret: '', notify: true },
+    { baseUrl: 'https://example.com/relay', secret: 'local-secret', notify: true }
+  );
+  assert.equal(cleared.migrate, false);
+  assert.equal(cleared.storePresent, true);
+  assert.equal(cleared.secret, '');
+
+  const footer = readFileSync(new URL('./priority-footer.js', import.meta.url), 'utf8');
+  const desktop = readFileSync(new URL('./taskos-desktop.js', import.meta.url), 'utf8');
+  const html = readFileSync(new URL('./price-bubble.html', import.meta.url), 'utf8');
+  for (const src of [footer, desktop]) {
+    assert.match(src, /load_priority_config/);
+    assert.match(src, /save_priority_config/);
+    assert.match(src, /taskos\.desktop\.priority\.notify/);
+  }
+  assert.match(desktop, /reconcilePriorityStore/);
+  assert.match(desktop, /import\('\.\/priority-footer\.js'\)/);
+  assert.match(html, /id="priorityNotify"/);
+  assert.match(desktop, /id="tcRelayNotify"/);
+  assert.match(footer, /localStorage\.setItem\(STORAGE_KEYS\.baseUrl/);
+  assert.match(footer, /localStorage\.setItem\(STORAGE_KEYS\.secret/);
+});
+
+test('live priority cards notify; snapshot and historical rows do not', () => {
+  const note = priorityNotice(trade, '胖猫社区');
+  assert.equal(note.title, 'Task OS · 胖猫社区');
+  assert.match(note.body, /BTC/);
+  assert.match(note.body, /多/);
+  assert.equal(note.title.includes('local-secret'), false);
+  assert.equal(note.body.includes('local-secret'), false);
+
+  const symbolOnly = priorityNotice(
+    { id: 'c9', source: 'pangmao', card: { symbol: 'ETH' }, meta: {} },
+    '胖猫社区'
+  );
+  assert.match(symbolOnly.body, /ETH/);
+  assert.equal(symbolOnly.body.includes('多'), false);
+
+  const live = noticesForPriorityItems('live', [trade], {
+    notify: true,
+    sourceName: '胖猫社区',
+  });
+  assert.equal(live.length, 1);
+  assert.equal(live[0].id, 'c1');
+  assert.equal(live[0].title, 'Task OS · 胖猫社区');
+  assert.match(live[0].body, /BTC/);
+  assert.match(live[0].body, /多/);
+
+  const historical = parseQueueItems({ items: [trade, plain] });
+  assert.deepEqual(noticesForPriorityItems('snapshot', historical, { notify: true, sourceName: '胖猫社区' }), []);
+  assert.deepEqual(noticesForPriorityItems('backfill', historical, { notify: true }), []);
+  assert.equal(noticeForPriorityArrival('snapshot', trade, { sourceName: '胖猫社区' }), null);
+  assert.equal(noticeForPriorityArrival('live', trade, { knownIds: { c1: true }, sourceName: '胖猫社区' }), null);
+  assert.equal(noticeForPriorityArrival('live', trade, { seenIds: { c1: true }, sourceName: '胖猫社区' }), null);
+  assert.equal(noticeForPriorityArrival('live', trade, { notify: false, sourceName: '胖猫社区' }), null);
+
+  const footer = readFileSync(new URL('./priority-footer.js', import.meta.url), 'utf8');
+  const noticeFn = footer.slice(footer.indexOf('export function priorityNotice'), footer.indexOf('export function noticeForPriorityArrival'));
+  assert.doesNotMatch(noticeFn, /secret|STORAGE_KEYS|token/);
+  const showFn = footer.slice(footer.indexOf('function showSystemNotice'), footer.indexOf('function publishNotices'));
+  const permissionFn = footer.slice(footer.indexOf('function requestNotificationPermission'), footer.indexOf('export function sourceLabelText'));
+  assert.match(showFn, /requestNotificationPermission/);
+  assert.match(permissionFn, /Notification\.requestPermission/);
+  assert.match(showFn, /show_price_alert/);
+  assert.match(showFn, /title: note\.title/);
+  assert.match(showFn, /body: note\.body/);
+  assert.doesNotMatch(showFn, /secret/);
+
+  const syncFn = footer.slice(footer.indexOf('function syncOnce'), footer.indexOf('function openSocket'));
+  assert.match(syncFn, /publishNotices\('snapshot'/);
+  assert.match(syncFn, /publishNotices\('live'/);
+  const rememberFn = footer.slice(footer.indexOf('function rememberFrame'), footer.indexOf('function syncOnce'));
+  assert.match(rememberFn, /publishNotices\('live'/);
+  assert.doesNotMatch(rememberFn, /publishNotices\('snapshot'/);
+  const applyFn = footer.slice(footer.indexOf('function applySnapshot'), footer.indexOf('function onSave'));
+  assert.doesNotMatch(applyFn, /publishNotices|showSystemNotice|show_price_alert/);
 });
