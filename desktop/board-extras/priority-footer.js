@@ -20,6 +20,11 @@ export var DEFAULT_SOURCES = Object.freeze([
   Object.freeze({ id: 'pangmao', name: '胖猫社区' })
 ]);
 
+export var OI_REPORT_SOURCE_ID = 'oi_report';
+export var OI_REPORT_SOURCE = Object.freeze({ id: 'oi_report', name: 'BTC/ETH 5m POP 试空' });
+export var DEFAULT_OI_WEB_BASE_URL = 'http://127.0.0.1:8765';
+export var OI_REPORT_POLL_MS = 15000;
+
 export var QUEUE_LIMIT = 200;
 export var SEEN_CAP = 800;
 
@@ -235,6 +240,114 @@ export function queueUrl(base, source, limit) {
   return u.toString();
 }
 
+export function oiReportQueueUrl(base) {
+  var root = normalizeBaseUrl(base || DEFAULT_OI_WEB_BASE_URL);
+  if (!root) return '';
+  return root + '/api/report-queue?kind=st_pop_short&symbols=BTCUSDT,ETHUSDT';
+}
+
+export function normalizeOiPopSymbol(raw) {
+  var s = String(raw || '').trim().toUpperCase().replace(/[\/-]/g, '');
+  if (s.slice(-2) === '.P') s = s.slice(0, -2);
+  if (s === 'BTC' || s === 'ETH') return s + 'USDT';
+  return s;
+}
+
+export function isOiPopShortItem(item) {
+  if (!item || typeof item !== 'object') return false;
+  var sym = normalizeOiPopSymbol(item.symbol);
+  if (sym !== 'BTCUSDT' && sym !== 'ETHUSDT') return false;
+  var kind = String(item.kind || '').trim();
+  var pattern = String(item.pattern || '').trim();
+  if (kind === 'st_pop_short') return true;
+  return pattern === '短空' || pattern === '5m POP 试空';
+}
+
+export function isoFromMillis(ms) {
+  var n = Number(ms);
+  if (!isFinite(n) || n <= 0) return '';
+  if (n < 1e12) n *= 1000;
+  var d = new Date(n);
+  if (isNaN(d.getTime())) return '';
+  return d.toISOString();
+}
+
+export function mapOiReportItem(item, sourceId, report) {
+  if (!item || typeof item.id !== 'string' || !item.id) return null;
+  var sid = sourceId || OI_REPORT_SOURCE_ID;
+  var interval = String(item.interval || '').trim();
+  var pattern = String(item.pattern || item.kind || '').trim();
+  var volume = String(item.volumeSurgeLabel || '').trim();
+  if (!volume) {
+    if (item.volumeSurge === true || item.volumeSurge === 'yes' || item.volumeSurge === 'true') volume = '放量';
+    else if (item.volumeSurge === false || item.volumeSurge === 'no') volume = '否';
+    else volume = '未知';
+  }
+  var side = String(item.sideLabel || item.side || '').trim();
+  var parts = [];
+  if (interval) parts.push('周期 ' + interval);
+  parts.push('放量 ' + volume);
+  if (pattern) parts.push('形态 ' + pattern);
+  if (item.oiAnomaly) parts.push('OI异常');
+  var created = isoFromMillis(item.timeMs) || isoFromMillis(report && report.windowEndMs) || '';
+  return {
+    id: item.id,
+    source: sid,
+    createdAt: created,
+    card: {
+      symbol: item.symbol || '',
+      direction: side,
+      interval: interval,
+      pattern: pattern,
+      volumeSurgeLabel: volume,
+      title: pattern,
+      text: parts.join(' · ')
+    },
+    meta: {
+      via: 'oi_report',
+      interval: interval,
+      pattern: pattern,
+      volumeSurgeLabel: volume,
+      oiAnomaly: !!item.oiAnomaly
+    }
+  };
+}
+
+export function parseOiReportQueue(body, sourceId) {
+  var sid = sourceId || OI_REPORT_SOURCE_ID;
+  var reports = body && Array.isArray(body.reports) ? body.reports.slice() : [];
+  if (body && body.pending && typeof body.pending === 'object') {
+    reports = [body.pending].concat(reports);
+  }
+  var out = [];
+  var seen = Object.create(null);
+  reports.forEach(function (report) {
+    ((report && report.items) || []).forEach(function (item) {
+      if (!isOiPopShortItem(item)) return;
+      var mapped = mapOiReportItem(item, sid, report);
+      if (mapped && !seen[mapped.id]) {
+        seen[mapped.id] = true;
+        out.push(mapped);
+      }
+    });
+  });
+  return out;
+}
+
+export function withOiReportSource(sources) {
+  var list = [];
+  var seen = Object.create(null);
+  function add(source) {
+    if (!source || typeof source.id !== 'string' || !source.id) return;
+    if (seen[source.id]) return;
+    seen[source.id] = true;
+    list.push({ id: source.id, name: source.name || source.id });
+  }
+  add(OI_REPORT_SOURCE);
+  (sources && sources.length ? sources : DEFAULT_SOURCES).forEach(add);
+  return list;
+}
+
 /** Live socket only: no source filter, no replay/since. */
 export function toWebSocketUrl(base, secret) {
   var root = normalizeBaseUrl(base);
@@ -325,7 +438,10 @@ export function describeItem(item, sourceName) {
     direction: stringFrom(firstEntry(card, DIRECTION_KEYS)),
     yieldValue: yieldText(card, meta),
     text: shortText(card),
-    via: meta.via === 'ocr' || meta.via === 'text' ? meta.via : ''
+    via: meta.via === 'ocr' || meta.via === 'text' ? meta.via : '',
+    interval: stringFrom(firstEntry(card, ['interval', '周期'])) || String(meta.interval || '').trim(),
+    volumeSurge: stringFrom(firstEntry(card, ['volumeSurgeLabel', '是否放量'])) || String(meta.volumeSurgeLabel || '').trim(),
+    pattern: stringFrom(firstEntry(card, ['pattern', '形态'])) || String(meta.pattern || '').trim()
   };
 }
 
@@ -451,12 +567,13 @@ export function parseSources(body) {
   return out;
 }
 
-export function footerRows(sources, items, seenMap, configured) {
+export function footerRows(sources, items, seenMap, configured, alwaysOn) {
   var list = sources && sources.length ? sources : DEFAULT_SOURCES;
   return list.map(function (source) {
     var id = source && source.id ? source.id : 'pangmao';
     var name = source && source.name ? source.name : id;
-    if (!configured) {
+    var on = !!configured || !!(alwaysOn && alwaysOn[id]);
+    if (!on) {
       return { id: id, name: name, messages: 0, newCards: 0, unconfigured: true };
     }
     var counts = sourceCounts(items, id, seenSet(seenMap, id));
@@ -480,6 +597,13 @@ function quietLog(err) {
 var api = {
   STORAGE_KEYS: STORAGE_KEYS,
   DEFAULT_SOURCES: DEFAULT_SOURCES,
+  OI_REPORT_SOURCE_ID: OI_REPORT_SOURCE_ID,
+  OI_REPORT_SOURCE: OI_REPORT_SOURCE,
+  DEFAULT_OI_WEB_BASE_URL: DEFAULT_OI_WEB_BASE_URL,
+  oiReportQueueUrl: oiReportQueueUrl,
+  parseOiReportQueue: parseOiReportQueue,
+  mapOiReportItem: mapOiReportItem,
+  withOiReportSource: withOiReportSource,
   normalizeBaseUrl: normalizeBaseUrl,
   sourcesUrl: sourcesUrl,
   queueUrl: queueUrl,
@@ -511,9 +635,10 @@ function bootFooter() {
 
 function mountFooter(footer) {
   var state = {
-    sources: DEFAULT_SOURCES.slice(),
+    sources: withOiReportSource(DEFAULT_SOURCES),
     items: [],
     networkConfigured: false,
+    oiConfigured: false,
     holdSnapshot: false,
     lastError: ''
   };
@@ -712,7 +837,7 @@ function mountFooter(footer) {
   function renderFooter() {
     var host = document.getElementById('priorityRows');
     if (!host) return;
-    var rows = footerRows(state.sources, state.items, loadSeen(), displayConfigured());
+    var rows = footerRows(state.sources, state.items, loadSeen(), displayConfigured(), { oi_report: true });
     host.textContent = '';
     rows.forEach(function (row) {
       var el = document.createElement('div');
@@ -785,9 +910,13 @@ function mountFooter(footer) {
     if (!items.length) {
       var empty = document.createElement('p');
       empty.className = 'priority-empty';
-      empty.textContent = displayConfigured()
-        ? '暂无消息'
-        : '填写本机密钥后即可拉取消息。未保存地址时使用 https://op.g.ezcoin.ink。';
+      if (listSource === OI_REPORT_SOURCE_ID) {
+        empty.textContent = state.oiConfigured ? '暂无 BTC/ETH 5m POP 试空' : '未连接到本机 /oi（127.0.0.1:8765）';
+      } else {
+        empty.textContent = displayConfigured()
+          ? '暂无消息'
+          : '填写本机密钥后即可拉取消息。未保存地址时使用 https://op.g.ezcoin.ink。';
+      }
       list.appendChild(empty);
       return;
     }
@@ -839,6 +968,26 @@ function mountFooter(footer) {
           main.appendChild(yld);
         }
         article.appendChild(main);
+      }
+      if (view.interval || view.volumeSurge || view.pattern) {
+        var spec = document.createElement('div');
+        spec.className = 'priority-item-main priority-item-oi';
+        if (view.interval) {
+          var tf = document.createElement('span');
+          tf.textContent = '周期 ' + view.interval;
+          spec.appendChild(tf);
+        }
+        if (view.volumeSurge) {
+          var vol = document.createElement('span');
+          vol.textContent = '放量 ' + view.volumeSurge;
+          spec.appendChild(vol);
+        }
+        if (view.pattern) {
+          var pat = document.createElement('span');
+          pat.textContent = '形态 ' + view.pattern;
+          spec.appendChild(pat);
+        }
+        article.appendChild(spec);
       }
       if (view.text) {
         var text = document.createElement('p');
@@ -1074,7 +1223,12 @@ function mountFooter(footer) {
       backoff = 1000;
       var knownSources = Object.create(null);
       nextSources.forEach(function (source) { knownSources[source.id] = true; });
-      state.sources = nextSources;
+      knownSources[OI_REPORT_SOURCE_ID] = true;
+      state.sources = withOiReportSource(nextSources);
+      var oiNow = state.items.filter(function (item) {
+        return item && item.source === OI_REPORT_SOURCE_ID;
+      });
+      nextItems = replaceSourceItems(nextItems, OI_REPORT_SOURCE_ID, oiNow);
       state.items = nextItems.filter(function (item) { return item && knownSources[item.source]; });
       var snapshotIds = itemIdSet(snapshotItems);
       // HTTP history is not a live arrival.
@@ -1163,6 +1317,74 @@ function mountFooter(footer) {
     });
   }
 
+  var oiTimer = null;
+  var oiReady = false;
+
+  // Packaged bubble pages cannot fetch 127.0.0.1:/oi (no CORS on JSON APIs).
+  // The shell GET is limited to local :8765 /api/report-queue.
+  function fetchOiReportQueue(url) {
+    var tauri = window.__TAURI__;
+    if (tauri && tauri.core && tauri.core.invoke) {
+      return tauri.core.invoke('oi_report_queue_get', { url: url }).then(function (res) {
+        var status = res && res.status;
+        if (!status || status < 200 || status >= 300) {
+          throw new Error('oi report-queue HTTP ' + (status || 0));
+        }
+        try {
+          return JSON.parse((res && res.body) || '{}');
+        } catch (e) {
+          throw new Error('oi report-queue invalid json');
+        }
+      });
+    }
+    if (typeof fetch !== 'function') {
+      return Promise.reject(new Error('oi report-queue fetch unavailable'));
+    }
+    return fetch(url, { headers: { Accept: 'application/json' } }).then(function (res) {
+      if (!res.ok) throw new Error('oi report-queue HTTP ' + res.status);
+      return res.json();
+    });
+  }
+
+  function syncOiReports() {
+    var url = oiReportQueueUrl(DEFAULT_OI_WEB_BASE_URL);
+    if (!url) {
+      state.oiConfigured = false;
+      state.sources = withOiReportSource(state.sources);
+      render();
+      return Promise.resolve();
+    }
+    return fetchOiReportQueue(url).then(function (body) {
+      var items = parseOiReportQueue(body);
+      var previous = itemIdSet(state.items.filter(function (item) {
+        return item && item.source === OI_REPORT_SOURCE_ID;
+      }));
+      state.oiConfigured = true;
+      state.sources = withOiReportSource(state.sources);
+      state.items = replaceSourceItems(state.items, OI_REPORT_SOURCE_ID, items);
+      if (oiReady) {
+        publishNotices('live', items.filter(function (item) {
+          return item && item.id && !previous[item.id];
+        }), previous);
+      } else {
+        publishNotices('snapshot', items, previous);
+        oiReady = true;
+      }
+      render();
+    }).catch(function (err) {
+      state.oiConfigured = false;
+      quietLog(err);
+      state.sources = withOiReportSource(state.sources);
+      render();
+    });
+  }
+
+  function startOiPoll() {
+    if (oiTimer) clearInterval(oiTimer);
+    syncOiReports();
+    oiTimer = setInterval(syncOiReports, OI_REPORT_POLL_MS);
+  }
+
   function restart() {
     session += 1;
     var token = session;
@@ -1178,9 +1400,11 @@ function mountFooter(footer) {
     var cfg = readConfig();
     state.networkConfigured = !!cfg.connect;
     state.lastError = '';
+    state.sources = withOiReportSource(state.networkConfigured ? state.sources : DEFAULT_SOURCES);
     if (!state.networkConfigured) {
-      state.items = [];
-      state.sources = DEFAULT_SOURCES.slice();
+      state.items = state.items.filter(function (item) {
+        return item && item.source === OI_REPORT_SOURCE_ID;
+      });
       render();
       return;
     }
@@ -1191,8 +1415,10 @@ function mountFooter(footer) {
     state.holdSnapshot = true;
     state.lastError = '';
     var sources = parseSources({ sources: snap && snap.sources });
-    state.sources = sources.length ? sources : DEFAULT_SOURCES.slice();
-    state.items = parseQueueItems({ items: snap && snap.items });
+    var snapItems = parseQueueItems({ items: snap && snap.items });
+    var oiKeep = state.items.filter(function (item) { return item && item.source === OI_REPORT_SOURCE_ID; });
+    state.sources = withOiReportSource(sources.length ? sources : DEFAULT_SOURCES);
+    state.items = mergeItems(oiKeep, snapItems);
     render();
   }
 
@@ -1250,7 +1476,7 @@ function mountFooter(footer) {
   api.openList = openList;
   api.closePanel = closePanel;
   api.footerModel = function () {
-    return footerRows(state.sources, state.items, loadSeen(), displayConfigured());
+    return footerRows(state.sources, state.items, loadSeen(), displayConfigured(), { oi_report: true });
   };
 
   var gear = document.getElementById('prioritySettingsBtn');
@@ -1314,6 +1540,7 @@ function mountFooter(footer) {
 
   render();
   hydrateConfig();
+  startOiPoll();
 }
 
 if (typeof document !== 'undefined') {

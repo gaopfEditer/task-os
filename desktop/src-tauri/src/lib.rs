@@ -437,6 +437,54 @@ async fn priority_http_get(url: String, secret: String) -> Result<PriorityHttpRe
         .map_err(|err| err.to_string())?
 }
 
+fn validate_oi_report_queue_url(raw: &str) -> Result<reqwest::Url, String> {
+    let url = reqwest::Url::parse(raw.trim()).map_err(|_| "invalid oi report-queue url".to_string())?;
+    if url.scheme() != "http" && url.scheme() != "https" {
+        return Err("invalid oi report-queue url".into());
+    }
+    if !url.username().is_empty() || url.password().is_some() {
+        return Err("invalid oi report-queue url".into());
+    }
+    let host = url.host_str().unwrap_or("");
+    if host != "127.0.0.1" && host != "localhost" {
+        return Err("invalid oi report-queue url".into());
+    }
+    if url.port() != Some(8765) {
+        return Err("invalid oi report-queue url".into());
+    }
+    let path = url.path().trim_end_matches('/');
+    if path != "/api/report-queue" {
+        return Err("invalid oi report-queue url".into());
+    }
+    Ok(url)
+}
+
+fn perform_oi_report_queue_get(url: reqwest::Url) -> Result<PriorityHttpResponse, String> {
+    let client = reqwest::blocking::Client::builder()
+        .timeout(std::time::Duration::from_secs(12))
+        .build()
+        .map_err(|err| err.to_string())?;
+    let response = client
+        .get(url)
+        .header("Accept", "application/json")
+        .send()
+        .map_err(|err| format!("oi report-queue HTTP {err}"))?;
+    let status = response.status().as_u16();
+    let body = response.text().map_err(|err| err.to_string())?;
+    if body.len() > 1_048_576 {
+        return Err("oi report-queue response too large".into());
+    }
+    Ok(PriorityHttpResponse { status, body })
+}
+
+#[tauri::command]
+async fn oi_report_queue_get(url: String) -> Result<PriorityHttpResponse, String> {
+    let parsed = validate_oi_report_queue_url(&url)?;
+    tauri::async_runtime::spawn_blocking(move || perform_oi_report_queue_get(parsed))
+        .await
+        .map_err(|err| err.to_string())?
+}
+
 #[tauri::command]
 fn set_price_bubble_layout(app: tauri::AppHandle, mode: String) -> Result<(), String> {
     let win = app
@@ -529,7 +577,8 @@ pub fn run() {
             focus_price_bubble,
             show_price_alert,
             set_price_bubble_layout,
-            priority_http_get
+            priority_http_get,
+            oi_report_queue_get
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -574,6 +623,22 @@ mod tests {
             super::validate_priority_get_url("https://user:secret@example.com/queue/priority")
                 .is_err()
         );
+    }
+
+    #[test]
+    fn oi_report_queue_url_allows_local_8765_only() {
+        assert!(super::validate_oi_report_queue_url("http://127.0.0.1:8765/api/report-queue").is_ok());
+        assert!(super::validate_oi_report_queue_url(
+            "http://localhost:8765/api/report-queue?limit=50"
+        )
+        .is_ok());
+        assert!(super::validate_oi_report_queue_url(
+            "http://127.0.0.1:8765/api/report-queue?kind=st_pop_short&symbols=BTCUSDT,ETHUSDT"
+        )
+        .is_ok());
+        assert!(super::validate_oi_report_queue_url("http://127.0.0.1:8765/api/health").is_err());
+        assert!(super::validate_oi_report_queue_url("http://127.0.0.1/api/report-queue").is_err());
+        assert!(super::validate_oi_report_queue_url("https://example.com/api/report-queue").is_err());
     }
 
     #[test]

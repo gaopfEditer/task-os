@@ -19,8 +19,13 @@ import {
   noticeForPriorityArrival,
   noticesForPriorityItems,
   parseNotifyFlag,
+  parseOiReportQueue,
   parseQueueItems,
   parseSources,
+  mapOiReportItem,
+  withOiReportSource,
+  OI_REPORT_SOURCE,
+  oiReportQueueUrl,
   priorityNotice,
   queueUrl,
   reconcilePriorityStore,
@@ -394,3 +399,91 @@ test('live priority cards notify; snapshot and historical rows do not', () => {
   const applyFn = footer.slice(footer.indexOf('function applySnapshot'), footer.indexOf('function onSave'));
   assert.doesNotMatch(applyFn, /publishNotices|showSystemNotice|show_price_alert/);
 });
+
+test('oi report queue sits above channel sources', () => {
+  const sources = withOiReportSource(DEFAULT_SOURCES);
+  assert.deepEqual(sources.map((row) => row.id), ['oi_report', 'pangmao']);
+  assert.equal(sources[0].name, 'BTC/ETH 5m POP 试空');
+  const again = withOiReportSource(sources);
+  assert.deepEqual(again.map((row) => row.id), ['oi_report', 'pangmao']);
+  assert.equal(oiReportQueueUrl('http://127.0.0.1:8765/'), 'http://127.0.0.1:8765/api/report-queue?kind=st_pop_short&symbols=BTCUSDT,ETHUSDT');
+});
+
+test('oi report items expose interval, volume and pattern', () => {
+  const items = parseOiReportQueue({
+    pending: {
+      windowEndMs: 1795005600000,
+      items: [{
+        id: 'st_pop_short:BTCUSDT:5m:1',
+        kind: 'st_pop_short',
+        symbol: 'BTCUSDT',
+        interval: '5m',
+        sideLabel: '空',
+        pattern: '短空',
+        volumeSurgeLabel: '是',
+        volumeSurge: 'yes',
+        timeMs: 1795005300000,
+        oiAnomaly: false,
+      }],
+    },
+    reports: [{
+      windowEndMs: 1795005300000,
+      items: [{
+        id: 'pattern:AAPLUSDT:4h:double_bottom:1',
+        kind: 'pattern',
+        symbol: 'AAPLUSDT',
+        interval: '4h',
+        sideLabel: '多',
+        pattern: '底部二次探底确认',
+        volumeSurgeLabel: '是',
+        volumeSurge: 'yes',
+        timeMs: 1795005000000,
+        oiAnomaly: false,
+      }, {
+        id: 'st_pop_short:ETHUSDT:5m:2',
+        kind: 'st_pop_short',
+        symbol: 'ETHUSDT',
+        interval: '5m',
+        sideLabel: '空',
+        pattern: '短空',
+        volumeSurgeLabel: '否',
+        volumeSurge: 'no',
+        timeMs: 1795005000000,
+        oiAnomaly: false,
+      }],
+    }],
+  });
+  assert.equal(items.length, 2);
+  assert.equal(items[0].source, 'oi_report');
+  assert.equal(items[0].card.symbol, 'BTCUSDT');
+  assert.equal(items[1].card.symbol, 'ETHUSDT');
+  assert.equal(isTradeCard(items[0]), true);
+  const view = describeItem(items[0], OI_REPORT_SOURCE.name);
+  assert.equal(view.symbol, 'BTCUSDT');
+  assert.equal(view.direction, '空');
+  assert.equal(view.interval, '5m');
+  assert.equal(view.volumeSurge, '是');
+  assert.equal(view.pattern, '短空');
+  const rows = footerRows(
+    withOiReportSource(DEFAULT_SOURCES),
+    items,
+    {},
+    false,
+    { oi_report: true }
+  );
+  assert.equal(rows[0].id, 'oi_report');
+  assert.equal(rows[0].unconfigured, false);
+  assert.equal(rows[0].messages, 2);
+  assert.equal(rows[1].id, 'pangmao');
+  assert.equal(rows[1].unconfigured, true);
+});
+
+test('oi report fetch uses the local shell command', () => {
+  const footer = readFileSync(new URL('./priority-footer.js', import.meta.url), 'utf8');
+  const fn = footer.slice(footer.indexOf('function fetchOiReportQueue'), footer.indexOf('function syncOiReports'));
+  assert.match(fn, /oi_report_queue_get/);
+  const syncFn = footer.slice(footer.indexOf('function syncOiReports'), footer.indexOf('function startOiPoll'));
+  assert.match(syncFn, /fetchOiReportQueue/);
+  assert.doesNotMatch(syncFn, /fetch\(url, \{ headers: \{ Accept: 'application\/json' \} \}/);
+});
+

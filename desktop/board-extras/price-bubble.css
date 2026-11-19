@@ -341,3 +341,9 @@ html, body {
 .priority-settings-actions { margin-top: 8px; }
 .priority-hint { margin-top: 6px; color: #8b949e; font-size: 11px; }
 .priority-hint.is-error { color: #f85149; }
+
+.priority-item-oi {
+  font-size: 11px;
+  opacity: 0.88;
+  gap: 8px;
+}
