@@ -49,6 +49,22 @@ if (!html.includes(marker)) {
 }
 writeFileSync(join(dist, "index.html"), html);
 
+mkdirSync(join(dist, "data"), { recursive: true });
+for (const name of [
+  "command-center.json",
+  "business-function-board.json",
+  "work-skills-board.json",
+  "grow-operations-board.json",
+  "live_watch.json",
+]) {
+  const src = join(repoRoot, "data", name);
+  if (existsSync(src)) copyFileSync(src, join(dist, "data", name));
+}
+for (const name of ["index.md", "log.csv", "annotations.json"]) {
+  const src = join(repoRoot, name);
+  if (existsSync(src)) copyFileSync(src, join(dist, name));
+}
+
 const required = [
   "index.html",
   "market-symbols.js",

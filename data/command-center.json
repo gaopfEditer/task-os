@@ -1,0 +1,220 @@
+{
+  "schema_version": 1,
+  "meta": {
+    "title": "Task OS · 状态驾驶舱",
+    "dispatcher_bot": "dispatch·总调度",
+    "principle": "专业 Bot 做事；总调度让正确的事发生；驾驶舱让你掌握全局。数据真源仅此文件，看板与 Bot 不写重复任务状态。",
+    "openmausbot_mirror": "/Users/maotouying/.openmausbot/workspaces/81414eac-984c-40f0-a464-bb33d306b30a/dispatch-command-center/command-center.json",
+    "user_directive": "",
+    "updated_at": "2026-11-19T00:00:00+08:00"
+  },
+  "goals": [
+    {
+      "id": "g_main",
+      "title": "发现可变现的软件开发机会",
+      "business_id": "software",
+      "stage": "验证",
+      "importance": "primary",
+      "needs_user": false,
+      "note": "主目标：需求验证与证据闸门后再 PRD"
+    },
+    {
+      "id": "g_game",
+      "title": "推进复古街机 / you-can-playfc",
+      "business_id": "game",
+      "stage": "启动",
+      "importance": "secondary",
+      "needs_user": false,
+      "note": ""
+    },
+    {
+      "id": "g_ai",
+      "title": "AI Agent 与工程能力提升",
+      "business_id": "work",
+      "stage": "持续",
+      "importance": "ongoing",
+      "needs_user": false,
+      "note": "work· 六角色循环"
+    }
+  ],
+  "businesses": [
+    {
+      "id": "software",
+      "name": "软件开发",
+      "goal": "找到可变现的工具站机会",
+      "stage": "需求验证",
+      "focus": "文件处理 / 多格式转换",
+      "health": "推进中",
+      "blocker": "竞品差异与付费意愿待确认",
+      "last_outcome": "市场情报：文件转换 SEO 长尾（grow 机会池）",
+      "next_step": "用户研究验证痛点"
+    },
+    {
+      "id": "game",
+      "name": "游戏",
+      "goal": "活跃、留存与传播",
+      "stage": "观察",
+      "focus": "怀旧 FC / 社区",
+      "health": "观察中",
+      "blocker": "本周无必须立即投入的热点",
+      "last_outcome": "怀旧 FC 社区话题跟踪中",
+      "next_step": "内容创意选题验证"
+    },
+    {
+      "id": "crypto",
+      "name": "币圈",
+      "goal": "情报与交易纪律",
+      "stage": "维护",
+      "focus": "OI 策略、运营内容",
+      "health": "维护中",
+      "blocker": "实盘滑点与手续费侵蚀需持续对照",
+      "last_outcome": "交易员回测对照进行中",
+      "next_step": "策略是否继续由你拍板"
+    }
+  ],
+  "workstreams": [
+    { "id": "software_market", "name": "软件市场验证", "business_id": "software" },
+    { "id": "file_converter", "name": "多格式转换产品", "business_id": "software" },
+    { "id": "oi_trading", "name": "OI 短线策略", "business_id": "crypto" },
+    { "id": "ai_agent", "name": "AI Agent 工程", "business_id": "work" }
+  ],
+  "tasks": [
+    {
+      "id": "task_001",
+      "business_id": "software",
+      "workstream_id": "software_market",
+      "title": "验证文件处理工具的用户需求",
+      "owner": "grow·用户研究",
+      "status": "waiting_user",
+      "priority": "high",
+      "source_event": "evt_001",
+      "reason": "grow 机会池：文件转换 SEO 长尾 + 主市场闸门",
+      "deliverable": "用户需求验证摘要",
+      "acceptance_criteria": ["真实使用场景", "竞品清单", "是否进入深度调研结论"],
+      "requires_user_approval": true,
+      "eta_minutes": 15,
+      "updated_at": "2026-11-19T22:00:00+08:00"
+    },
+    {
+      "id": "task_002",
+      "business_id": "software",
+      "workstream_id": "file_converter",
+      "title": "产品深度调研闸门（市场需求与产品）",
+      "owner": "市场需求与产品",
+      "status": "evaluating",
+      "priority": "high",
+      "source_event": "evt_002",
+      "reason": "多格式转换站点：未经调研确认不写 PRD",
+      "deliverable": "可复核证据与缺口报告",
+      "acceptance_criteria": ["猫头鹰书面确认后方能 PRD"],
+      "requires_user_approval": false,
+      "updated_at": "2026-11-19T20:00:00+08:00"
+    },
+    {
+      "id": "task_003",
+      "business_id": "work",
+      "workstream_id": "ai_agent",
+      "title": "OpenMausBot 三看板联动验收",
+      "owner": "dispatch·总调度",
+      "status": "in_progress",
+      "priority": "medium",
+      "source_event": "evt_003",
+      "reason": "base/work/grow 职能看板已上线，需与驾驶舱对齐",
+      "deliverable": "command-center 与 Bot 子页一致",
+      "acceptance_criteria": ["#cockpit 可读写", "总调度 Bot 可读 JSON"],
+      "requires_user_approval": false,
+      "updated_at": "2026-11-19T23:30:00+08:00"
+    },
+    {
+      "id": "task_004",
+      "business_id": "work",
+      "workstream_id": "ai_agent",
+      "title": "Agent 能力实践（base·技术学习）",
+      "owner": "base·技术学习",
+      "status": "blocked",
+      "priority": "high",
+      "source_event": "evt_004",
+      "reason": "工程环境阻塞待解除",
+      "deliverable": "可演示的自动化链路",
+      "acceptance_criteria": ["阻塞原因消除", "exec_state 回写"],
+      "requires_user_approval": false,
+      "blocker_type": "system",
+      "blocker_note": "依赖兼容 / 环境项待确认",
+      "updated_at": "2026-11-19T18:00:00+08:00"
+    }
+  ],
+  "events": [
+    {
+      "id": "evt_001",
+      "at": "2026-11-19T21:00:00+08:00",
+      "kind": "opportunity",
+      "title": "文件转换 SEO 长尾进入 grow 机会池",
+      "business_id": "software",
+      "source": "grow·市场情报"
+    },
+    {
+      "id": "evt_002",
+      "at": "2026-11-19T19:00:00+08:00",
+      "kind": "gate",
+      "title": "产品需求·深度合议：市场调研先于 PRD",
+      "business_id": "software",
+      "source": "MausBot"
+    },
+    {
+      "id": "evt_003",
+      "at": "2026-11-19T23:00:00+08:00",
+      "kind": "delivery",
+      "title": "Bot 个人聚焦/工作技能/内容创意 看板已推送 GitHub Pages",
+      "business_id": "work",
+      "source": "MausBot"
+    },
+    {
+      "id": "evt_004",
+      "at": "2026-11-19T17:00:00+08:00",
+      "kind": "blocked",
+      "title": "工程实践项标记阻塞",
+      "business_id": "work",
+      "source": "work·工程实践顾问"
+    }
+  ],
+  "decisions": [],
+  "action_queue": [
+    {
+      "id": "act_001",
+      "kind": "waiting_decision",
+      "title": "确定软件开发专题的第一个需求验证方向",
+      "business_id": "software",
+      "workstream_id": "software_market",
+      "task_id": "task_001",
+      "reason": "市场情报已发现机会，用户研究待你授权深入",
+      "prepared_by": "dispatch·总调度",
+      "user_action": "批准验证 / 暂缓 / 放弃",
+      "eta_minutes": 10,
+      "outcome_ref": "grow-operations-board opportunities o2"
+    },
+    {
+      "id": "act_002",
+      "kind": "need_user",
+      "title": "是否继续当前 OI 短线策略实盘节奏",
+      "business_id": "crypto",
+      "workstream_id": "oi_trading",
+      "task_id": null,
+      "reason": "扣费后边际偏低，需你决定是否维持或缩仓",
+      "prepared_by": "交易员",
+      "user_action": "继续 / 降频 / 暂停观察",
+      "eta_minutes": 5
+    },
+    {
+      "id": "act_003",
+      "kind": "suggest_watch",
+      "title": "工程任务兼容性阻塞",
+      "business_id": "work",
+      "workstream_id": "ai_agent",
+      "task_id": "task_004",
+      "reason": "业务问题与系统问题分离：此项标为系统阻塞",
+      "prepared_by": "work·工程实践顾问",
+      "user_action": "查看阻塞说明或转交",
+      "eta_minutes": 20
+    }
+  ]
+}

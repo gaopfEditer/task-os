@@ -191,6 +191,12 @@ monthly/
 
 `info/resources.md` 是收藏的资源列表（A. 项目库 / B. 运营 / C. 平台与工具 / D. 博主名单，每个小类一张 `名称 | 链接 | 简述 | 标签 | 收藏日期 | 备注` 表），由资讯创作官维护，其他 bot 和网页都不要改它。看板的「资源」页（`#resources`）运行时从 `main` 读取这个文件，只读展示：按分组折叠、可搜索（名称 / 简述 / 标签 / 备注 / 域名）、点标签筛选，点名称在新标签页打开（只放行 http/https 链接）。新条目合并到 `main` 后点「刷新」即可看到，不用改页面；文件还没同步时显示「资源文件还没同步上来」。
 
+## 驾驶舱 + 总调度（command-center）
+
+- **状态驾驶舱**（`#cockpit`，默认首页）：`data/command-center.json` — 五区概况 / 行动中心 / 业务 / 异常 / 动态；真源仅此文件，职能看板 JSON 不重复写任务状态。
+- **总调度 Bot**：`dispatch·总调度`（团队「系统调度·Dispatch」）读写 JSON 的 `tasks` / `events` / `decisions` / `action_queue`，协调 base· / work· / grow·，不重做专业研究。
+- 设计：`docs/command-center-design.md`；镜像同步：`scripts/build-command-center.mjs`。
+
 ## Bot（bots.md + 协作 + 工作技能 + 内容创意）
 
 - **分工说明**（`#bots`）：`bots.md`

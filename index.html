@@ -44,6 +44,38 @@
   .nodata { text-align: center; color: var(--muted); padding: 18px 0; }
   .hint { font-size: 12px; color: var(--muted); }
 
+  /* ---------- cockpit ---------- */
+  .cockpit-directive { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+  .cockpit-directive input { flex: 1 1 280px; }
+  .cockpit-stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; max-width: 980px; }
+  .cockpit-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+  .cockpit-col { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
+  .cockpit-col h2 { font-size: 14px; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+  .cockpit-col h2 small { font-weight: normal; color: var(--muted); font-size: 12px; }
+  .act-card { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; background: #fafbfc; }
+  .act-card .act-kind { font-size: 11px; color: var(--muted); text-transform: none; }
+  .act-card h3 { font-size: 14px; margin: 4px 0 6px; }
+  .act-card .meta { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .act-card .acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .biz-card { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; }
+  .biz-card:hover { border-color: var(--accent); }
+  .biz-card.open { box-shadow: 0 0 0 2px #0969da22; }
+  .biz-card .biz-h { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .biz-card .health { font-size: 12px; font-weight: 600; }
+  .biz-detail { margin-top: 8px; font-size: 12px; color: var(--muted); display: none; }
+  .biz-card.open .biz-detail { display: block; }
+  .alert-li { font-size: 13px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .alert-li:last-child { border-bottom: none; }
+  .evt-li { padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .evt-li:last-child { border-bottom: none; }
+  .evt-li .t { font-size: 12px; color: var(--muted); }
+  .goal-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+  .goal-pill { font-size: 12px; background: #eef1f4; border-radius: 6px; padding: 4px 8px; border: 1px solid var(--line); }
+  @media (max-width: 900px) {
+    .cockpit-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cockpit-grid { grid-template-columns: 1fr; }
+  }
+
   /* ---------- board ---------- */
   .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; max-width: 720px; }
   .stat { text-align: left; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; }
@@ -568,6 +600,7 @@
   <button id="openSettings" type="button" class="ghost" title="设置 GitHub 令牌">⚙ 设置</button>
 </header>
 <nav class="tabs">
+  <a href="#cockpit" data-tab="cockpit">驾驶舱</a>
   <a href="#board" data-tab="board">看板</a>
   <a href="#calendar" data-tab="calendar">日历</a>
   <a href="#focus" data-tab="focus">关注领域</a>
@@ -580,6 +613,18 @@
 </nav>
 <main>
   <div id="msg"></div>
+
+  <section class="tab" id="tab-cockpit">
+    <p class="hint" style="margin:0 0 8px">状态真源 <code>data/command-center.json</code> · 总调度 <strong>dispatch·总调度</strong> 维护任务/事件/行动队列；职能看板仍各自 JSON，P2 再聚合 exec 状态。</p>
+    <div id="cockpitBar"></div>
+    <div class="cockpit-directive">
+      <label for="cockpitDirective" class="hint" style="margin:0">今日指令</label>
+      <input id="cockpitDirective" type="text" placeholder="例如：本周优先验证文件转换需求；游戏线仅观察…" autocomplete="off" aria-label="今日指令">
+      <button type="button" id="cockpitDirectiveSave">记入 meta</button>
+    </div>
+    <div class="cockpit-stats" id="cockpitStats"></div>
+    <div class="cockpit-grid" id="cockpitHost"><div class="nodata">加载中…</div></div>
+  </section>
 
   <section class="tab" id="tab-board">
     <div class="stats" id="stats"></div>
@@ -708,7 +753,7 @@
   </section>
 
   <footer>
-    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>behavior.md</code>、<code>areas.md</code>、<code>annotations.json</code>、<code>memo.md</code>、<code>insights.md</code>、<code>bots.md</code>、<code>data/business-function-board.json</code>、<code>data/work-skills-board.json</code>、<code>data/grow-operations-board.json</code>（Bot 子页）、只读的 <code>docs/</code>（专题文档），以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
+    数据来源：仓库 <a href="https://github.com/gaopfEditer/task-os">gaopfEditer/task-os</a> 的 <code>index.md</code>、<code>log.csv</code> 与 <code>daily/</code>、<code>weekly/</code>、<code>monthly/</code>、<code>behavior.md</code>、<code>areas.md</code>、<code>annotations.json</code>、<code>memo.md</code>、<code>insights.md</code>、<code>bots.md</code>、<code>data/command-center.json</code>（驾驶舱）、<code>data/business-function-board.json</code>、<code>data/work-skills-board.json</code>、<code>data/grow-operations-board.json</code>（Bot 子页）、只读的 <code>docs/</code>（专题文档），以及只读的 <code>info/resources.md</code>（资讯创作官维护）。日志时间按 log.csv 原样显示（UTC+8）。
   </footer>
 </main>
 <div id="dayPop" class="daypop" role="dialog" hidden></div>
@@ -837,10 +882,21 @@
     });
   }
   function pad(n) { return String(n).padStart(2, '0'); }
-  function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function ymd(d) {
+    if (!d || typeof d.getFullYear !== 'function' || isNaN(d.getTime())) return '';
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
   function parseYmd(s) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; }
-  function addDays(s, n) { var d = parseYmd(s); return ymd(new Date(d.getFullYear(), d.getMonth(), d.getDate() + n)); }
-  function diffDays(a, b) { return Math.round((parseYmd(a) - parseYmd(b)) / 86400000); }   // a - b in days
+  function addDays(s, n) {
+    var d = parseYmd(s);
+    if (!d) return '';
+    return ymd(new Date(d.getFullYear(), d.getMonth(), d.getDate() + n));
+  }
+  function diffDays(a, b) {
+    var da = parseYmd(a), db = parseYmd(b);
+    if (!da || !db) return null;
+    return Math.round((da - db) / 86400000);
+  }   // a - b in days; null if either date is missing
   function todayStr() { return ymd(new Date()); }
   function cnDate(s, withYear) {
     var d = parseYmd(s); if (!d) return s;
@@ -849,10 +905,11 @@
   }
   function relDayWord(date, today) {
     today = today || todayStr();
-    var n = diffDays(today, date);
+    var d = parseYmd(date), t = parseYmd(today);
+    if (!d) return date || '';
+    var n = t ? Math.round((t - d) / 86400000) : null;
     if (n === 0) return '今天'; if (n === 1) return '昨日'; if (n === 2) return '前天';
-    var d = parseYmd(date);
-    return (d.getFullYear() !== parseYmd(today).getFullYear() ? d.getFullYear() + '年' : '') + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+    return ((t && d.getFullYear() !== t.getFullYear()) ? d.getFullYear() + '年' : '') + (d.getMonth() + 1) + '月' + d.getDate() + '日';
   }
   function shortDotDate(ds) {
     var d = parseYmd(ds);
@@ -1007,6 +1064,24 @@
         throw e;
       });
     });
+  }
+  /** Parse a repo JSON file. HTML/empty payloads (404 pages, proxy interstitials) are treated as missing. */
+  function parseRepoJson(text, label) {
+    var s = String(text == null ? '' : text).replace(/^\uFEFF/, '').trim();
+    if (!s || s.charAt(0) === '<') {
+      var miss = new Error((label || 'JSON') + ' 不存在或返回了网页而不是 JSON');
+      miss.status = 404;
+      miss.code = 'not-json';
+      throw miss;
+    }
+    try {
+      return JSON.parse(s);
+    } catch (e) {
+      var err = new Error((label || 'JSON') + ' 解析失败');
+      err.status = 0;
+      err.code = 'bad-json';
+      throw err;
+    }
   }
   function api(method, path, body, useToken) {
     var headers = { 'Accept': 'application/vnd.github+json' };
@@ -1412,6 +1487,7 @@
     var d = normDate(t.due);
     if (!d) return { cls: 'none', days: null, text: '无截止' };
     var n = diffDays(d, today);
+    if (n == null) return { cls: 'none', days: null, text: '无截止' };
     if (isClosed(t)) return { cls: 'closed', days: n, text: '截止 ' + d.slice(5) };
     if (n === 0) return { cls: 'today', days: 0, text: '今天到期' };
     if (n < 0) return { cls: 'overdue', days: n, text: '逾期 ' + (-n) + ' 天' };
@@ -3494,6 +3570,212 @@
     });
   }
 
+  // ---------- 驾驶舱: data/command-center.json ----------
+  var CMD_PATH = 'data/command-center.json';
+  var CMD_TASK_LABEL = {
+    new: '新发现', evaluating: '待评估', waiting_user: '待批准', ready: '待执行',
+    in_progress: '进行中', blocked: '阻塞', reviewing: '待验收',
+    completed: '已完成', paused: '已暂停', abandoned: '已放弃'
+  };
+  var CMD_ACT_KIND = { need_user: '现在需要你做', waiting_decision: '等待你决策', suggest_watch: '建议你关注' };
+  state.commandCenter = { status: '', data: null, sha: null, error: '', flash: null, saving: false, dirty: false, gen: 0, bizOpen: {} };
+  function cmdNow() { return new Date().toISOString(); }
+  function touchCmdDirty() {
+    var C = state.commandCenter;
+    if (C.data && C.data.meta) C.data.meta.updated_at = cmdNow();
+    C.dirty = true;
+  }
+  function loadCommandCenter(force) {
+    var C = state.commandCenter;
+    if (!force && (C.status === 'ok' || C.status === 'missing' || C.status === 'loading')) return Promise.resolve();
+    C.status = 'loading'; C.gen++;
+    var gen = C.gen;
+    renderCockpit();
+    return loadFile(CMD_PATH).then(function (res) {
+      if (gen !== C.gen) return;
+      try {
+        C.data = parseRepoJson(res.text, '驾驶舱');
+        C.status = 'ok'; C.error = ''; C.dirty = false;
+      } catch (e) {
+        if (e && e.status === 404) { C.status = 'missing'; C.data = null; C.error = ''; }
+        else { C.status = 'error'; C.error = (e && e.message) || 'JSON 解析失败'; C.data = null; }
+      }
+      renderCockpit();
+    }, function (e) {
+      if (gen !== C.gen) return;
+      if (e.status === 404) { C.status = 'missing'; C.data = null; C.error = ''; }
+      else { C.status = 'error'; C.error = e.message; }
+      renderCockpit();
+    });
+  }
+  function fetchCommandCenterLatest() {
+    return api('GET', repoPath + '/contents/' + CMD_PATH + '?ref=' + BRANCH).then(function (res) {
+      if (res.status === 404) return { sha: null, text: '' };
+      if (!res.ok || !res.json) throw new Error(apiErrText(res));
+      return { sha: res.json.sha, text: b64ToUtf8(res.json.content) };
+    });
+  }
+  function commandCenterText() { return JSON.stringify(state.commandCenter.data, null, 2) + '\n'; }
+  function cockpitBizName(id, data) {
+    var b = (data.businesses || []).find(function (x) { return x.id === id; });
+    return b ? b.name : (id || '—');
+  }
+  function cockpitTask(data, id) {
+    return (data.tasks || []).find(function (t) { return t.id === id; });
+  }
+  function cockpitPushEvent(data, ev) {
+    data.events = data.events || [];
+    data.events.unshift(ev);
+    if (data.events.length > 40) data.events.length = 40;
+  }
+  function cockpitActApprove(data, actId) {
+    var act = (data.action_queue || []).find(function (a) { return a.id === actId; });
+    if (!act) return;
+    var task = act.task_id ? cockpitTask(data, act.task_id) : null;
+    if (task) {
+      task.status = 'in_progress';
+      task.updated_at = cmdNow();
+      if (task.requires_user_approval) task.requires_user_approval = false;
+    }
+    data.action_queue = (data.action_queue || []).filter(function (a) { return a.id !== actId; });
+    data.decisions = data.decisions || [];
+    data.decisions.unshift({
+      id: 'dec_' + Date.now(), at: cmdNow(), act_id: actId, task_id: act.task_id || '',
+      choice: 'approved', title: act.title, business_id: act.business_id || ''
+    });
+    cockpitPushEvent(data, { id: 'evt_' + Date.now(), at: cmdNow(), kind: 'decision', title: '已批准：' + act.title, business_id: act.business_id || '', source: '驾驶舱' });
+  }
+  function cockpitActDefer(data, actId) {
+    var act = (data.action_queue || []).find(function (a) { return a.id === actId; });
+    if (!act) return;
+    var task = act.task_id ? cockpitTask(data, act.task_id) : null;
+    if (task) { task.status = 'paused'; task.updated_at = cmdNow(); }
+    data.action_queue = (data.action_queue || []).filter(function (a) { return a.id !== actId; });
+    cockpitPushEvent(data, { id: 'evt_' + Date.now(), at: cmdNow(), kind: 'pause', title: '已暂缓：' + act.title, business_id: act.business_id || '', source: '驾驶舱' });
+  }
+  function cockpitActAbandon(data, actId) {
+    var act = (data.action_queue || []).find(function (a) { return a.id === actId; });
+    if (!act) return;
+    var task = act.task_id ? cockpitTask(data, act.task_id) : null;
+    if (task) { task.status = 'abandoned'; task.updated_at = cmdNow(); }
+    data.action_queue = (data.action_queue || []).filter(function (a) { return a.id !== actId; });
+    cockpitPushEvent(data, { id: 'evt_' + Date.now(), at: cmdNow(), kind: 'abandon', title: '已放弃：' + act.title, business_id: act.business_id || '', source: '驾驶舱' });
+  }
+  function renderCockpit() {
+    var C = state.commandCenter;
+    renderBotBoardBar('cockpitBar', CMD_PATH, C, 'data-ccact');
+    var host = $('cockpitHost');
+    var stats = $('cockpitStats');
+    var dir = $('cockpitDirective');
+    if (dir && C.data && C.data.meta && document.activeElement !== dir) dir.value = C.data.meta.user_directive || '';
+    if (!host) return;
+    if (C.status === 'loading' || C.status === '') { host.innerHTML = '<div class="nodata">加载中…</div>'; if (stats) stats.innerHTML = ''; return; }
+    if (C.status === 'missing') { host.innerHTML = '<div class="nodata">尚无 command-center.json。请在仓库添加 <code>data/command-center.json</code> 后刷新。</div>'; return; }
+    if (C.status === 'error') { host.innerHTML = '<div class="msg error">' + esc(C.error) + '</div>'; return; }
+    var D = C.data;
+    var tasks = D.tasks || [];
+    var primaryGoals = (D.goals || []).filter(function (g) { return g.importance === 'primary'; }).length;
+    var inProg = tasks.filter(function (t) { return t.status === 'in_progress' || t.status === 'evaluating' || t.status === 'ready'; }).length;
+    var waitDec = (D.action_queue || []).length;
+    var blocked = tasks.filter(function (t) { return t.status === 'blocked' }).length;
+    var doneRecent = tasks.filter(function (t) { return t.status === 'completed'; }).length;
+    if (stats) {
+      stats.innerHTML =
+        '<div class="stat"><div class="n">' + primaryGoals + '</div><div class="l">主要目标</div></div>' +
+        '<div class="stat"><div class="n">' + inProg + '</div><div class="l">推进中任务</div></div>' +
+        '<div class="stat today"><div class="n">' + waitDec + '</div><div class="l">待你处理</div></div>' +
+        '<div class="stat blocked"><div class="n">' + blocked + '</div><div class="l">阻塞</div></div>' +
+        '<div class="stat"><div class="n">' + doneRecent + '</div><div class="l">已完成(册)</div></div>';
+    }
+    var h = '';
+    h += '<div>';
+    h += '<div class="cockpit-col"><h2>区域 B · 行动中心</h2>';
+    var kinds = ['need_user', 'waiting_decision', 'suggest_watch'];
+    kinds.forEach(function (kind) {
+      var list = (D.action_queue || []).filter(function (a) { return a.kind === kind; });
+      h += '<h3 style="font-size:13px;margin:10px 0 6px;color:var(--muted)">' + esc(CMD_ACT_KIND[kind] || kind) + ' <span class="cnt">' + list.length + '</span></h3>';
+      if (!list.length) h += '<p class="empty">无</p>';
+      list.forEach(function (a) {
+        h += '<div class="act-card" data-act="' + esc(a.id) + '">';
+        h += '<div class="act-kind">' + esc(cockpitBizName(a.business_id, D)) + (a.eta_minutes ? ' · 约 ' + a.eta_minutes + ' 分钟' : '') + '</div>';
+        h += '<h3>' + esc(a.title) + '</h3>';
+        h += '<div class="meta">' + esc(a.reason || '') + '</div>';
+        if (a.prepared_by) h += '<div class="meta">准备：<strong>' + esc(a.prepared_by) + '</strong>' + (a.user_action ? ' · 你可：' + esc(a.user_action) : '') + '</div>';
+        h += '<div class="acts">';
+        h += '<button type="button" class="primary" data-ccapprove="' + esc(a.id) + '">批准</button>';
+        h += '<button type="button" data-ccdefer="' + esc(a.id) + '">暂缓</button>';
+        h += '<button type="button" data-ccabandon="' + esc(a.id) + '">放弃</button>';
+        h += '</div></div>';
+      });
+    });
+    h += '</div>';
+    h += '<div class="cockpit-col"><h2>区域 E · 最近动态</h2>';
+    var evts = (D.events || []).slice().sort(function (a, b) { return (b.at || '').localeCompare(a.at || ''); }).slice(0, 10);
+    if (!evts.length) h += '<p class="empty">暂无事件</p>';
+    evts.forEach(function (e) {
+      h += '<div class="evt-li"><div class="t">' + esc((e.at || '').replace('T', ' ').slice(0, 16)) + ' · ' + esc(e.source || e.kind || '') + '</div>' + esc(e.title || '') + '</div>';
+    });
+    h += '</div></div>';
+    h += '<div>';
+    h += '<div class="cockpit-col"><h2>区域 A · 全局目标 <small>非 Bot 计数</small></h2><div class="goal-pills">';
+    (D.goals || []).forEach(function (g) {
+      h += '<span class="goal-pill">' + esc(g.title) + ' <span class="hint">(' + esc(cockpitBizName(g.business_id, D)) + ' · ' + esc(g.stage || '') + ')</span></span>';
+    });
+    h += '</div></div>';
+    h += '<div class="cockpit-col"><h2>区域 C · 业务状态</h2>';
+    (D.businesses || []).forEach(function (b) {
+      var open = !!C.bizOpen[b.id];
+      h += '<div class="biz-card' + (open ? ' open' : '') + '" data-ccbiz="' + esc(b.id) + '">';
+      h += '<div class="biz-h"><strong>' + esc(b.name) + '</strong><span class="health">' + esc(b.health || '') + '</span></div>';
+      h += '<div class="hint" style="margin-top:4px">' + esc(b.focus || b.goal || '') + ' · ' + esc(b.stage || '') + '</div>';
+      h += '<div class="biz-detail"><p><strong>阻碍</strong>：' + esc(b.blocker || '—') + '</p><p><strong>最近成果</strong>：' + esc(b.last_outcome || '—') + '</p><p><strong>下一步</strong>：' + esc(b.next_step || '—') + '</p></div>';
+      h += '</div>';
+    });
+    h += '</div>';
+    h += '<div class="cockpit-col"><h2>区域 D · 运行异常</h2>';
+    var alerts = [];
+    tasks.filter(function (t) { return t.status === 'blocked'; }).forEach(function (t) {
+      var tag = t.blocker_type === 'system' ? '系统' : '业务';
+      alerts.push('<div class="alert-li"><strong>[' + tag + ']</strong> ' + esc(t.title) + ' · ' + esc(t.owner || '') + (t.blocker_note ? ' — ' + esc(t.blocker_note) : '') + '</div>');
+    });
+    tasks.filter(function (t) { return t.status === 'waiting_user'; }).forEach(function (t) {
+      alerts.push('<div class="alert-li"><strong>待你</strong> ' + esc(t.title) + ' · ' + esc(t.owner || '') + '</div>');
+    });
+    tasks.filter(function (t) { return !t.owner; }).forEach(function (t) {
+      alerts.push('<div class="alert-li"><strong>无负责人</strong> ' + esc(t.title) + '</div>');
+    });
+    if (!alerts.length) h += '<p class="empty">无异常项</p>';
+    else h += alerts.join('');
+    h += '</div></div>';
+    host.innerHTML = h;
+  }
+  function saveCommandCenter() {
+    var C = state.commandCenter;
+    if (!C.data || C.saving) return;
+    if (!requestTokenForSave('commandcenter', '保存驾驶舱需要 GitHub 令牌。')) return;
+    C.saving = true; C.flash = null; renderCockpit();
+    fetchCommandCenterLatest().then(function (latest) {
+      C.sha = latest.sha;
+      var body = { message: '驾驶舱：更新 command-center.json', content: utf8ToB64(commandCenterText()), branch: BRANCH };
+      if (latest.sha) body.sha = latest.sha;
+      return api('PUT', repoPath + '/contents/' + CMD_PATH, body);
+    }).then(function (res) {
+      C.saving = false;
+      if (res.ok && res.json && res.json.content) {
+        C.dirty = false;
+        C.flash = { kind: 'ok', text: '已保存。' };
+        renderCockpit();
+        return;
+      }
+      C.flash = { kind: 'error', text: res.status === 409 || res.status === 422 ? '版本冲突：请重新加载后再改。' : '保存失败：' + esc(apiErrText(res)) };
+      renderCockpit();
+    }).catch(function (err) {
+      C.saving = false;
+      C.flash = { kind: 'error', text: '保存失败：' + esc(err && err.message || String(err)) };
+      renderCockpit();
+    });
+  }
+
   // ---------- Bot 协作: data/business-function-board.json ----------
   var BOT_BOARD_PATH = 'data/business-function-board.json';
   var BOT_EXEC_LABEL = { idle: '未启动', running: '执行中', blocked: '阻塞', done: '已交付' };
@@ -3534,10 +3816,11 @@
   return loadFile(BOT_BOARD_PATH).then(function (res) {
       if (gen !== B.gen) return;
       try {
-        B.data = JSON.parse(res.text);
+        B.data = parseRepoJson(res.text, '协作看板');
         B.status = 'ok'; B.error = ''; B.dirty = false;
       } catch (e) {
-        B.status = 'error'; B.error = 'JSON 解析失败'; B.data = null;
+        if (e && e.status === 404) { B.status = 'missing'; B.data = null; B.error = ''; }
+        else { B.status = 'error'; B.error = (e && e.message) || 'JSON 解析失败'; B.data = null; }
       }
       renderBotCollab();
     }, function (e) {
@@ -3646,8 +3929,11 @@
     renderBotWork();
     return loadFile(WORK_BOARD_PATH).then(function (res) {
       if (gen !== W.gen) return;
-      try { W.data = JSON.parse(res.text); W.status = 'ok'; W.error = ''; W.dirty = false; }
-      catch (e) { W.status = 'error'; W.error = 'JSON 解析失败'; W.data = null; }
+      try { W.data = parseRepoJson(res.text, '工作技能看板'); W.status = 'ok'; W.error = ''; W.dirty = false; }
+      catch (e) {
+        if (e && e.status === 404) { W.status = 'missing'; W.data = null; W.error = ''; }
+        else { W.status = 'error'; W.error = (e && e.message) || 'JSON 解析失败'; W.data = null; }
+      }
       renderBotWork();
     }, function (e) {
       if (gen !== W.gen) return;
@@ -3739,8 +4025,11 @@
     renderBotCreative();
     return loadFile(GROW_BOARD_PATH).then(function (res) {
       if (gen !== G.gen) return;
-      try { G.data = JSON.parse(res.text); G.status = 'ok'; G.error = ''; G.dirty = false; }
-      catch (e) { G.status = 'error'; G.error = 'JSON 解析失败'; G.data = null; }
+      try { G.data = parseRepoJson(res.text, '内容创意看板'); G.status = 'ok'; G.error = ''; G.dirty = false; }
+      catch (e) {
+        if (e && e.status === 404) { G.status = 'missing'; G.data = null; G.error = ''; }
+        else { G.status = 'error'; G.error = (e && e.message) || 'JSON 解析失败'; G.data = null; }
+      }
       renderBotCreative();
     }, function (e) {
       if (gen !== G.gen) return;
@@ -5088,7 +5377,10 @@
     renderLiveWatch();
     return loadFile(LIVE_WATCH_PATH).then(function (res) {
       if (gen !== L.gen) return;
-      try { L.data = JSON.parse(res.text); } catch (e) { L.status = 'error'; L.error = 'JSON 解析失败'; renderLiveWatch(); return; }
+      try { L.data = parseRepoJson(res.text, '盯盘'); } catch (e) {
+        if (e && e.status === 404) { L.status = 'missing'; L.error = ''; L.data = null; renderLiveWatch(); return; }
+        L.status = 'error'; L.error = (e && e.message) || 'JSON 解析失败'; renderLiveWatch(); return;
+      }
       L.status = 'ok'; L.error = ''; renderLiveWatch();
     }, function (e) {
       if (gen !== L.gen) return;
@@ -5130,8 +5422,9 @@
       history.replaceState(null, '', '#detail');
     }
     var focusView = FOCUS_VIEWS[parts[0]];
-    var tab = focusView ? 'focus' : (['board', 'calendar', 'detail', 'memo', 'docs', 'resources', 'bots', 'livewatch'].indexOf(parts[0]) >= 0 ? parts[0] : 'board');
+    var tab = focusView ? 'focus' : (['cockpit', 'board', 'calendar', 'detail', 'memo', 'docs', 'resources', 'bots', 'livewatch'].indexOf(parts[0]) >= 0 ? parts[0] : 'cockpit');
     setTab(tab);
+    if (tab === 'cockpit') { renderCockpit(); loadCommandCenter(); }
     if (tab === 'board') renderBoardTab();
     if (tab === 'calendar') selectDay(parseYmd(parts[1]) ? parts[1] : (state.selected || todayStr()), true);
     if (tab === 'focus') openFocus(focusView, prevTab, state.focusView);
@@ -5179,6 +5472,7 @@
     if (!state.botBoard.saving) { state.botBoard.status = ''; state.botBoard.data = null; state.botBoard.gen++; state.botBoard.flash = null; }
     if (!state.workBoard.saving) { state.workBoard.status = ''; state.workBoard.data = null; state.workBoard.gen++; state.workBoard.flash = null; }
     if (!state.growBoard.saving) { state.growBoard.status = ''; state.growBoard.data = null; state.growBoard.gen++; state.growBoard.flash = null; }
+    if (!state.commandCenter.saving) { state.commandCenter.status = ''; state.commandCenter.data = null; state.commandCenter.gen++; state.commandCenter.flash = null; }
     if (!(state.memo.edit && state.memo.edit.saving)) { state.memo.edit = null; state.memo.flash = null; state.memo.status = ''; }
     if (state.ann && !state.ann.saving) { state.ann.status = ''; state.ann.ops = []; state.ann.flash = null; state.ann.error = ''; state.ann.activeId = ''; state.ann.armDelete = ''; }
     state.insights.status = ''; state.insights.parsed = null;
@@ -5392,6 +5686,36 @@
     else if (act === 'cancel') { try { localStorage.removeItem(DRAFT_KEY + 'bots'); } catch (x) {} B.edit = null; renderBots(); }
   });
   $('bots').addEventListener('toggle', function (ev) { var d = ev.target; if (d.classList && (d.classList.contains('bot') || d.classList.contains('bot-edges'))) state.bots.closed[d.getAttribute('data-name')] = !d.open; }, true);
+  $('tab-cockpit').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-ccact],[data-ccapprove],[data-ccdefer],[data-ccabandon],[data-ccbiz]');
+    if (!b) return;
+    var C = state.commandCenter;
+    if (b.hasAttribute('data-ccact')) {
+      var act = b.getAttribute('data-ccact');
+      if (act === 'save') saveCommandCenter();
+      else if (act === 'reload') { C.status = ''; C.dirty = false; loadCommandCenter(true); }
+      return;
+    }
+    if (!C.data) return;
+    var actId = b.getAttribute('data-ccapprove') || b.getAttribute('data-ccdefer') || b.getAttribute('data-ccabandon');
+    if (actId) {
+      if (b.hasAttribute('data-ccapprove')) cockpitActApprove(C.data, actId);
+      else if (b.hasAttribute('data-ccdefer')) cockpitActDefer(C.data, actId);
+      else cockpitActAbandon(C.data, actId);
+      touchCmdDirty();
+      renderCockpit();
+      return;
+    }
+    var bid = b.getAttribute('data-ccbiz');
+    if (bid) { C.bizOpen[bid] = !C.bizOpen[bid]; renderCockpit(); }
+  });
+  $('cockpitDirectiveSave').addEventListener('click', function () {
+    var C = state.commandCenter;
+    if (!C.data || !C.data.meta) return;
+    C.data.meta.user_directive = ($('cockpitDirective') && $('cockpitDirective').value || '').trim();
+    touchCmdDirty();
+    renderCockpit();
+  });
   $('tab-bots').addEventListener('click', function (ev) {
     var pane = ev.target.closest('[data-botpane]');
     if (pane) { ev.preventDefault(); openBotsPane(pane.getAttribute('data-botpane')); return; }
