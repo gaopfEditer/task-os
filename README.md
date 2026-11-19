@@ -191,9 +191,14 @@ monthly/
 
 `info/resources.md` 是收藏的资源列表（A. 项目库 / B. 运营 / C. 平台与工具 / D. 博主名单，每个小类一张 `名称 | 链接 | 简述 | 标签 | 收藏日期 | 备注` 表），由资讯创作官维护，其他 bot 和网页都不要改它。看板的「资源」页（`#resources`）运行时从 `main` 读取这个文件，只读展示：按分组折叠、可搜索（名称 / 简述 / 标签 / 备注 / 域名）、点标签筛选，点名称在新标签页打开（只放行 http/https 链接）。新条目合并到 `main` 后点「刷新」即可看到，不用改页面；文件还没同步时显示「资源文件还没同步上来」。
 
-## Bot（bots.md + 职能协作）
+## Bot（bots.md + 协作 + 工作技能 + 内容创意）
 
-根目录的 `bots.md` 记录各 bot 分工（`#bots` 子页「分工说明」）。**Bot 协作**（`#bots/collab`）读 `data/business-function-board.json`：10 个业务角色、职能条目、阶段重点，以及每条职能的 `exec_state` / `exec_note`（供 base· OpenMausBot 回写执行状态）。保存需 GitHub 令牌。与 OpenMausBot 镜像同步：`node scripts/sync-business-board.mjs to-taskos|to-openmausbot`。
+- **分工说明**（`#bots`）：`bots.md`
+- **Bot 个人聚焦**（`#bots/collab`）：`data/business-function-board.json`（base· 个人事业 10 角色）
+- **Bot 工作技能**（`#bots/work`）：`data/work-skills-board.json`（work· 技术研究六角色循环）
+- **Bot 内容创意**（`#bots/creative`）：`data/grow-operations-board.json`（grow· 运营七角色 + 业务配置 + 机会池）
+
+两层 JSON 均支持改阶段/优先级与 `exec_state` / `exec_note`，保存需 GitHub 令牌。个人事业同步：`scripts/sync-business-board.mjs`；工作技能重建/扩展：`scripts/build-work-skills-board.mjs`。
 
 ## 看板
 
