@@ -1,8 +1,19 @@
 {
   "version": 1,
-  "updated_at": "2026-11-20T16:00:00+08:00",
-  "last_slot": "2026-11-20T16:00+08:00",
+  "updated_at": "2026-11-20T20:00:00+08:00",
+  "last_slot": "2026-11-20T20:00+08:00",
   "items": [
+    {
+      "id": "vpn:20:2026-11-20",
+      "category": "vpn",
+      "ts": "2026-11-20T20:00:00+08:00",
+      "title": "VPN Guard · OK · clash",
+      "body": "健康: 正常\n出口归属: clash",
+      "meta": {
+        "ok": true,
+        "owner": "clash"
+      }
+    },
     {
       "id": "pub:run_end:?:body:b517dd435efc:2026-11-20T15:25:54+08:00",
       "category": "publish",
