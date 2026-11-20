@@ -2,7 +2,7 @@
   'use strict';
 
   var WATCH_KEY = 'taskos.desktop.watchlist';
-  var DEFAULT_WATCH = 'BTC,ETH,SOL';
+  var DEFAULT_WATCH = 'BTC,ETH,QQQ,XAU';
   var POLL_MS = 60 * 1000;
   var Q = window.TaskOsQuotes;
   if (!Q) return;
@@ -14,7 +14,11 @@
   function loadWatchlist() {
     try {
       var s = localStorage.getItem(WATCH_KEY);
-      if (s != null && String(s).trim()) return String(s).trim();
+      if (s != null && String(s).trim()) {
+        s = String(s).trim();
+        if (s === 'BTC,ETH,SOL' || s === 'BTC,ETH,QQQ,SOL') return DEFAULT_WATCH;
+        return s;
+      }
     } catch (e) {}
     return DEFAULT_WATCH;
   }

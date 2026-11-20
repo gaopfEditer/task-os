@@ -461,3 +461,106 @@
 - 错误场景清单还没落盘：待补充
 - 2026-10-23 只有「英语搞一搞」，没有新材料
 - 专属目录：待补充
+
+## 总调度（OpenMausBot）
+
+### 一句话职责
+
+Task OS 系统级协调中枢：读驾驶舱与三看板 JSON，分派 work· / grow· 职能 Bot，维护 `action_queue`，不重复专业研究。
+
+### 负责项目 / 目录
+
+- `D:\frontend\main\1.operations\task-os\data\command-center.json`
+- `data/work-skills-board.json`、`data/grow-operations-board.json`
+- 同步脚本 `scripts/sync-openmausbot-bindings.mjs`
+- 说明 `docs/openmausbot-dispatcher-sync-2026-11-20.md`、`docs/command-center-design.md`
+
+### 主要产出
+
+- 调度决策记录、待你拍板项（`action_queue`）
+- OpenMausBot `coordinate` 分派
+- `meta.openmausbot_bindings` 与 duty `agent` 字段同步
+
+### 所属领域
+
+- 成长
+
+### 上下游
+
+- 上游：我（资金/发布/长期目标拍板）、各职能 Bot 结构化交付
+- 下游：work· 六角色、grow· 七角色、源雷达、交易观察员等
+
+### 边界（不做什么）
+
+- 不重做情报/研究/工程交付
+- 不盘手、不代投、不擅自外发
+
+### 状态 / 待补充
+
+- 2026-11-20：OpenMausBot bot_id `afe2ac3d-ba69-4567-aad8-5d8eb798617b`；驾驶舱 task_003 绑定验收进行中
+- grow· 独立 bot 尚余 6 个待创建（见同步说明）
+
+## OpenMausBot · 工作技能链（#bots/work）
+
+### 一句话职责
+
+六角色流水线：收集器→研究员→分析师→工程顾问→评审者→教练；与 Task OS `work-skills-board.json` 同名。
+
+### 负责项目 / 目录
+
+- 看板 `#bots/work`、本页职能与 `data/work-skills-board.json`
+
+### 主要产出
+
+- 各 duty 的 `agent` / `exec_state` 回写
+- 技术问题分派、选型、PRD 闸门、工程交付、评审、原理沉淀
+
+### 所属领域
+
+- 软件开发和海外需求
+- 成长
+
+### 上下游
+
+- 上游：总调度、我
+- 下游：编码部署（工程）、产品设计（分析）、技逆向（研究）
+
+### 边界（不做什么）
+
+- 个人聚焦（#bots/collab）不在此链
+
+### 状态 / 待补充
+
+- 2026-11-20：收集器/评审者/教练为新建 OpenMausBot；研究员=技逆向、分析师=产品设计、工程=编码部署（见 `openmausbot_bindings`）
+
+## OpenMausBot · 内容创意链（#bots/creative）
+
+### 一句话职责
+
+七角色 grow· 流水线：情报→用户→策略→策划→创作→渠道→数据；与 `grow-operations-board.json` 对齐。
+
+### 负责项目 / 目录
+
+- 看板 `#bots/creative`、`D:\frontend\main\1.operations\MediaEngage`（实操发布仍以我确认为准）
+
+### 主要产出
+
+- 机会卡、Brief、成稿与发布记录、归因摘要
+
+### 所属领域
+
+- Web3 运营
+- 软件开发和海外需求
+
+### 上下游
+
+- 上游：源雷达（情报）、总调度（策略 proxy）
+- 下游：我（发布拍板）、资讯创作官（Grok 侧成稿可参考）
+
+### 边界（不做什么）
+
+- 本次未建「个人聚焦」bot；grow· 部分角色仍为 proxy/pending
+
+### 状态 / 待补充
+
+- 2026-11-20：用户研究/运营策略/内容策划/内容创作已建 OpenMausBot；市场情报=源雷达；渠道/数据优化仍 proxy，说「建 grow 渠道和数据」可再建

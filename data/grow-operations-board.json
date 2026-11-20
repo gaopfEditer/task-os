@@ -4,7 +4,7 @@
     "system": "发现→理解用户→策略→策划→创作发布→分析优化",
     "principle": "通用方法+业务配置切换；业务数据隔离；每事项一个主负责人；重大方向由猫头鹰拍板",
     "tab_label": "内容创意",
-    "openmausbot_mirror": "/Users/maotouying/.openmausbot/workspaces/81414eac-984c-40f0-a464-bb33d306b30a/grow-operations-board/grow-operations-board.json",
+    "openmausbot_mirror": "C:\\Users\\eason\\.openmausbot\\workspaces\\9e834061-15eb-43eb-b9f2-911161e85c22\\grow-operations-board\\grow-operations-board.json",
     "role_bots": {
       "intel": "grow·市场情报",
       "user": "grow·用户研究",
@@ -24,7 +24,101 @@
       "monetization",
       "risk",
       "stage"
-    ]
+    ],
+    "openmausbot_bindings": {
+      "dispatch·总调度": {
+        "bot_id": "afe2ac3d-ba69-4567-aad8-5d8eb798617b",
+        "openmausbot_name": "总调度",
+        "role_key": "dispatcher",
+        "link": "active"
+      },
+      "work·工作问题收集器": {
+        "bot_id": "e55d7b04-484d-4b2f-809e-26acb7f09ef7",
+        "openmausbot_name": "work·工作问题收集器",
+        "role_key": "collector",
+        "link": "active"
+      },
+      "work·技术研究员": {
+        "bot_id": "eabac058-364b-475a-bdcf-fff9a5c2e0d2",
+        "openmausbot_name": "技逆向",
+        "role_key": "researcher",
+        "link": "active",
+        "note": "Task OS 职能名 work·技术研究员"
+      },
+      "work·项目分析师": {
+        "bot_id": "1ad0da16-7a04-4e3d-b109-94a22ee7c9bc",
+        "openmausbot_name": "产品设计",
+        "role_key": "analyst",
+        "link": "active",
+        "note": "Task OS 职能名 work·项目分析师"
+      },
+      "work·工程实践顾问": {
+        "bot_id": "dc4a4ecb-a50e-4163-814b-f24e2d01128d",
+        "openmausbot_name": "编码部署",
+        "role_key": "engineer",
+        "link": "active",
+        "note": "Task OS 职能名 work·工程实践顾问"
+      },
+      "work·技术评审者": {
+        "bot_id": "83eee851-4e32-4b3b-a6b8-9b1448e24e9a",
+        "openmausbot_name": "work·技术评审者",
+        "role_key": "reviewer",
+        "link": "active"
+      },
+      "work·技术学习教练": {
+        "bot_id": "dc3694b6-46e5-4e22-8e63-21cbc16c7f9f",
+        "openmausbot_name": "work·技术学习教练",
+        "role_key": "coach",
+        "link": "active"
+      },
+      "grow·市场情报": {
+        "bot_id": "49aa248d-4b1a-4b08-9366-3beb62600fa9",
+        "openmausbot_name": "源雷达",
+        "role_key": "intel",
+        "link": "active",
+        "note": "暂由源雷达兼任，后续可拆独立 grow·市场情报"
+      },
+      "grow·用户研究": {
+        "bot_id": "60364a5b-5234-4016-8409-d7684bff942e",
+        "openmausbot_name": "grow·用户研究",
+        "role_key": "user",
+        "link": "active"
+      },
+      "grow·运营策略": {
+        "bot_id": "520cc044-7cd8-4808-988e-1b9ccdd075fd",
+        "openmausbot_name": "grow·运营策略",
+        "role_key": "strategy",
+        "link": "active",
+        "note": "重大方向拍板仍归我"
+      },
+      "grow·内容策划": {
+        "bot_id": "2ddcba47-01d6-4aca-8359-3941a064b74e",
+        "openmausbot_name": "grow·内容策划",
+        "role_key": "planner",
+        "link": "active"
+      },
+      "grow·内容创作": {
+        "bot_id": "ca3bf900-9da0-4654-8eb5-51fef593dffd",
+        "openmausbot_name": "grow·内容创作",
+        "role_key": "creator",
+        "link": "active"
+      },
+      "grow·渠道社区": {
+        "bot_id": "49aa248d-4b1a-4b08-9366-3beb62600fa9",
+        "openmausbot_name": "源雷达",
+        "role_key": "channel",
+        "link": "proxy",
+        "note": "发布/互动仍须我确认；待独立 grow·渠道社区"
+      },
+      "grow·数据优化": {
+        "bot_id": "f3b28263-e68d-4a85-ad32-dadaf8b23196",
+        "openmausbot_name": "交易观察员",
+        "role_key": "analytics",
+        "link": "proxy",
+        "note": "币圈度量为主；待 grow·数据优化"
+      }
+    },
+    "synced_at": "2026-11-20T09:30:00+08:00"
   },
   "roles": [
     {
@@ -32,49 +126,91 @@
       "name": "市场情报研究员",
       "desc": "发现市场、热点、竞品与可运营机会",
       "goal": "发现市场、热点、竞品与可运营机会",
-      "deliverables": "机会卡片、热点分析、话题清单"
+      "deliverables": "机会卡片、热点分析、话题清单",
+      "openmausbot": {
+        "bot_id": "49aa248d-4b1a-4b08-9366-3beb62600fa9",
+        "name": "源雷达",
+        "link": "active",
+        "note": "暂由源雷达兼任，后续可拆独立 grow·市场情报"
+      }
     },
     {
       "id": "user",
       "name": "用户研究员",
       "desc": "理解用户是谁、痛点与决策行为",
       "goal": "理解用户是谁、痛点与决策行为",
-      "deliverables": "用户画像、痛点库、表达素材"
+      "deliverables": "用户画像、痛点库、表达素材",
+      "openmausbot": {
+        "bot_id": "60364a5b-5234-4016-8409-d7684bff942e",
+        "name": "grow·用户研究",
+        "link": "active",
+        "note": ""
+      }
     },
     {
       "id": "strategy",
       "name": "运营策略师",
       "desc": "把机会转成可执行运营计划",
       "goal": "把机会转成可执行运营计划",
-      "deliverables": "运营方案、增长路径、任务清单"
+      "deliverables": "运营方案、增长路径、任务清单",
+      "openmausbot": {
+        "bot_id": "520cc044-7cd8-4808-988e-1b9ccdd075fd",
+        "name": "grow·运营策略",
+        "link": "active",
+        "note": "重大方向拍板仍归我"
+      }
     },
     {
       "id": "planner",
       "name": "内容策划师",
       "desc": "选题、栏目、Brief",
       "goal": "选题、栏目、Brief",
-      "deliverables": "选题库、内容日历、创作说明"
+      "deliverables": "选题库、内容日历、创作说明",
+      "openmausbot": {
+        "bot_id": "2ddcba47-01d6-4aca-8359-3941a064b74e",
+        "name": "grow·内容策划",
+        "link": "active",
+        "note": ""
+      }
     },
     {
       "id": "creator",
       "name": "内容创作师",
       "desc": "可发布内容与多平台适配",
       "goal": "可发布内容与多平台适配",
-      "deliverables": "文稿、脚本、素材包"
+      "deliverables": "文稿、脚本、素材包",
+      "openmausbot": {
+        "bot_id": "ca3bf900-9da0-4654-8eb5-51fef593dffd",
+        "name": "grow·内容创作",
+        "link": "active",
+        "note": ""
+      }
     },
     {
       "id": "channel",
       "name": "渠道与社区运营",
       "desc": "发布、互动、社区与渠道增长",
       "goal": "发布、互动、社区与渠道增长",
-      "deliverables": "发布记录、活动方案、互动索引"
+      "deliverables": "发布记录、活动方案、互动索引",
+      "openmausbot": {
+        "bot_id": "49aa248d-4b1a-4b08-9366-3beb62600fa9",
+        "name": "源雷达",
+        "link": "proxy",
+        "note": "发布/互动仍须我确认；待独立 grow·渠道社区"
+      }
     },
     {
       "id": "analytics",
       "name": "数据分析与运营优化师",
       "desc": "全链路效果与下一轮实验",
       "goal": "全链路效果与下一轮实验",
-      "deliverables": "看板摘要、归因、优化建议"
+      "deliverables": "看板摘要、归因、优化建议",
+      "openmausbot": {
+        "bot_id": "f3b28263-e68d-4a85-ad32-dadaf8b23196",
+        "name": "交易观察员",
+        "link": "proxy",
+        "note": "币圈度量为主；待 grow·数据优化"
+      }
     }
   ],
   "businesses": [
@@ -115,7 +251,7 @@
       "description": "Google Trends、行业事件、突发新闻",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "grow·市场情报",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -130,7 +266,7 @@
       "description": "Reddit/X/Discord/TG 可运营话题",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "grow·市场情报",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -145,7 +281,7 @@
       "description": "竞品动态、变现方式对比",
       "status": "进行中",
       "priority": "普通",
-      "agent": "",
+      "agent": "grow·市场情报",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -160,7 +296,7 @@
       "description": "按业务配置拆分画像，禁止跨业务混用",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "grow·用户研究",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -175,7 +311,7 @@
       "description": "原话摘录、反复出现的问题",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "grow·用户研究",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -190,7 +326,7 @@
       "description": "搜索意图、参与/付费触发",
       "status": "待尝试",
       "priority": "普通",
-      "agent": "",
+      "agent": "grow·用户研究",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -205,7 +341,7 @@
       "description": "读取情报+用户研究，输出阶段指标",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "grow·运营策略",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -220,7 +356,7 @@
       "description": "渠道、活动、转化路径",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "grow·运营策略",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -235,7 +371,7 @@
       "description": "方案须可拆成具体任务",
       "status": "待尝试",
       "priority": "普通",
-      "agent": "",
+      "agent": "grow·运营策略",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -250,7 +386,7 @@
       "description": "价值/时效/竞争评估",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "grow·内容策划",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -265,7 +401,7 @@
       "description": "长期栏目+系列化",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "grow·内容策划",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -280,7 +416,7 @@
       "description": "关联业务目标与渠道",
       "status": "进行中",
       "priority": "普通",
-      "agent": "",
+      "agent": "grow·内容策划",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -295,7 +431,7 @@
       "description": "按 Brief 与平台规范",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "grow·内容创作",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -310,7 +446,7 @@
       "description": "事实可核验，禁止洗稿多平台伪原创",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "grow·内容创作",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -325,7 +461,7 @@
       "description": "脚本+配图说明",
       "status": "待尝试",
       "priority": "普通",
-      "agent": "",
+      "agent": "grow·内容创作",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -340,7 +476,7 @@
       "description": "频率、时段、渠道适配",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "grow·渠道社区",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -355,7 +491,7 @@
       "description": "反馈回流用户研究/数据",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "grow·渠道社区",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -370,7 +506,7 @@
       "description": "遵守平台自动化规则",
       "status": "待尝试",
       "priority": "普通",
-      "agent": "",
+      "agent": "grow·渠道社区",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -385,7 +521,7 @@
       "description": "曝光→互动→转化分段",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "grow·数据优化",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -400,7 +536,7 @@
       "description": "必须回答「下一轮改什么」",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "grow·数据优化",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -415,7 +551,7 @@
       "description": "高阅读低转化等内容诊断",
       "status": "待尝试",
       "priority": "普通",
-      "agent": "",
+      "agent": "grow·数据优化",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",

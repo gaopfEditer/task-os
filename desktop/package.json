@@ -6,7 +6,7 @@
   "scripts": {
     "sync-board": "node scripts/sync-board.mjs",
     "build:frontend": "node scripts/sync-board.mjs",
-    "serve:dist": "serve dist -l 1420 --no-clipboard",
+    "serve:dist": "node scripts/serve-with-market-proxy.mjs",
     "dev:web": "npm run build:frontend && npm run serve:dist",
     "tauri": "tauri",
     "tauri:dev": "npm run build:frontend && tauri dev",

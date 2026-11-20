@@ -27,6 +27,16 @@ fn dev_static_server_available() -> bool {
     TcpStream::connect_timeout(&addr, Duration::from_millis(250)).is_ok()
 }
 
+fn dev_static_server_available_with_retry() -> bool {
+    for _ in 0..40 {
+        if dev_static_server_available() {
+            return true;
+        }
+        std::thread::sleep(Duration::from_millis(100));
+    }
+    false
+}
+
 fn bundled_asset_url(path: &str) -> Result<Url, String> {
     let path = path.trim_start_matches('/');
     Url::parse(&format!("http://tauri.localhost/{path}")).map_err(|e| e.to_string())
@@ -264,6 +274,11 @@ fn focus_price_bubble(app: tauri::AppHandle) -> Result<(), String> {
     let win = app
         .get_webview_window("price-bubble")
         .ok_or_else(|| "price bubble not found".to_string())?;
+    if dev_static_server_available() {
+        if let Ok(url) = bubble_dev_page_url() {
+            let _ = win.navigate(url);
+        }
+    }
     win.show().map_err(|e| e.to_string())?;
     win.unminimize().map_err(|e| e.to_string())?;
     win.set_focus().map_err(|e| e.to_string())?;
@@ -292,12 +307,15 @@ fn show_price_alert(app: tauri::AppHandle, title: String, body: String) -> Resul
         .map_err(|e| e.to_string())
 }
 
+fn bubble_dev_page_url() -> Result<Url, String> {
+    format!("http://127.0.0.1:{DEV_STATIC_PORT}/price-bubble.html")
+        .parse::<Url>()
+        .map_err(|e| e.to_string())
+}
+
 fn bubble_url() -> Result<WebviewUrl, String> {
-    if dev_static_server_available() {
-        format!("http://127.0.0.1:{DEV_STATIC_PORT}/price-bubble.html")
-            .parse()
-            .map(WebviewUrl::External)
-            .map_err(|e| e.to_string())
+    if dev_static_server_available_with_retry() {
+        bubble_dev_page_url().map(WebviewUrl::External)
     } else {
         Ok(WebviewUrl::App("price-bubble.html".into()))
     }
@@ -405,24 +423,90 @@ struct PriorityHttpResponse {
     body: String,
 }
 
-fn perform_priority_get(url: reqwest::Url, secret: String) -> Result<PriorityHttpResponse, String> {
-    let client = reqwest::blocking::Client::builder()
-        .timeout(std::time::Duration::from_secs(12))
-        .build()
-        .map_err(|err| err.to_string())?;
-    let response = client
-        .get(url)
-        .header("Authorization", format!("Bearer {secret}"))
-        .header("X-Relay-Secret", secret)
-        .header("Accept", "application/json")
-        .send()
-        .map_err(|err| format!("priority HTTP {err}"))?;
-    let status = response.status().as_u16();
-    let body = response.text().map_err(|err| err.to_string())?;
-    if body.len() > 1_048_576 {
-        return Err("priority response too large".into());
+/// Clash 等本地 HTTP 代理端口可能轮换，按序尝试。
+const LOCAL_HTTP_PROXY_PORTS: [u16; 4] = [7890, 7891, 7892, 7893];
+
+#[derive(Clone, Copy)]
+enum HttpClientProxyMode {
+    /// 尊重 HTTP_PROXY / 系统代理（与浏览器一致）。
+    System,
+    /// 不经代理直连。
+    Direct,
+    /// 127.0.0.1 上显式端口。
+    Local(u16),
+}
+
+fn build_blocking_http_client(mode: HttpClientProxyMode) -> Result<reqwest::blocking::Client, String> {
+    let mut builder = reqwest::blocking::Client::builder().timeout(Duration::from_secs(12));
+    match mode {
+        HttpClientProxyMode::System => {}
+        HttpClientProxyMode::Direct => {
+            builder = builder.no_proxy();
+        }
+        HttpClientProxyMode::Local(port) => {
+            let proxy = reqwest::Proxy::all(format!("http://127.0.0.1:{port}"))
+                .map_err(|err| err.to_string())?;
+            builder = builder.proxy(proxy);
+        }
     }
-    Ok(PriorityHttpResponse { status, body })
+    builder.build().map_err(|err| err.to_string())
+}
+
+fn http_status_retry_via_local_proxy(status: u16) -> bool {
+    matches!(status, 403 | 451 | 502 | 503 | 520 | 521 | 522 | 523 | 524)
+}
+
+fn blocking_get_with_local_proxy_fallback<F>(
+    url: reqwest::Url,
+    err_label: &str,
+    apply: F,
+) -> Result<PriorityHttpResponse, String>
+where
+    F: Fn(reqwest::blocking::Client, reqwest::Url) -> Result<reqwest::blocking::Response, reqwest::Error>,
+{
+    let mut plan: Vec<HttpClientProxyMode> = Vec::with_capacity(2 + LOCAL_HTTP_PROXY_PORTS.len());
+    plan.push(HttpClientProxyMode::System);
+    plan.push(HttpClientProxyMode::Direct);
+    plan.extend(
+        LOCAL_HTTP_PROXY_PORTS
+            .iter()
+            .copied()
+            .map(HttpClientProxyMode::Local),
+    );
+
+    let mut last_err = String::new();
+    for (idx, proxy_mode) in plan.iter().copied().enumerate() {
+        let client = build_blocking_http_client(proxy_mode)?;
+        match apply(client, url.clone()) {
+            Ok(response) => {
+                let status = response.status().as_u16();
+                let body = response.text().map_err(|err| err.to_string())?;
+                if body.len() > 1_048_576 {
+                    return Err(format!("{err_label} response too large"));
+                }
+                if idx < 2 && http_status_retry_via_local_proxy(status) {
+                    last_err = format!("{err_label} HTTP {status}");
+                    continue;
+                }
+                return Ok(PriorityHttpResponse { status, body });
+            }
+            Err(err) => {
+                last_err = format!("{err_label} {err}");
+            }
+        }
+    }
+    Err(last_err)
+}
+
+fn perform_priority_get(url: reqwest::Url, secret: String) -> Result<PriorityHttpResponse, String> {
+    blocking_get_with_local_proxy_fallback(url, "priority", |client, url| {
+        client
+            .get(url)
+            .header("Authorization", format!("Bearer {secret}"))
+            .header("X-Relay-Secret", secret.as_str())
+            .header("Accept", "application/json")
+            .send()
+    })
 }
 
 #[tauri::command]
@@ -481,6 +565,51 @@ fn perform_oi_report_queue_get(url: reqwest::Url) -> Result<PriorityHttpResponse
 async fn oi_report_queue_get(url: String) -> Result<PriorityHttpResponse, String> {
     let parsed = validate_oi_report_queue_url(&url)?;
     tauri::async_runtime::spawn_blocking(move || perform_oi_report_queue_get(parsed))
+        .await
+        .map_err(|err| err.to_string())?
+}
+
+fn market_host_allowed(host: &str) -> bool {
+    matches!(
+        host,
+        "fapi.binance.com"
+            | "api.binance.com"
+            | "data-api.binance.vision"
+            | "api.gateio.ws"
+            | "api.coingecko.com"
+            | "push2.eastmoney.com"
+    )
+}
+
+fn validate_market_get_url(raw: &str) -> Result<reqwest::Url, String> {
+    let url = reqwest::Url::parse(raw.trim()).map_err(|_| "invalid market url".to_string())?;
+    if url.scheme() != "https" {
+        return Err("invalid market url".into());
+    }
+    if !url.username().is_empty() || url.password().is_some() {
+        return Err("invalid market url".into());
+    }
+    let host = url.host_str().unwrap_or("");
+    if !market_host_allowed(host) {
+        return Err("invalid market url".into());
+    }
+    Ok(url)
+}
+
+fn perform_market_get(url: reqwest::Url) -> Result<PriorityHttpResponse, String> {
+    blocking_get_with_local_proxy_fallback(url, "market", |client, url| {
+        client
+            .get(url)
+            .header("Accept", "application/json")
+            .header("User-Agent", "task-os-desktop")
+            .send()
+    })
+}
+
+#[tauri::command]
+async fn market_http_get(url: String) -> Result<PriorityHttpResponse, String> {
+    let parsed = validate_market_get_url(&url)?;
+    tauri::async_runtime::spawn_blocking(move || perform_market_get(parsed))
         .await
         .map_err(|err| err.to_string())?
 }
@@ -578,7 +707,8 @@ pub fn run() {
             show_price_alert,
             set_price_bubble_layout,
             priority_http_get,
-            oi_report_queue_get
+            oi_report_queue_get,
+            market_http_get
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -604,6 +734,23 @@ mod tests {
     #[test]
     fn falls_back_when_window_cannot_fit() {
         assert_eq!(clamp_point(0, 0, 300, 80, 0, 0, 200, 200), None);
+    }
+
+    #[test]
+    fn local_proxy_ports_cover_clash_style_range() {
+        assert_eq!(super::LOCAL_HTTP_PROXY_PORTS, [7890, 7891, 7892, 7893]);
+        assert!(super::http_status_retry_via_local_proxy(451));
+        assert!(!super::http_status_retry_via_local_proxy(200));
+        assert!(!super::http_status_retry_via_local_proxy(404));
+    }
+
+    #[test]
+    fn market_gate_xau_url_is_whitelisted() {
+        let url = super::validate_market_get_url(
+            "https://api.gateio.ws/api/v4/futures/usdt/tickers?contract=XAU_USDT",
+        )
+        .unwrap();
+        assert_eq!(url.host_str(), Some("api.gateio.ws"));
     }
 
     #[test]
@@ -634,7 +781,8 @@ mod tests {
         .is_ok());
         assert!(super::validate_oi_report_queue_url(
             "http://127.0.0.1:8765/api/report-queue?kind=st_pop_short&symbols=BTCUSDT,ETHUSDT"
-        ));
+        )
+        .is_ok());
         assert!(super::validate_oi_report_queue_url(
             "http://127.0.0.1:8765/api/report-queue?kind=st_vol_wick&symbols=BTCUSDT,ETHUSDT"
         )

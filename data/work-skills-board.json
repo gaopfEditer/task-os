@@ -3,7 +3,7 @@
   "meta": {
     "system": "收集器→研究员→分析师→工程顾问→评审者→成长教练→反哺",
     "principle": "每事项一个主负责人；简单 Bug 直交工程顾问；重大选型才走全链",
-    "openmausbot_mirror": "/Users/maotouying/.openmausbot/workspaces/81414eac-984c-40f0-a464-bb33d306b30a/work-skills-board/work-skills-board.json",
+    "openmausbot_mirror": "C:\\Users\\eason\\.openmausbot\\workspaces\\9e834061-15eb-43eb-b9f2-911161e85c22\\work-skills-board\\work-skills-board.json",
     "role_bots": {
       "collector": "work·工作问题收集器",
       "researcher": "work·技术研究员",
@@ -61,7 +61,101 @@
         "owner": "collector",
         "helpers": []
       }
-    ]
+    ],
+    "openmausbot_bindings": {
+      "dispatch·总调度": {
+        "bot_id": "afe2ac3d-ba69-4567-aad8-5d8eb798617b",
+        "openmausbot_name": "总调度",
+        "role_key": "dispatcher",
+        "link": "active"
+      },
+      "work·工作问题收集器": {
+        "bot_id": "e55d7b04-484d-4b2f-809e-26acb7f09ef7",
+        "openmausbot_name": "work·工作问题收集器",
+        "role_key": "collector",
+        "link": "active"
+      },
+      "work·技术研究员": {
+        "bot_id": "eabac058-364b-475a-bdcf-fff9a5c2e0d2",
+        "openmausbot_name": "技逆向",
+        "role_key": "researcher",
+        "link": "active",
+        "note": "Task OS 职能名 work·技术研究员"
+      },
+      "work·项目分析师": {
+        "bot_id": "1ad0da16-7a04-4e3d-b109-94a22ee7c9bc",
+        "openmausbot_name": "产品设计",
+        "role_key": "analyst",
+        "link": "active",
+        "note": "Task OS 职能名 work·项目分析师"
+      },
+      "work·工程实践顾问": {
+        "bot_id": "dc4a4ecb-a50e-4163-814b-f24e2d01128d",
+        "openmausbot_name": "编码部署",
+        "role_key": "engineer",
+        "link": "active",
+        "note": "Task OS 职能名 work·工程实践顾问"
+      },
+      "work·技术评审者": {
+        "bot_id": "83eee851-4e32-4b3b-a6b8-9b1448e24e9a",
+        "openmausbot_name": "work·技术评审者",
+        "role_key": "reviewer",
+        "link": "active"
+      },
+      "work·技术学习教练": {
+        "bot_id": "dc3694b6-46e5-4e22-8e63-21cbc16c7f9f",
+        "openmausbot_name": "work·技术学习教练",
+        "role_key": "coach",
+        "link": "active"
+      },
+      "grow·市场情报": {
+        "bot_id": "49aa248d-4b1a-4b08-9366-3beb62600fa9",
+        "openmausbot_name": "源雷达",
+        "role_key": "intel",
+        "link": "active",
+        "note": "暂由源雷达兼任，后续可拆独立 grow·市场情报"
+      },
+      "grow·用户研究": {
+        "bot_id": "60364a5b-5234-4016-8409-d7684bff942e",
+        "openmausbot_name": "grow·用户研究",
+        "role_key": "user",
+        "link": "active"
+      },
+      "grow·运营策略": {
+        "bot_id": "520cc044-7cd8-4808-988e-1b9ccdd075fd",
+        "openmausbot_name": "grow·运营策略",
+        "role_key": "strategy",
+        "link": "active",
+        "note": "重大方向拍板仍归我"
+      },
+      "grow·内容策划": {
+        "bot_id": "2ddcba47-01d6-4aca-8359-3941a064b74e",
+        "openmausbot_name": "grow·内容策划",
+        "role_key": "planner",
+        "link": "active"
+      },
+      "grow·内容创作": {
+        "bot_id": "ca3bf900-9da0-4654-8eb5-51fef593dffd",
+        "openmausbot_name": "grow·内容创作",
+        "role_key": "creator",
+        "link": "active"
+      },
+      "grow·渠道社区": {
+        "bot_id": "49aa248d-4b1a-4b08-9366-3beb62600fa9",
+        "openmausbot_name": "源雷达",
+        "role_key": "channel",
+        "link": "proxy",
+        "note": "发布/互动仍须我确认；待独立 grow·渠道社区"
+      },
+      "grow·数据优化": {
+        "bot_id": "f3b28263-e68d-4a85-ad32-dadaf8b23196",
+        "openmausbot_name": "交易观察员",
+        "role_key": "analytics",
+        "link": "proxy",
+        "note": "币圈度量为主；待 grow·数据优化"
+      }
+    },
+    "synced_at": "2026-11-20T09:30:00+08:00"
   },
   "roles": [
     {
@@ -69,42 +163,78 @@
       "name": "工作问题收集器",
       "desc": "信息入口：收集→去重→分类→分派，不做深度分析",
       "goal": "不遗漏问题与机会，降低分派成本",
-      "deliverables": "待处理问题列表、分派结果、灵感库索引"
+      "deliverables": "待处理问题列表、分派结果、灵感库索引",
+      "openmausbot": {
+        "bot_id": "e55d7b04-484d-4b2f-809e-26acb7f09ef7",
+        "name": "work·工作问题收集器",
+        "link": "active",
+        "note": ""
+      }
     },
     {
       "id": "researcher",
       "name": "技术研究员",
       "desc": "发现可利用的技术、开源项目与工具机会",
       "goal": "技术机会、可用方案、可运行 Demo",
-      "deliverables": "技术发现卡片、选型对比、技术资源库"
+      "deliverables": "技术发现卡片、选型对比、技术资源库",
+      "openmausbot": {
+        "bot_id": "eabac058-364b-475a-bdcf-fff9a5c2e0d2",
+        "name": "技逆向",
+        "link": "active",
+        "note": "Task OS 职能名 work·技术研究员"
+      }
     },
     {
       "id": "analyst",
       "name": "项目分析师",
       "desc": "需求→架构→任务：把模糊想法变成可执行方案",
       "goal": "需求说明、架构设计、开发任务与验收标准",
-      "deliverables": "不为了架构而架构；不确定须标注"
+      "deliverables": "不为了架构而架构；不确定须标注",
+      "openmausbot": {
+        "bot_id": "1ad0da16-7a04-4e3d-b109-94a22ee7c9bc",
+        "name": "产品设计",
+        "link": "active",
+        "note": "Task OS 职能名 work·项目分析师"
+      }
     },
     {
       "id": "engineer",
       "name": "工程实践顾问",
       "desc": "编码、修复、测试、交付可运行成果",
       "goal": "已修改≠已完成：须区分编译/运行/测试/验收",
-      "deliverables": "可运行代码、测试与部署说明"
+      "deliverables": "可运行代码、测试与部署说明",
+      "openmausbot": {
+        "bot_id": "dc4a4ecb-a50e-4163-814b-f24e2d01128d",
+        "name": "编码部署",
+        "link": "active",
+        "note": "Task OS 职能名 work·工程实践顾问"
+      }
     },
     {
       "id": "coach",
       "name": "技术学习与成长教练",
       "desc": "从真实工作提炼原理与可迁移能力",
       "goal": "原理解释、知识地图、经验总结",
-      "deliverables": "不把所有工作变成课程"
+      "deliverables": "不把所有工作变成课程",
+      "openmausbot": {
+        "bot_id": "dc3694b6-46e5-4e22-8e63-21cbc16c7f9f",
+        "name": "work·技术学习教练",
+        "link": "active",
+        "note": ""
+      }
     },
     {
       "id": "reviewer",
       "name": "技术评审与批判者",
       "desc": "独立审查方案、代码与成果，纠偏",
       "goal": "评审意见、风险清单、验收结果",
-      "deliverables": "按需介入，不刻意找茬"
+      "deliverables": "按需介入，不刻意找茬",
+      "openmausbot": {
+        "bot_id": "83eee851-4e32-4b3b-a6b8-9b1448e24e9a",
+        "name": "work·技术评审者",
+        "link": "active",
+        "note": ""
+      }
     }
   ],
   "duties": [
@@ -115,7 +245,7 @@
       "description": "接收 Bug/兼容/性能等问题，去重后分派主负责人",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·工作问题收集器",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -129,7 +259,7 @@
       "description": "链接/截图/语音转写入库，推荐负责角色",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·工作问题收集器",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -143,7 +273,7 @@
       "description": "对照已有队列，标注重复与关联项目",
       "status": "进行中",
       "priority": "普通",
-      "agent": "",
+      "agent": "work·工作问题收集器",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -157,7 +287,7 @@
       "description": "LLM、Agent、MCP、Skills、RAG、多 Agent 协作",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·技术研究员",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -171,7 +301,7 @@
       "description": "成熟度、维护、部署与学习成本评估",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·技术研究员",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -185,7 +315,7 @@
       "description": "小规模验证后可运行 Demo",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·技术研究员",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -199,7 +329,7 @@
       "description": "前端/后端/部署方案对比",
       "status": "待研究",
       "priority": "普通",
-      "agent": "",
+      "agent": "work·技术研究员",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -213,7 +343,7 @@
       "description": "观察新兴框架与产品",
       "status": "暂缓",
       "priority": "普通",
-      "agent": "",
+      "agent": "work·技术研究员",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -227,7 +357,7 @@
       "description": "场景、功能边界、隐含需求与假设",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·项目分析师",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -241,7 +371,7 @@
       "description": "接口、依赖、模块边界与取舍说明",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·项目分析师",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -255,7 +385,7 @@
       "description": "任务顺序、依赖、验收条件",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·项目分析师",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -269,7 +399,7 @@
       "description": "目录、技术债务、扩展点",
       "status": "进行中",
       "priority": "普通",
-      "agent": "",
+      "agent": "work·项目分析师",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -283,7 +413,7 @@
       "description": "前后端/接口/业务实现",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·工程实践顾问",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -297,7 +427,7 @@
       "description": "复现、日志、回归验证",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·工程实践顾问",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -311,7 +441,7 @@
       "description": "单测/集成/边界；编译运行分离标注",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·工程实践顾问",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -325,7 +455,7 @@
       "description": "CI/CD、环境、发布说明",
       "status": "待尝试",
       "priority": "普通",
-      "agent": "",
+      "agent": "work·工程实践顾问",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -339,7 +469,7 @@
       "description": "由真实问题触发，结合项目代码",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·技术学习教练",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -353,7 +483,7 @@
       "description": "长期可迁移知识点归档",
       "status": "待尝试",
       "priority": "普通",
-      "agent": "",
+      "agent": "work·技术学习教练",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -367,7 +497,7 @@
       "description": "阶段性可独立运用项",
       "status": "待尝试",
       "priority": "普通",
-      "agent": "",
+      "agent": "work·技术学习教练",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -381,7 +511,7 @@
       "description": "遗漏、过度设计、更简单方案",
       "status": "进行中",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·技术评审者",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -395,7 +525,7 @@
       "description": "逻辑/边界/只测正常路径",
       "status": "待尝试",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·技术评审者",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",
@@ -409,7 +539,7 @@
       "description": "对照原定目标与验收标准",
       "status": "待尝试",
       "priority": "重点",
-      "agent": "",
+      "agent": "work·技术评审者",
       "collaborators": "",
       "archived": false,
       "exec_state": "idle",

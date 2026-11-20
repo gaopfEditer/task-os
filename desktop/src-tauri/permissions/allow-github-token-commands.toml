@@ -1,4 +1,4 @@
 [[permission]]
 identifier = "allow-github-token-commands"
-description = "Read/write GitHub PAT and priority relay settings in the OS keychain"
-commands.allow = ["load_github_token", "save_github_token", "load_priority_config", "save_priority_config", "focus_main_window", "focus_price_bubble", "show_price_alert", "set_price_bubble_layout", "priority_http_get", "oi_report_queue_get"]
+description = "GitHub PAT and priority relay keychain commands"
+commands.allow = ["load_github_token", "save_github_token", "load_priority_config", "save_priority_config", "focus_main_window", "focus_price_bubble", "show_price_alert", "set_price_bubble_layout", "priority_http_get", "oi_report_queue_get", "market_http_get"]
