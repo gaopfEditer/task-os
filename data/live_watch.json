@@ -1,8 +1,164 @@
 {
   "version": 1,
-  "updated_at": "2026-11-20T12:00:00+08:00",
-  "last_slot": "2026-11-20T12:00+08:00",
+  "updated_at": "2026-11-20T16:00:00+08:00",
+  "last_slot": "2026-11-20T16:00+08:00",
   "items": [
+    {
+      "id": "pub:run_end:?:body:b517dd435efc:2026-11-20T15:25:54+08:00",
+      "category": "publish",
+      "ts": "2026-11-20T15:25:54+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 2, \"total\": 4, \"message\": \"发布结束 成功 2/4\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:bitget:body:b517dd435efc:2026-11-20T15:25:54+08:00",
+      "category": "publish",
+      "ts": "2026-11-20T15:25:54+08:00",
+      "title": "✓ bitget platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "bitget",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:binance_square:body:b517dd435efc:2026-11-20T15:25:24+08:00",
+      "category": "publish",
+      "ts": "2026-11-20T15:25:24+08:00",
+      "title": "✗ binance_square platform_fail",
+      "body": "未找到币安广场编辑区，请确认已登录（当前 https://www.binance.com/zh-CN/square）",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "binance_square",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:okx:body:b517dd435efc:2026-11-20T15:24:55+08:00",
+      "category": "publish",
+      "ts": "2026-11-20T15:24:55+08:00",
+      "title": "✓ okx platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "okx",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:gate:body:b517dd435efc:2026-11-20T15:24:27+08:00",
+      "category": "publish",
+      "ts": "2026-11-20T15:24:27+08:00",
+      "title": "✗ gate platform_fail",
+      "body": "已点击「发布」但帖子未发出：编辑区还在（32 字），点击没有发出去",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "gate",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:b517dd435efc:2026-11-20T15:23:08+08:00",
+      "category": "publish",
+      "ts": "2026-11-20T15:23:08+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"gate\", \"okx\", \"binance_square\", \"bitget\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 4 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:40548205f357:2026-11-20T14:52:19+08:00",
+      "category": "publish",
+      "ts": "2026-11-20T14:52:19+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 2, \"total\": 4, \"message\": \"发布结束 成功 2/4\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:bitget:body:40548205f357:2026-11-20T14:52:19+08:00",
+      "category": "publish",
+      "ts": "2026-11-20T14:52:19+08:00",
+      "title": "✓ bitget platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "bitget",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:binance_square:body:40548205f357:2026-11-20T14:51:40+08:00",
+      "category": "publish",
+      "ts": "2026-11-20T14:51:40+08:00",
+      "title": "✗ binance_square platform_fail",
+      "body": "未找到币安广场编辑区，请确认已登录（当前 https://www.binance.com/zh-CN/square）",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "binance_square",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:okx:body:40548205f357:2026-11-20T14:51:11+08:00",
+      "category": "publish",
+      "ts": "2026-11-20T14:51:11+08:00",
+      "title": "✓ okx platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "okx",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:gate:body:40548205f357:2026-11-20T14:49:28+08:00",
+      "category": "publish",
+      "ts": "2026-11-20T14:49:28+08:00",
+      "title": "✗ gate platform_fail",
+      "body": "已点击「发布」但帖子未发出：编辑区还在（153 字），点击没有发出去",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "gate",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:40548205f357:2026-11-20T14:48:09+08:00",
+      "category": "publish",
+      "ts": "2026-11-20T14:48:09+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"gate\", \"okx\", \"binance_square\", \"bitget\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 4 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
     {
       "id": "vpn:12:2026-11-20",
       "category": "vpn",
