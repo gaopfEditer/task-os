@@ -9,6 +9,7 @@ import {
   STORAGE_KEYS,
   describeItem,
   displayBaseUrl,
+  effectiveSpecialSymbols,
   footerRows,
   formatTime,
   ingestPriorityFrame,
@@ -16,10 +17,12 @@ import {
   markSeen,
   mergeItems,
   normalizeBaseUrl,
+  normalizeSpecialSymbol,
   noticeForPriorityArrival,
   noticesForPriorityItems,
   parseNotifyFlag,
   parseOiReportQueue,
+  parseSpecialSymbolList,
   parseQueueItems,
   parseSources,
   mapOiReportItem,
@@ -31,6 +34,7 @@ import {
   reconcilePriorityStore,
   replaceSourceItems,
   resolvePriorityConfig,
+  SPECIAL_SYMBOLS,
   seenSet,
   sourceCounts,
   sourceLabelText,
@@ -96,7 +100,7 @@ test('trade cards are counted separately from plain messages', () => {
   assert.equal(isTradeCard(plain), false);
 
   const counts = sourceCounts([trade, plain, { ...trade, id: 'c2' }], 'pangmao', { c1: true });
-  assert.deepEqual(counts, { messages: 3, newCards: 1 });
+  assert.deepEqual(counts, { messages: 3, newCards: 1, specialCards: 0 });
 });
 
 test('opening the list marks trade cards seen and the new-card count drops', () => {
@@ -122,6 +126,7 @@ test('missing config renders the source with zero counts', () => {
     name: '胖猫社区',
     messages: 0,
     newCards: 0,
+    specialCards: 0,
     unconfigured: true,
   }]);
 });
@@ -476,6 +481,102 @@ test('oi report items expose interval, volume and pattern', () => {
   assert.equal(rows[0].messages, 2);
   assert.equal(rows[1].id, 'pangmao');
   assert.equal(rows[1].unconfigured, true);
+});
+
+test('special count is the unseen new cards whose symbol is on the watchlist', () => {
+  assert.deepEqual(SPECIAL_SYMBOLS, []);
+  assert.deepEqual(effectiveSpecialSymbols(null, SPECIAL_SYMBOLS), []);
+  assert.deepEqual(effectiveSpecialSymbols(undefined, ['eth']), ['ETH']);
+  assert.deepEqual(effectiveSpecialSymbols('', ['BTC']), []);
+  assert.deepEqual(parseSpecialSymbolList('btc, BTCUSDT, eth/usdt, , SOL'), ['BTC', 'ETH', 'SOL']);
+  assert.deepEqual(parseSpecialSymbolList('["ENA", "HYPEUSDT"]'), ['ENA', 'HYPE']);
+  assert.equal(normalizeSpecialSymbol('btc/usdt'), 'BTC');
+  assert.equal(normalizeSpecialSymbol('ETH.P'), 'ETH');
+  assert.equal(normalizeSpecialSymbol('  '), '');
+  assert.equal(STORAGE_KEYS.specialSymbols, 'taskos.desktop.priority.specialSymbols');
+
+  const eth = { ...trade, id: 'c2', card: { symbol: 'ETHUSDT', direction: '空' } };
+  const sol = { ...trade, id: 'c3', card: { symbol: 'SOL' } };
+  const btcPerp = { ...trade, id: 'c4', card: { symbol: 'btc/usdt' } };
+  const seenEth = { c2: true };
+  const items = [trade, eth, sol, plain, btcPerp];
+  const counts = sourceCounts(items, 'pangmao', seenEth, ['BTC', 'eth']);
+  assert.deepEqual(counts, { messages: 5, newCards: 3, specialCards: 2 });
+
+  const empty = sourceCounts(items, 'pangmao', seenEth, []);
+  assert.equal(empty.newCards, 3);
+  assert.equal(empty.specialCards, 0);
+
+  const rows = footerRows(DEFAULT_SOURCES, [trade, sol], {}, true, null, ['BTC']);
+  assert.equal(rows[0].newCards, 2);
+  assert.equal(rows[0].specialCards, 1);
+
+  const hidden = footerRows(DEFAULT_SOURCES, [trade], {}, false, null, ['BTC']);
+  assert.equal(hidden[0].unconfigured, true);
+  assert.equal(hidden[0].newCards, 0);
+  assert.equal(hidden[0].specialCards, 0);
+
+  const oiItems = parseOiReportQueue({
+    reports: [{
+      items: [{
+        id: 'st_vol_wick:BTCUSDT:5m:9',
+        kind: 'st_vol_wick',
+        symbol: 'BTCUSDT',
+        interval: '5m',
+        sideLabel: '空',
+        pattern: '放量射击之星',
+        volumeSurgeLabel: '是',
+        timeMs: 1795005300000,
+      }, {
+        id: 'st_vol_wick:ETHUSDT:5m:9',
+        kind: 'st_vol_wick',
+        symbol: 'ETHUSDT',
+        interval: '5m',
+        sideLabel: '多',
+        pattern: '放量下影',
+        volumeSurgeLabel: '是',
+        timeMs: 1795005300000,
+      }],
+    }],
+  });
+  const oiRows = footerRows(
+    withOiReportSource(DEFAULT_SOURCES),
+    oiItems,
+    {},
+    false,
+    { oi_report: true },
+    ['BTC']
+  );
+  assert.equal(oiRows[0].id, 'oi_report');
+  assert.equal(oiRows[0].name, 'BTC/ETH 5m 放量影线');
+  assert.equal(oiRows[0].newCards, 2);
+  assert.equal(oiRows[0].specialCards, 1);
+  assert.equal(oiReportQueueUrl('http://127.0.0.1:8765/'), 'http://127.0.0.1:8765/api/report-queue?kind=st_vol_wick&symbols=BTCUSDT,ETHUSDT');
+
+  const seen = markSeen({}, 'pangmao', ['c1']);
+  const afterOpen = footerRows(DEFAULT_SOURCES, [trade], seen, true, null, ['BTC']);
+  assert.equal(afterOpen[0].newCards, 0);
+  assert.equal(afterOpen[0].specialCards, 0);
+});
+
+test('footer renders 特别 after 新卡 and stays inside the compact bubble', () => {
+  const footer = readFileSync(new URL('./priority-footer.js', import.meta.url), 'utf8');
+  const css = readFileSync(new URL('./price-bubble.css', import.meta.url), 'utf8');
+  const rust = readFileSync(new URL('../src-tauri/src/lib.rs', import.meta.url), 'utf8');
+  const renderFn = footer.slice(footer.indexOf('function renderFooter'), footer.indexOf('function itemsForList'));
+  const freshAt = renderFn.indexOf("textContent = '新卡'");
+  const specialAt = renderFn.indexOf("textContent = '特别'");
+  assert.ok(freshAt > 0 && specialAt > freshAt);
+  assert.match(renderFn, /appendChild\(fresh\);\s*el\.appendChild\(special\)/);
+  assert.match(renderFn, /readSpecialSymbols\(\)/);
+  assert.match(footer, /STORAGE_KEYS\.specialSymbols/);
+  assert.match(css, /grid-template-columns:\s*minmax\(0, 1fr\) auto auto auto/);
+  assert.match(css, /\.priority-special\.is-hot/);
+  const footerWidth = Number(css.match(/\.priority-footer\s*\{[^}]*width:\s*(\d+)px/)[1]);
+  const bubbleWidth = Number(rust.match(/const BUBBLE_COMPACT_W: f64 = (\d+(?:\.\d+)?)/)[1]);
+  assert.ok(bubbleWidth >= footerWidth);
+  assert.equal(footerWidth, 280);
+  assert.equal(bubbleWidth, 300);
 });
 
 test('oi report fetch uses the local shell command', () => {

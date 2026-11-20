@@ -10,7 +10,9 @@ export var STORAGE_KEYS = {
   baseUrl: 'taskos.desktop.priority.baseUrl',
   secret: 'taskos.desktop.priority.secret',
   seen: 'taskos.desktop.priority.seen',
-  notify: 'taskos.desktop.priority.notify'
+  notify: 'taskos.desktop.priority.notify',
+  // Comma/space-separated tickers. When this key exists it replaces SPECIAL_SYMBOLS.
+  specialSymbols: 'taskos.desktop.priority.specialSymbols'
 };
 
 /** Public relay on the VPS. Used only when the user has not saved a base URL. */
@@ -27,6 +29,17 @@ export var OI_REPORT_POLL_MS = 15000;
 
 export var QUEUE_LIMIT = 200;
 export var SEEN_CAP = 800;
+
+/**
+ * Symbols that count as 特别提醒. Leave this empty until a watchlist is filled in.
+ * Each entry is a ticker such as "BTC" or "ETHUSDT". Matching ignores case,
+ * separators, a trailing ".P", and a quote suffix (USDT / USDC / BUSD / FDUSD / USD).
+ * If localStorage has STORAGE_KEYS.specialSymbols, that value replaces this list
+ * (an empty saved value means no special hits). Absent key → this list.
+ */
+export var SPECIAL_SYMBOLS = Object.freeze([]);
+
+var SPECIAL_QUOTE_SUFFIXES = ['USDT', 'USDC', 'BUSD', 'FDUSD', 'USD'];
 
 var SYMBOL_KEYS = ['symbol', 'pair', 'ticker', 'coin', '币种', '交易对'];
 var DIRECTION_KEYS = ['direction', 'side', 'dir', '方向'];
@@ -459,15 +472,70 @@ export function formatTime(iso) {
   return pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
 }
 
-export function sourceCounts(items, sourceId, seenIds) {
+export function normalizeSpecialSymbol(raw) {
+  var s = String(raw == null ? '' : raw).trim().toUpperCase();
+  if (!s) return '';
+  s = s.replace(/\s+/g, '');
+  if (s.slice(-2) === '.P') s = s.slice(0, -2);
+  s = s.replace(/[^A-Z0-9]/g, '');
+  if (!s) return '';
+  for (var i = 0; i < SPECIAL_QUOTE_SUFFIXES.length; i++) {
+    var quote = SPECIAL_QUOTE_SUFFIXES[i];
+    if (s.length > quote.length && s.slice(-quote.length) === quote) {
+      s = s.slice(0, -quote.length);
+      break;
+    }
+  }
+  return s;
+}
+
+export function parseSpecialSymbolList(raw) {
+  var parts;
+  if (Array.isArray(raw)) parts = raw;
+  else parts = String(raw == null ? '' : raw).replace(/[\[\]"'`]/g, ' ').split(/[,，;；\s]+/);
+  var seen = Object.create(null);
+  var out = [];
+  parts.forEach(function (part) {
+    var sym = normalizeSpecialSymbol(part);
+    if (!sym || seen[sym]) return;
+    seen[sym] = true;
+    out.push(sym);
+  });
+  return out;
+}
+
+/** A saved string replaces the code list. null/undefined keeps the code list. */
+export function effectiveSpecialSymbols(stored, codeList) {
+  if (stored == null) return parseSpecialSymbolList(codeList == null ? SPECIAL_SYMBOLS : codeList);
+  return parseSpecialSymbolList(stored);
+}
+
+function specialSymbolSet(list) {
+  var set = Object.create(null);
+  parseSpecialSymbolList(list || []).forEach(function (sym) {
+    set[sym] = true;
+  });
+  return set;
+}
+
+function itemSpecialSymbol(item) {
+  return normalizeSpecialSymbol(describeItem(item, '').symbol);
+}
+
+export function sourceCounts(items, sourceId, seenIds, specialSymbols) {
   var messages = 0;
   var fresh = 0;
+  var special = 0;
+  var specials = specialSymbolSet(specialSymbols);
   (items || []).forEach(function (item) {
     if (!item || item.source !== sourceId) return;
     messages += 1;
-    if (isTradeCard(item) && item.id && !(seenIds && seenIds[item.id])) fresh += 1;
+    if (!(isTradeCard(item) && item.id && !(seenIds && seenIds[item.id]))) return;
+    fresh += 1;
+    var sym = itemSpecialSymbol(item);
+    if (sym && specials[sym]) special += 1;
   });
-  return { messages: messages, newCards: fresh };
+  return { messages: messages, newCards: fresh, specialCards: special };
 }
 
 export function seenSet(map, sourceId) {
@@ -574,21 +642,23 @@ export function parseSources(body) {
   return out;
 }
 
-export function footerRows(sources, items, seenMap, configured, alwaysOn) {
+export function footerRows(sources, items, seenMap, configured, alwaysOn, specialSymbols) {
   var list = sources && sources.length ? sources : DEFAULT_SOURCES;
+  var symbols = specialSymbols == null ? [] : specialSymbols;
   return list.map(function (source) {
     var id = source && source.id ? source.id : 'pangmao';
     var name = source && source.name ? source.name : id;
     var on = !!configured || !!(alwaysOn && alwaysOn[id]);
     if (!on) {
-      return { id: id, name: name, messages: 0, newCards: 0, unconfigured: true };
+      return { id: id, name: name, messages: 0, newCards: 0, specialCards: 0, unconfigured: true };
     }
-    var counts = sourceCounts(items, id, seenSet(seenMap, id));
+    var counts = sourceCounts(items, id, seenSet(seenMap, id), symbols);
     return {
       id: id,
       name: name,
       messages: counts.messages,
       newCards: counts.newCards,
+      specialCards: counts.specialCards,
       unconfigured: false
     };
   });
@@ -618,6 +688,10 @@ var api = {
   isTradeCard: isTradeCard,
   describeItem: describeItem,
   formatTime: formatTime,
+  SPECIAL_SYMBOLS: SPECIAL_SYMBOLS,
+  normalizeSpecialSymbol: normalizeSpecialSymbol,
+  parseSpecialSymbolList: parseSpecialSymbolList,
+  effectiveSpecialSymbols: effectiveSpecialSymbols,
   sourceCounts: sourceCounts,
   footerRows: footerRows,
   applySnapshot: function () {},
@@ -826,6 +900,16 @@ function mountFooter(footer) {
     } catch (e) {}
   }
 
+  function readSpecialSymbols() {
+    var stored = null;
+    try {
+      stored = localStorage.getItem(STORAGE_KEYS.specialSymbols);
+    } catch (e) {
+      stored = null;
+    }
+    return effectiveSpecialSymbols(stored, SPECIAL_SYMBOLS);
+  }
+
   function sourceName(id) {
     for (var i = 0; i < state.sources.length; i++) {
       if (state.sources[i].id === id) return state.sources[i].name || id;
@@ -844,7 +928,7 @@ function mountFooter(footer) {
   function renderFooter() {
     var host = document.getElementById('priorityRows');
     if (!host) return;
-    var rows = footerRows(state.sources, state.items, loadSeen(), displayConfigured(), { oi_report: true });
+    var rows = footerRows(state.sources, state.items, loadSeen(), displayConfigured(), { oi_report: true }, readSpecialSymbols());
     host.textContent = '';
     rows.forEach(function (row) {
       var el = document.createElement('div');
@@ -878,9 +962,18 @@ function mountFooter(footer) {
       fresh.appendChild(freshLabel);
       fresh.appendChild(document.createTextNode(String(row.newCards)));
 
+      var special = document.createElement('span');
+      special.className = 'priority-stat priority-special' + (row.specialCards > 0 ? ' is-hot' : '');
+      special.title = '特别提醒：观察列表中的新交易卡片';
+      var specialLabel = document.createElement('b');
+      specialLabel.textContent = '特别';
+      special.appendChild(specialLabel);
+      special.appendChild(document.createTextNode(String(row.specialCards)));
+
       el.appendChild(name);
       el.appendChild(messages);
       el.appendChild(fresh);
+      el.appendChild(special);
       host.appendChild(el);
     });
     footer.title = state.lastError
@@ -1483,7 +1576,7 @@ function mountFooter(footer) {
   api.openList = openList;
   api.closePanel = closePanel;
   api.footerModel = function () {
-    return footerRows(state.sources, state.items, loadSeen(), displayConfigured(), { oi_report: true });
+    return footerRows(state.sources, state.items, loadSeen(), displayConfigured(), { oi_report: true }, readSpecialSymbols());
   };
 
   var gear = document.getElementById('prioritySettingsBtn');
@@ -1542,7 +1635,7 @@ function mountFooter(footer) {
     if (!event.key) return;
     if (event.key === STORAGE_KEYS.baseUrl || event.key === STORAGE_KEYS.secret || event.key === STORAGE_KEYS.notify) {
       hydrateConfig();
-    } else if (event.key === STORAGE_KEYS.seen) render();
+    } else if (event.key === STORAGE_KEYS.seen || event.key === STORAGE_KEYS.specialSymbols) render();
   });
 
   render();

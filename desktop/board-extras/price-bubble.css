@@ -137,7 +137,7 @@ html, body {
 .bubble-open:hover { background: rgba(255, 106, 0, 0.85); }
 
 .priority-footer {
-  width: 228px;
+  width: 280px;
   max-height: 64px;
   overflow: auto;
   display: flex;
@@ -154,7 +154,7 @@ html, body {
 .priority-rows { flex: 1 1 auto; min-width: 0; }
 .priority-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
   gap: 6px;
   align-items: center;
   padding: 2px 0;
@@ -195,7 +195,9 @@ html, body {
   margin-right: 3px;
 }
 .priority-new.is-hot,
-.priority-new.is-hot b { color: #ffb86c; }
+.priority-new.is-hot b,
+.priority-special.is-hot,
+.priority-special.is-hot b { color: #ffb86c; }
 .priority-gear {
   flex: 0 0 auto;
   width: 18px;
