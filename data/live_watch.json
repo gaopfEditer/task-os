@@ -1,8 +1,18 @@
 {
   "version": 1,
-  "updated_at": "2026-11-21T00:00:00+08:00",
-  "last_slot": "2026-11-21T00:00+08:00",
+  "updated_at": "2026-11-21T08:00:00+08:00",
+  "last_slot": "2026-11-21T08:00+08:00",
   "items": [
+    {
+      "id": "meta:publish:gap:1795219200",
+      "category": "publish",
+      "ts": "2026-11-21T08:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-21.log",
+      "meta": {
+        "level": "info"
+      }
+    },
     {
       "id": "vpn:20:2026-11-20",
       "category": "vpn",
