@@ -1,8 +1,39 @@
 {
   "version": 1,
-  "updated_at": "2026-11-21T16:00:00+08:00",
-  "last_slot": "2026-11-21T16:00+08:00",
+  "updated_at": "2026-11-21T20:00:00+08:00",
+  "last_slot": "2026-11-21T20:00+08:00",
   "items": [
+    {
+      "id": "vpn:20:2026-11-21",
+      "category": "vpn",
+      "ts": "2026-11-21T20:00:00+08:00",
+      "title": "VPN Guard · OK · clash",
+      "body": "健康: 正常\n出口归属: clash",
+      "meta": {
+        "ok": true,
+        "owner": "clash"
+      }
+    },
+    {
+      "id": "meta:bitget:api:1795262400",
+      "category": "bitget",
+      "ts": "2026-11-21T20:00:00+08:00",
+      "title": "Collector API 不可用",
+      "body": "http://127.0.0.1:3851/api/discord/signal-cards?from=2026-11-21T16%3A00%3A00%2B08%3A00&to=2026-11-21T20%3A00%3A00%2B08%3A00&limit=200\n<urlopen error [Errno 61] Connection refused>",
+      "meta": {
+        "level": "info"
+      }
+    },
+    {
+      "id": "meta:publish:gap:1795262400",
+      "category": "publish",
+      "ts": "2026-11-21T20:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-21.log",
+      "meta": {
+        "level": "info"
+      }
+    },
     {
       "id": "meta:publish:gap:1795248000",
       "category": "publish",
