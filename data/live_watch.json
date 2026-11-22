@@ -1,8 +1,43 @@
 {
   "version": 1,
-  "updated_at": "2026-11-22T16:00:00+08:00",
-  "last_slot": "2026-11-22T16:00+08:00",
+  "updated_at": "2026-11-22T20:00:00+08:00",
+  "last_slot": "2026-11-22T20:00+08:00",
   "items": [
+    {
+      "id": "vpn:20:2026-11-22",
+      "category": "vpn",
+      "ts": "2026-11-22T20:00:00+08:00",
+      "title": "VPN Guard · OK · clash",
+      "body": "健康: 正常\n出口归属: clash",
+      "meta": {
+        "ok": true,
+        "owner": "clash"
+      }
+    },
+    {
+      "id": "meta:publish:gap:1795348800",
+      "category": "publish",
+      "ts": "2026-11-22T20:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-22.log",
+      "meta": {
+        "level": "info"
+      }
+    },
+    {
+      "id": "sig:binance_square:390946334840380",
+      "category": "signal",
+      "ts": "2026-11-22T17:33:13+08:00",
+      "title": "币安广场 · yanchibit · BTC long",
+      "body": "现货不怕？\n头寸也是得先浮亏5个…\n\n管它是不是底，是不是🐻\n再跌再买，近半年只买入，1年后再卖出…\n\n📌我不是能赢，是包赢！\n\n不要跟我，我随时会加入更多资金，你不论是定比还是定额，都会被我一笔打满。#BTC \n\n不要跟单！\nhttps://www.binance.com/zh-CN/square/post/390946334840380",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "yanchibit",
+        "profile": "yanchibit",
+        "source_mode": "binance_square"
+      }
+    },
     {
       "id": "meta:publish:gap:1795334400",
       "category": "publish",
