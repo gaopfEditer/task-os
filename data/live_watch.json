@@ -1,8 +1,32 @@
 {
   "version": 1,
-  "updated_at": "2026-11-23T20:00:00+08:00",
-  "last_slot": "2026-11-23T20:00+08:00",
+  "updated_at": "2026-11-24T00:00:00+08:00",
+  "last_slot": "2026-11-24T00:00+08:00",
   "items": [
+    {
+      "id": "meta:publish:gap:1795449600",
+      "category": "publish",
+      "ts": "2026-11-24T00:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-23.log",
+      "meta": {
+        "level": "info"
+      }
+    },
+    {
+      "id": "sig:list_realtime:2124872738301251707",
+      "category": "signal",
+      "ts": "2026-11-23T22:28:33+08:00",
+      "title": "list_realtime · tradermige · BTC long",
+      "body": "三次带着群里加仓btc多单，今天25被拉满了，赚了2400w。 $btc https://t.co/qnJyAHfpGB\nhttps://x.com/tradermige/status/2124872738301251707",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "tradermige",
+        "profile": "tradermige",
+        "source_mode": "list_realtime"
+      }
+    },
     {
       "id": "vpn:20:2026-11-23",
       "category": "vpn",
