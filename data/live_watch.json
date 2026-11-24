@@ -1,8 +1,409 @@
 {
   "version": 1,
-  "updated_at": "2026-11-24T20:00:00+08:00",
-  "last_slot": "2026-11-24T20:00+08:00",
+  "updated_at": "2026-11-25T00:00:00+08:00",
+  "last_slot": "2026-11-25T00:00+08:00",
   "items": [
+    {
+      "id": "pub:hist:d54d2d019509",
+      "category": "publish",
+      "ts": "2026-11-24T23:07:32",
+      "title": "控制台发布 · cancelled (0/5)",
+      "body": "已终止 · 成功 0/5\n平台: binance_square, okx, bitget, gate, x",
+      "meta": {
+        "source": "publish_history",
+        "status": "cancelled"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:9f8cc528f4cc:2026-11-24T23:06:09+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:06:09+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 0, \"total\": 1, \"message\": \"发布结束 成功 0/1\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:x:body:9f8cc528f4cc:2026-11-24T23:06:09+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:06:09+08:00",
+      "title": "✗ x platform_fail",
+      "body": "X 没有打开，当前是 chrome-error://chromewebdata/",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "x",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:9f8cc528f4cc:2026-11-24T23:05:38+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:05:38+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"x\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 1 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:9f8cc528f4cc:2026-11-24T23:05:38+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:05:38+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 0, \"total\": 1, \"message\": \"发布结束 成功 0/1\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:gate:body:9f8cc528f4cc:2026-11-24T23:05:38+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:05:38+08:00",
+      "title": "✗ gate platform_fail",
+      "body": "打开过程中离开了Gate 广场，当前是 chrome-error://chromewebdata/",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "gate",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:9f8cc528f4cc:2026-11-24T23:04:16+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:04:16+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"gate\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 1 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:9f8cc528f4cc:2026-11-24T23:04:16+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:04:16+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 0, \"total\": 1, \"message\": \"发布结束 成功 0/1\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:bitget:body:9f8cc528f4cc:2026-11-24T23:04:16+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:04:16+08:00",
+      "title": "✗ bitget platform_fail",
+      "body": "能输入正文，但没点到提交按钮",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "bitget",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:9f8cc528f4cc:2026-11-24T23:03:20+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:03:20+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"bitget\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 1 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:9f8cc528f4cc:2026-11-24T23:03:20+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:03:20+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 0, \"total\": 1, \"message\": \"发布结束 成功 0/1\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:okx:body:9f8cc528f4cc:2026-11-24T23:03:20+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:03:20+08:00",
+      "title": "✗ okx platform_fail",
+      "body": "已点击「发文」但帖子未发出：编辑区还在（478 字），点击没有发出去",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "okx",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:9f8cc528f4cc:2026-11-24T23:02:08+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:02:08+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"okx\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 1 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:9f8cc528f4cc:2026-11-24T23:02:08+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:02:08+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 0, \"total\": 1, \"message\": \"发布结束 成功 0/1\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:binance_square:body:9f8cc528f4cc:2026-11-24T23:02:08+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:02:08+08:00",
+      "title": "✗ binance_square platform_fail",
+      "body": "未找到币安广场编辑区，请确认已登录（当前 https://www.binance.com/zh-CN/square）",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "binance_square",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:9f8cc528f4cc:2026-11-24T23:01:32+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T23:01:32+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"binance_square\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 1 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:9f8cc528f4cc:2026-11-24T22:57:41+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:57:41+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 0, \"total\": 1, \"message\": \"发布结束 成功 0/1\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:x:body:9f8cc528f4cc:2026-11-24T22:57:41+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:57:41+08:00",
+      "title": "✗ x platform_fail",
+      "body": "未找到推文编辑框，请确认已登录 X",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "x",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:9f8cc528f4cc:2026-11-24T22:56:44+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:56:44+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"x\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 1 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:9f8cc528f4cc:2026-11-24T22:56:44+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:56:44+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 0, \"total\": 1, \"message\": \"发布结束 成功 0/1\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:gate:body:9f8cc528f4cc:2026-11-24T22:56:44+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:56:44+08:00",
+      "title": "✗ gate platform_fail",
+      "body": "已点击「发布」但帖子未发出：编辑区还在（478 字），点击没有发出去",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "gate",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:9f8cc528f4cc:2026-11-24T22:55:09+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:55:09+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"gate\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 1 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:9f8cc528f4cc:2026-11-24T22:55:09+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:55:09+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 0, \"total\": 1, \"message\": \"发布结束 成功 0/1\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:bitget:body:9f8cc528f4cc:2026-11-24T22:55:09+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:55:09+08:00",
+      "title": "✗ bitget platform_fail",
+      "body": "未找到Bitget编辑区，请确认已登录（当前 https://www.bitget.com/zh-CN/insights）",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "bitget",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:9f8cc528f4cc:2026-11-24T22:54:50+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:54:50+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"bitget\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 1 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:9f8cc528f4cc:2026-11-24T22:54:50+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:54:50+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 0, \"total\": 1, \"message\": \"发布结束 成功 0/1\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:okx:body:9f8cc528f4cc:2026-11-24T22:54:50+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:54:50+08:00",
+      "title": "✗ okx platform_fail",
+      "body": "未找到OKX编辑区，请确认已登录（当前 https://www.okx.com/zh-hans/orbit）",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "okx",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:9f8cc528f4cc:2026-11-24T22:54:02+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:54:02+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"okx\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 1 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:9f8cc528f4cc:2026-11-24T22:54:02+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:54:02+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 0, \"total\": 1, \"message\": \"发布结束 成功 0/1\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:binance_square:body:9f8cc528f4cc:2026-11-24T22:54:02+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:54:02+08:00",
+      "title": "✗ binance_square platform_fail",
+      "body": "未找到币安广场编辑区，请确认已登录（当前 https://www.binance.com/zh-CN/square）",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "binance_square",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:9f8cc528f4cc:2026-11-24T22:50:22+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T22:50:22+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"binance_square\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 1 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
     {
       "id": "vpn:20:2026-11-24",
       "category": "vpn",
