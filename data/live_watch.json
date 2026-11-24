@@ -1,8 +1,201 @@
 {
   "version": 1,
-  "updated_at": "2026-11-24T08:00:00+08:00",
-  "last_slot": "2026-11-24T08:00+08:00",
+  "updated_at": "2026-11-24T12:00:00+08:00",
+  "last_slot": "2026-11-24T12:00+08:00",
   "items": [
+    {
+      "id": "vpn:12:2026-11-24",
+      "category": "vpn",
+      "ts": "2026-11-24T12:00:00+08:00",
+      "title": "VPN Guard · OK · clash",
+      "body": "健康: 正常\n出口归属: clash",
+      "meta": {
+        "ok": true,
+        "owner": "clash"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:31a888a6bf99:2026-11-24T11:06:50+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T11:06:50+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 0, \"total\": 4, \"message\": \"发布结束 成功 0/4\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:bitget:body:31a888a6bf99:2026-11-24T11:06:50+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T11:06:50+08:00",
+      "title": "✗ bitget platform_fail",
+      "body": "CDP 连接失败: CDP 127.0.0.1:9223 上的 Chrome 为 157.0.8103.39，本机 Chrome 为 158.0.8127.88，Selenium 会使用 ChromeDriver 158，无法 attach 到 157 的调试实例。9223/9222 端口能 curl 通不代表版本已对齐。请完全退出该调试 Chrome，用本机最新 Chrome 重新启动，例如： \"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --remote-debugging-port=9223 --user-data-dir=\"$HOME/chrome-cdp-profile\"",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "bitget",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:binance_square:body:31a888a6bf99:2026-11-24T11:06:50+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T11:06:50+08:00",
+      "title": "✗ binance_square platform_fail",
+      "body": "CDP 连接失败: CDP 127.0.0.1:9223 上的 Chrome 为 157.0.8103.39，本机 Chrome 为 158.0.8127.88，Selenium 会使用 ChromeDriver 158，无法 attach 到 157 的调试实例。9223/9222 端口能 curl 通不代表版本已对齐。请完全退出该调试 Chrome，用本机最新 Chrome 重新启动，例如： \"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --remote-debugging-port=9223 --user-data-dir=\"$HOME/chrome-cdp-profile\"",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "binance_square",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:okx:body:31a888a6bf99:2026-11-24T11:06:50+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T11:06:50+08:00",
+      "title": "✗ okx platform_fail",
+      "body": "CDP 连接失败: CDP 127.0.0.1:9223 上的 Chrome 为 157.0.8103.39，本机 Chrome 为 158.0.8127.88，Selenium 会使用 ChromeDriver 158，无法 attach 到 157 的调试实例。9223/9222 端口能 curl 通不代表版本已对齐。请完全退出该调试 Chrome，用本机最新 Chrome 重新启动，例如： \"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --remote-debugging-port=9223 --user-data-dir=\"$HOME/chrome-cdp-profile\"",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "okx",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:gate:body:31a888a6bf99:2026-11-24T11:06:50+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T11:06:50+08:00",
+      "title": "✗ gate platform_fail",
+      "body": "CDP 连接失败: CDP 127.0.0.1:9223 上的 Chrome 为 157.0.8103.39，本机 Chrome 为 158.0.8127.88，Selenium 会使用 ChromeDriver 158，无法 attach 到 157 的调试实例。9223/9222 端口能 curl 通不代表版本已对齐。请完全退出该调试 Chrome，用本机最新 Chrome 重新启动，例如： \"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --remote-debugging-port=9223 --user-data-dir=\"$HOME/chrome-cdp-profile\"",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "gate",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:cdp_connect_fail:?:body:31a888a6bf99:2026-11-24T11:06:50+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T11:06:50+08:00",
+      "title": "✗ ? cdp_connect_fail",
+      "body": "CDP 127.0.0.1:9223 上的 Chrome 为 157.0.8103.39，本机 Chrome 为 158.0.8127.88，Selenium 会使用 ChromeDriver 158，无法 attach 到 157 的调试实例。9223/9222 端口能 curl 通不代表版本已对齐。请完全退出该调试 Chrome，用本机最新 Chrome 重新启动，例如： \"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --remote-debugging-port=9223 --user-data-dir=\"$HOME/chrome-cdp-profile\"",
+      "meta": {
+        "event": "cdp_connect_fail",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:31a888a6bf99:2026-11-24T11:06:50+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T11:06:50+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"gate\", \"okx\", \"binance_square\", \"bitget\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 4 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:7e4d2b17651d:2026-11-24T09:59:29+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T09:59:29+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 0, \"total\": 4, \"message\": \"发布结束 成功 0/4\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:bitget:body:7e4d2b17651d:2026-11-24T09:59:29+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T09:59:29+08:00",
+      "title": "✗ bitget platform_fail",
+      "body": "CDP 连接失败: CDP 127.0.0.1:9223 上的 Chrome 为 157.0.8103.39，本机 Chrome 为 158.0.8127.88，Selenium 会使用 ChromeDriver 158，无法 attach 到 157 的调试实例。9223/9222 端口能 curl 通不代表版本已对齐。请完全退出该调试 Chrome，用本机最新 Chrome 重新启动，例如： \"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --remote-debugging-port=9223 --user-data-dir=\"$HOME/chrome-cdp-profile\"",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "bitget",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:binance_square:body:7e4d2b17651d:2026-11-24T09:59:28+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T09:59:28+08:00",
+      "title": "✗ binance_square platform_fail",
+      "body": "CDP 连接失败: CDP 127.0.0.1:9223 上的 Chrome 为 157.0.8103.39，本机 Chrome 为 158.0.8127.88，Selenium 会使用 ChromeDriver 158，无法 attach 到 157 的调试实例。9223/9222 端口能 curl 通不代表版本已对齐。请完全退出该调试 Chrome，用本机最新 Chrome 重新启动，例如： \"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --remote-debugging-port=9223 --user-data-dir=\"$HOME/chrome-cdp-profile\"",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "binance_square",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:okx:body:7e4d2b17651d:2026-11-24T09:59:28+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T09:59:28+08:00",
+      "title": "✗ okx platform_fail",
+      "body": "CDP 连接失败: CDP 127.0.0.1:9223 上的 Chrome 为 157.0.8103.39，本机 Chrome 为 158.0.8127.88，Selenium 会使用 ChromeDriver 158，无法 attach 到 157 的调试实例。9223/9222 端口能 curl 通不代表版本已对齐。请完全退出该调试 Chrome，用本机最新 Chrome 重新启动，例如： \"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --remote-debugging-port=9223 --user-data-dir=\"$HOME/chrome-cdp-profile\"",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "okx",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:gate:body:7e4d2b17651d:2026-11-24T09:59:28+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T09:59:28+08:00",
+      "title": "✗ gate platform_fail",
+      "body": "CDP 连接失败: CDP 127.0.0.1:9223 上的 Chrome 为 157.0.8103.39，本机 Chrome 为 158.0.8127.88，Selenium 会使用 ChromeDriver 158，无法 attach 到 157 的调试实例。9223/9222 端口能 curl 通不代表版本已对齐。请完全退出该调试 Chrome，用本机最新 Chrome 重新启动，例如： \"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --remote-debugging-port=9223 --user-data-dir=\"$HOME/chrome-cdp-profile\"",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "gate",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:cdp_connect_fail:?:body:7e4d2b17651d:2026-11-24T09:59:28+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T09:59:28+08:00",
+      "title": "✗ ? cdp_connect_fail",
+      "body": "CDP 127.0.0.1:9223 上的 Chrome 为 157.0.8103.39，本机 Chrome 为 158.0.8127.88，Selenium 会使用 ChromeDriver 158，无法 attach 到 157 的调试实例。9223/9222 端口能 curl 通不代表版本已对齐。请完全退出该调试 Chrome，用本机最新 Chrome 重新启动，例如： \"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --remote-debugging-port=9223 --user-data-dir=\"$HOME/chrome-cdp-profile\"",
+      "meta": {
+        "event": "cdp_connect_fail",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:7e4d2b17651d:2026-11-24T09:59:23+08:00",
+      "category": "publish",
+      "ts": "2026-11-24T09:59:23+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"gate\", \"okx\", \"binance_square\", \"bitget\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 4 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
     {
       "id": "meta:publish:gap:1795478400",
       "category": "publish",
