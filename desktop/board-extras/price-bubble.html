@@ -17,14 +17,20 @@
     <button type="button" class="bubble-open" id="btnOpenMain" title="打开 Task OS 主窗口">↗</button>
   </div>
   <footer id="priorityFooter" class="priority-footer">
-    <div id="priorityRows" class="priority-rows" aria-live="polite"></div>
-    <button type="button" id="prioritySettingsBtn" class="priority-gear" title="优先队列设置" aria-label="优先队列设置">⚙</button>
+    <div id="priorityFooterRange" class="priority-range" role="group" aria-label="拉取范围"></div>
+    <p id="priorityFilterHint" class="priority-filter-hint" hidden></p>
+    <p id="priorityFooterError" class="priority-filter-hint" hidden></p>
+    <div class="priority-footer-main">
+      <div id="priorityRows" class="priority-rows" aria-live="polite"></div>
+      <button type="button" id="prioritySettingsBtn" class="priority-gear" title="优先队列设置" aria-label="优先队列设置">⚙</button>
+    </div>
   </footer>
   <section id="priorityPanel" class="priority-panel" hidden>
     <div class="priority-panel-bar">
       <strong id="priorityPanelTitle">消息</strong>
       <button type="button" id="priorityPanelClose">关闭</button>
     </div>
+    <div id="priorityRangeBar" class="priority-range" hidden role="group" aria-label="拉取范围"></div>
     <div id="priorityPanelList" class="priority-panel-list"></div>
     <details id="prioritySettingsDetails">
       <summary>连接设置</summary>
@@ -42,6 +48,10 @@
           <input id="priorityNotify" type="checkbox" checked>
           新卡片系统通知
         </label>
+        <div class="priority-range-field">
+          <span>拉取范围</span>
+          <div id="prioritySettingsRange" class="priority-range" role="group" aria-label="拉取范围"></div>
+        </div>
         <div class="priority-settings-actions">
           <button type="submit">保存</button>
         </div>

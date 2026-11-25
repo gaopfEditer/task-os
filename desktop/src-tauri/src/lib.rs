@@ -55,7 +55,7 @@ fn switch_main_to_bundled_frontend(app: &tauri::AppHandle) -> Result<(), String>
 
 /// Circle stays 132×168. Extra width/height is the priority footer under it.
 const BUBBLE_COMPACT_W: f64 = 248.0;
-const BUBBLE_COMPACT_H: f64 = 236.0;
+const BUBBLE_COMPACT_H: f64 = 464.0;
 const BUBBLE_LIST_W: f64 = 420.0;
 const BUBBLE_LIST_H: f64 = 600.0;
 const BUBBLE_SETTINGS_W: f64 = 360.0;
@@ -530,10 +530,12 @@ fn validate_oi_report_queue_url(raw: &str) -> Result<reqwest::Url, String> {
         return Err("invalid oi report-queue url".into());
     }
     let host = url.host_str().unwrap_or("");
-    if host != "127.0.0.1" && host != "localhost" {
-        return Err("invalid oi report-queue url".into());
-    }
-    if url.port() != Some(8765) {
+    let port = url.port();
+    let allowed_host = matches!(
+        (host, port),
+        ("127.0.0.1" | "localhost", Some(8765)) | ("149.88.80.60", Some(39134))
+    );
+    if !allowed_host {
         return Err("invalid oi report-queue url".into());
     }
     let path = url.path().trim_end_matches('/');
@@ -546,6 +548,7 @@ fn validate_oi_report_queue_url(raw: &str) -> Result<reqwest::Url, String> {
 fn perform_oi_report_queue_get(url: reqwest::Url) -> Result<PriorityHttpResponse, String> {
     let client = reqwest::blocking::Client::builder()
         .timeout(std::time::Duration::from_secs(12))
+        .no_proxy()
         .build()
         .map_err(|err| err.to_string())?;
     let response = client
@@ -565,6 +568,62 @@ fn perform_oi_report_queue_get(url: reqwest::Url) -> Result<PriorityHttpResponse
 async fn oi_report_queue_get(url: String) -> Result<PriorityHttpResponse, String> {
     let parsed = validate_oi_report_queue_url(&url)?;
     tauri::async_runtime::spawn_blocking(move || perform_oi_report_queue_get(parsed))
+        .await
+        .map_err(|err| err.to_string())?
+}
+
+fn validate_autoscript_live_feed_url(raw: &str) -> Result<reqwest::Url, String> {
+    let url = reqwest::Url::parse(raw.trim()).map_err(|_| "invalid autoscript feed url".to_string())?;
+    if url.scheme() != "http" && url.scheme() != "https" {
+        return Err("invalid autoscript feed url".into());
+    }
+    if !url.username().is_empty() || url.password().is_some() {
+        return Err("invalid autoscript feed url".into());
+    }
+    let host = url.host_str().unwrap_or("");
+    let port = url.port();
+    let allowed_host = matches!(
+        (host, port),
+        ("127.0.0.1" | "localhost", Some(3852)) | ("149.88.80.60", Some(39137))
+    );
+    if !allowed_host {
+        return Err("invalid autoscript feed url".into());
+    }
+    let path = url.path().trim_end_matches('/');
+    let allowed = path == "/queue/priority" || path == "/queue/priority/sources";
+    if !allowed {
+        return Err("invalid autoscript feed url".into());
+    }
+    Ok(url)
+}
+
+fn perform_autoscript_live_feed_get(url: reqwest::Url, secret: String) -> Result<PriorityHttpResponse, String> {
+    let client = reqwest::blocking::Client::builder()
+        .timeout(std::time::Duration::from_secs(12))
+        .no_proxy()
+        .build()
+        .map_err(|err| err.to_string())?;
+    let mut request = client.get(url).header("Accept", "application/json");
+    if !secret.is_empty() {
+        request = request
+            .header("Authorization", format!("Bearer {secret}"))
+            .header("X-Relay-Secret", secret);
+    }
+    let response = request
+        .send()
+        .map_err(|err| format!("autoscript feed HTTP {err}"))?;
+    let status = response.status().as_u16();
+    let body = response.text().map_err(|err| err.to_string())?;
+    if body.len() > 1_048_576 {
+        return Err("autoscript feed response too large".into());
+    }
+    Ok(PriorityHttpResponse { status, body })
+}
+
+#[tauri::command]
+async fn autoscript_live_feed_get(url: String, secret: String) -> Result<PriorityHttpResponse, String> {
+    let parsed = validate_autoscript_live_feed_url(&url)?;
+    tauri::async_runtime::spawn_blocking(move || perform_autoscript_live_feed_get(parsed, secret))
         .await
         .map_err(|err| err.to_string())?
 }
@@ -708,6 +767,7 @@ pub fn run() {
             set_price_bubble_layout,
             priority_http_get,
             oi_report_queue_get,
+            autoscript_live_feed_get,
             market_http_get
         ])
         .run(tauri::generate_context!())
@@ -790,6 +850,35 @@ mod tests {
         assert!(super::validate_oi_report_queue_url("http://127.0.0.1:8765/api/health").is_err());
         assert!(super::validate_oi_report_queue_url("http://127.0.0.1/api/report-queue").is_err());
         assert!(super::validate_oi_report_queue_url("https://example.com/api/report-queue").is_err());
+        assert!(super::validate_oi_report_queue_url(
+            "http://149.88.80.60:39134/api/report-queue?kind=st_vol_wick&symbols=BTCUSDT,ETHUSDT"
+        )
+        .is_ok());
+        assert!(super::validate_oi_report_queue_url("http://149.88.80.60:39137/api/report-queue").is_err());
+    }
+
+    #[test]
+    fn autoscript_feed_url_allows_local_3852_queue_only() {
+        assert!(super::validate_autoscript_live_feed_url(
+            "http://127.0.0.1:3852/queue/priority?source=autoscript_cards&limit=200"
+        )
+        .is_ok());
+        assert!(super::validate_autoscript_live_feed_url(
+            "http://localhost:3852/queue/priority/sources"
+        )
+        .is_ok());
+        assert!(super::validate_autoscript_live_feed_url("http://127.0.0.1:3852/health").is_err());
+        assert!(super::validate_autoscript_live_feed_url("http://127.0.0.1:8765/queue/priority").is_err());
+        assert!(super::validate_autoscript_live_feed_url("https://example.com/queue/priority").is_err());
+        assert!(super::validate_autoscript_live_feed_url(
+            "http://149.88.80.60:39137/queue/priority/sources"
+        )
+        .is_ok());
+        assert!(super::validate_autoscript_live_feed_url(
+            "http://149.88.80.60:39137/queue/priority?source=autoscript_cards&limit=200"
+        )
+        .is_ok());
+        assert!(super::validate_autoscript_live_feed_url("http://149.88.80.60:39134/queue/priority").is_err());
     }
 
     #[test]

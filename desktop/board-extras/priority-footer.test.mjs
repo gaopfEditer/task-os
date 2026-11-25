@@ -24,6 +24,24 @@ import {
   parseSources,
   mapOiReportItem,
   withOiReportSource,
+  arrangePrioritySources,
+  isLocalPrioritySourceId,
+  AUTOSCRIPT_CARD_SOURCE,
+  AUTOSCRIPT_ORDER_SOURCE,
+  AUTOSCRIPT_CDP_SOURCE,
+  KOLVIP_AUTOTRADE_SOURCES,
+  DISPLAY_TIME_ZONE,
+  DEFAULT_ITEM_RANGE,
+  LIST_FOLD_LIMIT,
+  parseRangeKey,
+  rangeOptionLabel,
+  startOfHongKongDay,
+  rangeStartMs,
+  itemInRange,
+  filterItemsByRange,
+  foldList,
+  autoscriptFeedSourcesUrl,
+  autoscriptFeedWebSocketUrl,
   OI_REPORT_SOURCE,
   oiReportQueueUrl,
   priorityNotice,
@@ -201,9 +219,9 @@ test('seen ids are capped per source without dropping the newest', () => {
   assert.deepEqual(seen.pangmao, ['b', 'c']);
 });
 
-test('formatTime uses the local calendar', () => {
-  const local = new Date(2026, 10, 17, 7, 5);
-  assert.equal(formatTime(local.toISOString()), '11-17 07:05');
+test('formatTime uses Asia/Hong_Kong', () => {
+  assert.equal(DISPLAY_TIME_ZONE, 'Asia/Hong_Kong');
+  assert.equal(formatTime('2026-11-16T23:05:00.000Z'), '11-17 07:05');
   assert.equal(formatTime('not-a-date'), 'not-a-date');
 });
 
@@ -288,7 +306,8 @@ test('unset base URL defaults to the public relay and auto-connects when a secre
   assert.match(footer, /state\.networkConfigured = !!cfg\.connect/);
   assert.match(desktop, /RELAY_DEFAULT_BASE = 'https:\/\/op\.g\.ezcoin\.ink'/);
   assert.match(desktop, /if \(!raw\) return RELAY_DEFAULT_BASE/);
-  assert.doesNotMatch(footer, /149\.88\.80\.60/);
+  // 149.88.80.60 is the existing Mac FRP path for auto-script /oi, not the msg-relay default.
+  assert.doesNotMatch(DEFAULT_BASE_URL, /149\.88\.80\.60/);
   assert.doesNotMatch(desktop, /149\.88\.80\.60/);
   assert.doesNotMatch(footer, /localStorage\.setItem\(STORAGE_KEYS\.baseUrl,\s*DEFAULT_BASE_URL\)/);
 });
@@ -487,3 +506,159 @@ test('oi report fetch uses the local shell command', () => {
   assert.doesNotMatch(syncFn, /fetch\(url, \{ headers: \{ Accept: 'application\/json' \} \}/);
 });
 
+test('autoscript and kolvip rows sit around 胖猫社区', () => {
+  const sources = arrangePrioritySources(DEFAULT_SOURCES);
+  const ids = sources.map((row) => row.id);
+  assert.deepEqual(ids.slice(0, 5), ['oi_report', 'autoscript_cards', 'autoscript_orders', 'autoscript_cdp', 'pangmao']);
+  assert.deepEqual(ids.slice(5), KOLVIP_AUTOTRADE_SOURCES.map((row) => row.id));
+  assert.equal(ids.includes('kolvip_huajie'), true);
+  assert.equal(sources.find((row) => row.id === 'kolvip_lingxia').name, '零下二度VIP禁言群');
+  assert.equal(isLocalPrioritySourceId('autoscript_orders'), true);
+  assert.equal(isLocalPrioritySourceId('pangmao'), false);
+  assert.equal(autoscriptFeedSourcesUrl('http://127.0.0.1:3852/'), 'http://127.0.0.1:3852/queue/priority/sources');
+  assert.equal(autoscriptFeedWebSocketUrl('http://127.0.0.1:3852', ''), 'ws://127.0.0.1:3852/ws/priority');
+  const again = arrangePrioritySources(sources);
+  assert.deepEqual(again.map((row) => row.id), ids);
+});
+
+test('order and cdp items describe status and count as new cards', () => {
+  const order = parseQueueItems({
+    items: [{
+      id: 'tlog:weex:3134:1',
+      source: AUTOSCRIPT_ORDER_SOURCE.id,
+      createdAt: '2026-11-24T18:42:52.261Z',
+      card: {
+        symbol: 'XAUUSDT',
+        direction: 'SHORT',
+        title: 'WEEX failed',
+        text: 'invalid_symbol_or_direction',
+        status: 'failed',
+        exchange: 'weex',
+        reason: 'invalid_symbol_or_direction',
+        cardId: '3134'
+      },
+      meta: { kind: 'order', via: 'order' }
+    }]
+  })[0];
+  assert.equal(isTradeCard(order), true);
+  const view = describeItem(order, AUTOSCRIPT_ORDER_SOURCE.name);
+  assert.equal(view.exchange, 'weex');
+  assert.equal(view.status, 'failed');
+  assert.equal(view.reason, 'invalid_symbol_or_direction');
+  assert.equal(view.cardId, '3134');
+  const cdp = parseQueueItems({
+    items: [{
+      id: 'cdp:platform_fail:j1:x',
+      source: AUTOSCRIPT_CDP_SOURCE.id,
+      createdAt: '2026-11-24T15:06:09.000Z',
+      card: { title: 'X / Twitter 失败', text: 'chrome-error', status: 'fail', platform: 'X / Twitter' },
+      meta: { kind: 'cdp', via: 'cdp' }
+    }]
+  })[0];
+  assert.equal(describeItem(cdp).platform, 'X / Twitter');
+  assert.equal(isTradeCard(cdp), true);
+  const message = parseQueueItems({
+    items: [{
+      id: 'msg:kolvip_huajie:1',
+      source: 'kolvip_huajie',
+      createdAt: '2026-11-25T01:00:00.000Z',
+      card: { title: '消息', text: 'Coin: #XAUUSDT' },
+      meta: { kind: 'message', via: 'message' }
+    }]
+  })[0];
+  assert.equal(isTradeCard(message), false);
+  const rows = footerRows(
+    arrangePrioritySources(DEFAULT_SOURCES),
+    [order, cdp, message],
+    {},
+    false,
+    { autoscript_orders: true, autoscript_cdp: true, kolvip_huajie: true, oi_report: true }
+  );
+  const orderRow = rows.find((row) => row.id === AUTOSCRIPT_ORDER_SOURCE.id);
+  const pangmao = rows.find((row) => row.id === 'pangmao');
+  const queen = rows.find((row) => row.id === 'kolvip_huajie');
+  assert.equal(orderRow.unconfigured, false);
+  assert.equal(orderRow.messages, 1);
+  assert.equal(orderRow.newCards, 1);
+  assert.ok(rows.indexOf(orderRow) < rows.indexOf(pangmao));
+  assert.ok(rows.indexOf(pangmao) < rows.indexOf(queen));
+  assert.equal(queen.messages, 1);
+  assert.equal(queen.newCards, 0);
+});
+
+test('default item range is today from Hong Kong midnight', () => {
+  assert.equal(DEFAULT_ITEM_RANGE, 'today');
+  assert.equal(parseRangeKey(''), 'today');
+  assert.equal(parseRangeKey(null), 'today');
+  assert.equal(parseRangeKey('12h'), 'today');
+  assert.equal(parseRangeKey('24h'), '24h');
+  assert.equal(parseRangeKey('week'), 'week');
+  assert.equal(parseRangeKey('all'), 'all');
+  assert.equal(rangeOptionLabel('today'), '今天 0 点起');
+  const now = new Date('2026-11-24T18:30:00.000Z'); // 2026-11-25 02:30 +08
+  assert.equal(startOfHongKongDay(now), Date.parse('2026-11-24T16:00:00.000Z'));
+  assert.equal(rangeStartMs('today', now), Date.parse('2026-11-24T16:00:00.000Z'));
+  assert.equal(rangeStartMs('24h', now), Date.parse('2026-11-23T18:30:00.000Z'));
+  assert.equal(itemInRange({ createdAt: '2026-11-24T15:59:59.000Z' }, 'today', now), false);
+  assert.equal(itemInRange({ createdAt: '2026-11-24T16:00:00.000Z' }, 'today', now), true);
+  assert.equal(itemInRange({ createdAt: '' }, 'today', now), false);
+  assert.equal(itemInRange({ createdAt: '2026-11-24T15:59:59.000Z' }, 'all', now), true);
+  assert.equal(itemInRange({ createdAt: Date.parse('2026-11-24T16:00:00.000Z') }, 'today', now), true);
+  assert.equal(itemInRange({ created_at: '2026-11-24T16:00:00.000Z' }, 'today', now), true);
+  const rows = filterItemsByRange([
+    { id: 'old', createdAt: '2026-11-24T15:59:59.000Z' },
+    { id: 'new', createdAt: '2026-11-24T16:00:01.000Z' }
+  ], 'today', now);
+  assert.deepEqual(rows.map((row) => row.id), ['new']);
+});
+
+test('long lists fold after four rows until expanded', () => {
+  assert.equal(LIST_FOLD_LIMIT, 4);
+  const rows = [1, 2, 3, 4, 5].map((n) => ({ id: String(n) }));
+  const folded = foldList(rows, 4, false);
+  assert.deepEqual(folded.items.map((row) => row.id), ['1', '2', '3', '4']);
+  assert.equal(folded.hidden, 1);
+  assert.equal(folded.folded, true);
+  const open = foldList(rows, 4, true);
+  assert.equal(open.items.length, 5);
+  assert.equal(open.folded, false);
+  assert.equal(foldList(rows.slice(0, 4), 4, false).folded, false);
+});
+
+test('bubble settings offer a fetch range and four-line text fold styles', () => {
+  const html = readFileSync(new URL('./price-bubble.html', import.meta.url), 'utf8');
+  const css = readFileSync(new URL('./price-bubble.css', import.meta.url), 'utf8');
+  const footer = readFileSync(new URL('./priority-footer.js', import.meta.url), 'utf8');
+  assert.match(html, /id="priorityRangeBar"/);
+  assert.match(html, /id="priorityFooterRange"/);
+  assert.match(html, /id="prioritySettingsRange"/);
+  assert.match(html, /拉取范围/);
+  assert.match(footer, /priorityFooterRange/);
+  assert.match(css, /priority-item-text\.is-folded[^}]*-webkit-line-clamp:\s*4/s);
+  assert.match(footer, /writeRangeKey/);
+  assert.match(footer, /prepareTextFolds/);
+  assert.match(footer, /展开其余/);
+  assert.match(footer, /function wireTextFold/);
+  assert.doesNotMatch(footer, /save_priority_config[\s\S]{0,120}range/);
+});
+
+test('autoscript and oi feed candidates prefer localhost then the Mac FRP path', () => {
+  const footer = readFileSync(new URL('./priority-footer.js', import.meta.url), 'utf8');
+  assert.match(footer, /AUTOSCRIPT_FEED_BASE_CANDIDATES/);
+  assert.match(footer, /149\.88\.80\.60:39137/);
+  assert.match(footer, /OI_WEB_BASE_CANDIDATES/);
+  assert.match(footer, /149\.88\.80\.60:39134/);
+  assert.match(footer, /priorityFooterError/);
+});
+
+test('expanded list panel is not crushed by the compact bubble and uses a thin scrollbar', () => {
+  const css = readFileSync(new URL('./price-bubble.css', import.meta.url), 'utf8');
+  const footer = readFileSync(new URL('./priority-footer.js', import.meta.url), 'utf8');
+  assert.match(footer, /classList\.add\('priority-expanded'\)/);
+  assert.match(css, /body\.priority-expanded \.bubble-stage\s*\{[^}]*display:\s*none/s);
+  assert.match(css, /body\.priority-expanded \.priority-panel\s*\{[^}]*min-height:\s*280px/s);
+  assert.match(css, /body\.priority-expanded \.priority-panel-list\s*\{[^}]*min-height:\s*200px/s);
+  assert.match(css, /body\.priority-expanded \.priority-footer\s*\{[^}]*max-height:\s*132px/s);
+  assert.match(css, /\.priority-footer::-webkit-scrollbar\s*,\s*\.priority-panel-list::-webkit-scrollbar\s*\{[^}]*width:\s*6px/s);
+  assert.match(css, /scrollbar-width:\s*thin/);
+});

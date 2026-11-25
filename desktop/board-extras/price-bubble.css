@@ -138,10 +138,11 @@ html, body {
 
 .priority-footer {
   width: 228px;
-  max-height: 64px;
+  max-height: 276px;
   overflow: auto;
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: stretch;
   gap: 2px;
   padding: 4px 4px 4px 8px;
   border-radius: 12px;
@@ -151,6 +152,29 @@ html, body {
   flex: 0 0 auto;
   scrollbar-width: thin;
 }
+.priority-footer-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+.priority-footer .priority-range {
+  padding: 2px 0 4px;
+  gap: 4px;
+}
+.priority-footer .priority-range button {
+  font-size: 10px;
+  padding: 2px 6px;
+}
+.priority-filter-hint {
+  margin: 0 0 2px;
+  padding: 0 2px;
+  color: #ffb86c;
+  font-size: 10px;
+  line-height: 1.35;
+}
+.priority-filter-hint[hidden] { display: none !important; }
 .priority-rows { flex: 1 1 auto; min-width: 0; }
 .priority-row {
   display: grid;
@@ -346,4 +370,129 @@ html, body {
   font-size: 11px;
   opacity: 0.88;
   gap: 8px;
+}
+
+.priority-item-trade { margin-top: 4px; flex-wrap: wrap; gap: 6px 8px; }
+.priority-status { font-weight: 700; }
+.priority-status.is-ok,
+.priority-status.is-filled,
+.priority-status.is-created { color: #3fb950; }
+.priority-status.is-waiting { color: #d4a72c; }
+.priority-status.is-fail,
+.priority-status.is-failed,
+.priority-status.is-aborted { color: #f85149; }
+.priority-reason { color: #8b949e; }
+
+.priority-range-field {
+  display: block;
+  margin-top: 8px;
+  color: #8b949e;
+  font-size: 11px;
+}
+.priority-range {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 10px 4px;
+  flex: 0 0 auto;
+}
+.priority-range-field .priority-range { padding: 4px 0 0; }
+.priority-range button {
+  background: #161b22;
+  border: 1px solid #30363d;
+  color: #8b949e;
+  border-radius: 10px;
+  font-size: 11px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+.priority-range button.is-on {
+  border-color: #ffb86c;
+  color: #ffb86c;
+}
+.priority-item-text.is-folded {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+.priority-more,
+.priority-fold-btn {
+  margin-top: 6px;
+  background: transparent;
+  border: none;
+  color: #ffb86c;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+}
+.priority-fold-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 0 4px;
+}
+
+/* List/settings: give the message panel the window, instead of sharing it with
+   the 168px price circle and the compact footer (up to 276px). */
+body.priority-expanded {
+  color-scheme: dark;
+}
+body.priority-expanded .bubble-root {
+  padding: 8px;
+  gap: 8px;
+}
+body.priority-expanded .bubble-stage {
+  display: none;
+}
+body.priority-expanded .priority-footer {
+  order: 2;
+  width: 100%;
+  max-height: 132px;
+  flex: 0 0 auto;
+}
+body.priority-expanded .priority-panel {
+  order: 1;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 280px;
+  margin-bottom: 0;
+}
+body.priority-expanded .priority-panel-list {
+  flex: 1 1 auto;
+  min-height: 200px;
+}
+
+/* Thin overlay-style scrollbar (WebView2/Chromium + Firefox + WebKit). */
+.priority-footer,
+.priority-panel-list {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 148, 158, 0.55) transparent;
+  color-scheme: dark;
+}
+.priority-footer::-webkit-scrollbar,
+.priority-panel-list::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.priority-footer::-webkit-scrollbar-track,
+.priority-panel-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.priority-footer::-webkit-scrollbar-thumb,
+.priority-panel-list::-webkit-scrollbar-thumb {
+  background: rgba(139, 148, 158, 0.45);
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+.priority-footer::-webkit-scrollbar-thumb:hover,
+.priority-panel-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 184, 108, 0.7);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+.priority-footer::-webkit-scrollbar-corner,
+.priority-panel-list::-webkit-scrollbar-corner {
+  background: transparent;
 }

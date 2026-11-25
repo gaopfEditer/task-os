@@ -10,7 +10,9 @@ export var STORAGE_KEYS = {
   baseUrl: 'taskos.desktop.priority.baseUrl',
   secret: 'taskos.desktop.priority.secret',
   seen: 'taskos.desktop.priority.seen',
-  notify: 'taskos.desktop.priority.notify'
+  notify: 'taskos.desktop.priority.notify',
+  range: 'taskos.desktop.priority.range',
+  debug: 'taskos.desktop.priority.debug'
 };
 
 /** Public relay on the VPS. Used only when the user has not saved a base URL. */
@@ -23,10 +25,50 @@ export var DEFAULT_SOURCES = Object.freeze([
 export var OI_REPORT_SOURCE_ID = 'oi_report';
 export var OI_REPORT_SOURCE = Object.freeze({ id: 'oi_report', name: 'BTC/ETH 5m 放量影线' });
 export var DEFAULT_OI_WEB_BASE_URL = 'http://127.0.0.1:8765';
+/** Local first; the existing Mac FRP path is used when this machine has no :8765. */
+export var OI_WEB_BASE_CANDIDATES = Object.freeze([
+  DEFAULT_OI_WEB_BASE_URL,
+  'http://149.88.80.60:39134'
+]);
 export var OI_REPORT_POLL_MS = 15000;
+
+export var DISPLAY_TIME_ZONE = 'Asia/Hong_Kong';
+export var DEFAULT_AUTOSCRIPT_FEED_BASE_URL = 'http://127.0.0.1:3852';
+/** Local first; the existing Mac FRP path is used when this machine has no :3852. */
+export var AUTOSCRIPT_FEED_BASE_CANDIDATES = Object.freeze([
+  DEFAULT_AUTOSCRIPT_FEED_BASE_URL,
+  'http://149.88.80.60:39137'
+]);
+export var AUTOSCRIPT_FEED_POLL_MS = 10000;
+
+export var AUTOSCRIPT_CARD_SOURCE = Object.freeze({ id: 'autoscript_cards', name: '信号卡片' });
+export var AUTOSCRIPT_ORDER_SOURCE = Object.freeze({ id: 'autoscript_orders', name: '自动挂单/下单' });
+export var AUTOSCRIPT_CDP_SOURCE = Object.freeze({ id: 'autoscript_cdp', name: 'CDP 发布' });
+export var AUTOSCRIPT_FEED_SOURCES = Object.freeze([
+  AUTOSCRIPT_CARD_SOURCE,
+  AUTOSCRIPT_ORDER_SOURCE,
+  AUTOSCRIPT_CDP_SOURCE
+]);
+export var KOLVIP_AUTOTRADE_SOURCES = Object.freeze([
+  Object.freeze({ id: 'kolvip_huajie', name: '华尔街女王' }),
+  Object.freeze({ id: 'kolvip_lingxia', name: '零下二度VIP禁言群' }),
+  Object.freeze({ id: 'kolvip_kacang', name: 'kacang-团队' }),
+  Object.freeze({ id: 'kolvip_fxgold', name: 'FX-黄金信号' }),
+  Object.freeze({ id: 'kolvip_binancekiller', name: '币安杀手' }),
+  Object.freeze({ id: 'kolvip_aoying', name: '熬鹰' })
+]);
 
 export var QUEUE_LIMIT = 200;
 export var SEEN_CAP = 800;
+export var DEFAULT_ITEM_RANGE = 'today';
+export var ITEM_RANGE_OPTIONS = Object.freeze([
+  Object.freeze({ id: 'today', name: '今天 0 点起' }),
+  Object.freeze({ id: '24h', name: '最近 24h' }),
+  Object.freeze({ id: 'week', name: '最近一周' }),
+  Object.freeze({ id: 'all', name: '全部' })
+]);
+export var LIST_FOLD_LIMIT = 4;
+export var TEXT_FOLD_LINES = 4;
 
 var SYMBOL_KEYS = ['symbol', 'pair', 'ticker', 'coin', '币种', '交易对'];
 var DIRECTION_KEYS = ['direction', 'side', 'dir', '方向'];
@@ -355,6 +397,69 @@ export function withOiReportSource(sources) {
   return list;
 }
 
+export function isAutoscriptFeedSourceId(id) {
+  var s = String(id || '');
+  if (AUTOSCRIPT_FEED_SOURCES.some(function (src) { return src.id === s; })) return true;
+  return KOLVIP_AUTOTRADE_SOURCES.some(function (src) { return src.id === s; });
+}
+
+export function isLocalPrioritySourceId(id) {
+  return id === OI_REPORT_SOURCE_ID || isAutoscriptFeedSourceId(id);
+}
+
+export function localPriorityAlwaysOn() {
+  var map = { oi_report: true };
+  AUTOSCRIPT_FEED_SOURCES.forEach(function (src) { map[src.id] = true; });
+  KOLVIP_AUTOTRADE_SOURCES.forEach(function (src) { map[src.id] = true; });
+  return map;
+}
+
+/**
+ * 气泡行顺序：OI → 信号卡片/挂单下单/CDP 发布 → 胖猫社区及其他中转来源 → kolvip 白名单频道。
+ */
+export function arrangePrioritySources(sources) {
+  var list = [];
+  var seen = Object.create(null);
+  function add(source) {
+    if (!source || typeof source.id !== 'string' || !source.id) return;
+    if (seen[source.id]) return;
+    seen[source.id] = true;
+    list.push({ id: source.id, name: source.name || source.id });
+  }
+  add(OI_REPORT_SOURCE);
+  AUTOSCRIPT_FEED_SOURCES.forEach(add);
+  var incoming = sources && sources.length ? sources : DEFAULT_SOURCES;
+  incoming.forEach(function (source) {
+    if (!source || isLocalPrioritySourceId(source.id)) return;
+    add(source);
+  });
+  if (!seen.pangmao) add(DEFAULT_SOURCES[0]);
+  KOLVIP_AUTOTRADE_SOURCES.forEach(add);
+  return list;
+}
+
+export function autoscriptFeedSourcesUrl(base) {
+  var root = normalizeBaseUrl(base || DEFAULT_AUTOSCRIPT_FEED_BASE_URL);
+  if (!root) return '';
+  return root + '/queue/priority/sources';
+}
+
+export function autoscriptFeedQueueUrl(base, source, limit) {
+  return queueUrl(base || DEFAULT_AUTOSCRIPT_FEED_BASE_URL, source, limit);
+}
+
+/** Local feed may omit the token when no secret is configured. */
+export function autoscriptFeedWebSocketUrl(base, secret) {
+  var root = normalizeBaseUrl(base || DEFAULT_AUTOSCRIPT_FEED_BASE_URL);
+  if (!root) return '';
+  var u = new URL(root + '/ws/priority');
+  u.protocol = u.protocol === 'https:' ? 'wss:' : 'ws:';
+  u.search = '';
+  var token = String(secret || '').trim();
+  if (token) u.searchParams.set('token', token);
+  return u.toString();
+}
+
 /** Live socket only: no source filter, no replay/since. */
 export function toWebSocketUrl(base, secret) {
   var root = normalizeBaseUrl(base);
@@ -403,7 +508,9 @@ export function isTradeCard(item) {
   if (!item || typeof item !== 'object') return false;
   var card = cardOf(item);
   var meta = metaOf(item);
-  if (meta.via === 'ocr' || meta.via === 'text') return true;
+  var kind = String(meta.kind || '').trim();
+  if (kind === 'card' || kind === 'order' || kind === 'cdp') return true;
+  if (meta.via === 'ocr' || meta.via === 'text' || meta.via === 'card' || meta.via === 'order' || meta.via === 'cdp') return true;
   if (firstEntry(card, SYMBOL_KEYS) || firstEntry(card, DIRECTION_KEYS) || firstEntry(card, YIELD_KEYS)) return true;
   if (meta.yield_pct != null && meta.yield_pct !== '' && (typeof meta.yield_pct === 'number' || typeof meta.yield_pct === 'string')) {
     return true;
@@ -448,16 +555,113 @@ export function describeItem(item, sourceName) {
     via: meta.via === 'ocr' || meta.via === 'text' ? meta.via : '',
     interval: stringFrom(firstEntry(card, ['interval', '周期'])) || String(meta.interval || '').trim(),
     volumeSurge: stringFrom(firstEntry(card, ['volumeSurgeLabel', '是否放量'])) || String(meta.volumeSurgeLabel || '').trim(),
-    pattern: stringFrom(firstEntry(card, ['pattern', '形态'])) || String(meta.pattern || '').trim()
+    pattern: stringFrom(firstEntry(card, ['pattern', '形态'])) || String(meta.pattern || '').trim(),
+    kind: String(meta.kind || meta.via || '').trim(),
+    status: stringFrom(firstEntry(card, ['status', '状态'])) || String(meta.result || meta.status || '').trim(),
+    exchange: stringFrom(firstEntry(card, ['exchange', '交易所'])) || String(meta.exchange || '').trim(),
+    platform: stringFrom(firstEntry(card, ['platform', '平台'])) || String(meta.platform || '').trim(),
+    reason: stringFrom(firstEntry(card, ['reason', '原因'])) || String(meta.reason || '').trim(),
+    entry: stringFrom(firstEntry(card, ['entry', '入场'])) || String(meta.entry || '').trim(),
+    cardId: stringFrom(firstEntry(card, ['cardId', '卡片'])) || String(meta.cardId || '').trim()
   };
 }
 
-export function formatTime(iso) {
+export function formatTime(iso, timeZone) {
   var d = new Date(iso);
   if (isNaN(d.getTime())) return String(iso || '');
-  function pad(n) { return (n < 10 ? '0' : '') + n; }
-  return pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  var zone = timeZone || DISPLAY_TIME_ZONE;
+  var parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: zone,
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23'
+  }).formatToParts(d);
+  var map = Object.create(null);
+  parts.forEach(function (part) { map[part.type] = part.value; });
+  return map.month + '-' + map.day + ' ' + map.hour + ':' + map.minute;
 }
+
+/** Unset or unknown values use today from 00:00 Asia/Hong_Kong. */
+export function parseRangeKey(raw) {
+  var s = String(raw == null ? '' : raw).trim().toLowerCase();
+  if (s === 'today' || s === '24h' || s === 'week' || s === 'all') return s;
+  return DEFAULT_ITEM_RANGE;
+}
+
+export function rangeOptionLabel(rangeKey) {
+  var key = parseRangeKey(rangeKey);
+  for (var i = 0; i < ITEM_RANGE_OPTIONS.length; i++) {
+    if (ITEM_RANGE_OPTIONS[i].id === key) return ITEM_RANGE_OPTIONS[i].name;
+  }
+  return ITEM_RANGE_OPTIONS[0].name;
+}
+
+/** Start of the calendar day in Asia/Hong_Kong (no DST, UTC+8). */
+export function startOfHongKongDay(now) {
+  var d = now instanceof Date ? now : new Date(now || Date.now());
+  if (isNaN(d.getTime())) d = new Date();
+  var day = new Intl.DateTimeFormat('en-CA', {
+    timeZone: DISPLAY_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(d);
+  return new Date(day + 'T00:00:00+08:00').getTime();
+}
+
+export function rangeStartMs(rangeKey, now) {
+  var key = parseRangeKey(rangeKey);
+  var at = now instanceof Date ? now.getTime() : (now != null ? Number(now) : Date.now());
+  if (!isFinite(at)) at = Date.now();
+  if (key === 'all') return 0;
+  if (key === '24h') return at - 24 * 60 * 60 * 1000;
+  if (key === 'week') return at - 7 * 24 * 60 * 60 * 1000;
+  return startOfHongKongDay(at);
+}
+
+export function itemTimestampMs(item) {
+  if (!item || typeof item !== 'object') return NaN;
+  var raw = item.createdAt;
+  if (raw == null || raw === '') raw = item.created_at;
+  if ((raw == null || raw === '') && item.meta && item.meta.timeMs != null) raw = item.meta.timeMs;
+  if (typeof raw === 'number' && isFinite(raw) && raw > 0) {
+    return raw < 1e12 ? raw * 1000 : raw;
+  }
+  if (typeof raw === 'string' && raw) {
+    var ts = Date.parse(raw);
+    if (isFinite(ts)) return ts;
+    var asNum = Number(raw);
+    if (isFinite(asNum) && asNum > 0) return asNum < 1e12 ? asNum * 1000 : asNum;
+  }
+  return NaN;
+}
+
+export function itemInRange(item, rangeKey, now) {
+  var key = parseRangeKey(rangeKey);
+  if (key === 'all') return true;
+  var ts = itemTimestampMs(item);
+  if (!isFinite(ts)) return false;
+  return ts >= rangeStartMs(key, now);
+}
+
+export function filterItemsByRange(items, rangeKey, now) {
+  var key = parseRangeKey(rangeKey);
+  if (key === 'all') return (items || []).slice();
+  return (items || []).filter(function (item) { return itemInRange(item, key, now); });
+}
+
+export function foldList(items, limit, expanded) {
+  var list = items || [];
+  var cap = Number(limit);
+  if (!isFinite(cap) || cap <= 0) cap = LIST_FOLD_LIMIT;
+  if (expanded || list.length <= cap) {
+    return { items: list, hidden: 0, folded: false };
+  }
+  return { items: list.slice(0, cap), hidden: list.length - cap, folded: true };
+}
+
 
 export function sourceCounts(items, sourceId, seenIds) {
   var messages = 0;
@@ -538,7 +742,9 @@ export function ingestPriorityFrame(items, frame) {
     source: frame.source,
     card: card,
     meta: meta,
-    createdAt: typeof frame.createdAt === 'string' ? frame.createdAt : ''
+    createdAt: typeof frame.createdAt === 'string' && frame.createdAt
+      ? frame.createdAt
+      : (isoFromMillis(frame && frame.createdAt) || isoFromMillis(frame && frame.created_at) || '')
   }]);
 }
 
@@ -607,10 +813,35 @@ var api = {
   OI_REPORT_SOURCE_ID: OI_REPORT_SOURCE_ID,
   OI_REPORT_SOURCE: OI_REPORT_SOURCE,
   DEFAULT_OI_WEB_BASE_URL: DEFAULT_OI_WEB_BASE_URL,
+  OI_WEB_BASE_CANDIDATES: OI_WEB_BASE_CANDIDATES,
   oiReportQueueUrl: oiReportQueueUrl,
   parseOiReportQueue: parseOiReportQueue,
   mapOiReportItem: mapOiReportItem,
   withOiReportSource: withOiReportSource,
+  arrangePrioritySources: arrangePrioritySources,
+  isLocalPrioritySourceId: isLocalPrioritySourceId,
+  localPriorityAlwaysOn: localPriorityAlwaysOn,
+  AUTOSCRIPT_CARD_SOURCE: AUTOSCRIPT_CARD_SOURCE,
+  AUTOSCRIPT_ORDER_SOURCE: AUTOSCRIPT_ORDER_SOURCE,
+  AUTOSCRIPT_CDP_SOURCE: AUTOSCRIPT_CDP_SOURCE,
+  KOLVIP_AUTOTRADE_SOURCES: KOLVIP_AUTOTRADE_SOURCES,
+  DEFAULT_AUTOSCRIPT_FEED_BASE_URL: DEFAULT_AUTOSCRIPT_FEED_BASE_URL,
+  AUTOSCRIPT_FEED_BASE_CANDIDATES: AUTOSCRIPT_FEED_BASE_CANDIDATES,
+  autoscriptFeedSourcesUrl: autoscriptFeedSourcesUrl,
+  autoscriptFeedQueueUrl: autoscriptFeedQueueUrl,
+  autoscriptFeedWebSocketUrl: autoscriptFeedWebSocketUrl,
+  DISPLAY_TIME_ZONE: DISPLAY_TIME_ZONE,
+  DEFAULT_ITEM_RANGE: DEFAULT_ITEM_RANGE,
+  ITEM_RANGE_OPTIONS: ITEM_RANGE_OPTIONS,
+  LIST_FOLD_LIMIT: LIST_FOLD_LIMIT,
+  parseRangeKey: parseRangeKey,
+  rangeOptionLabel: rangeOptionLabel,
+  startOfHongKongDay: startOfHongKongDay,
+  itemTimestampMs: itemTimestampMs,
+  rangeStartMs: rangeStartMs,
+  itemInRange: itemInRange,
+  filterItemsByRange: filterItemsByRange,
+  foldList: foldList,
   normalizeBaseUrl: normalizeBaseUrl,
   sourcesUrl: sourcesUrl,
   queueUrl: queueUrl,
@@ -642,10 +873,11 @@ function bootFooter() {
 
 function mountFooter(footer) {
   var state = {
-    sources: withOiReportSource(DEFAULT_SOURCES),
+    sources: arrangePrioritySources(DEFAULT_SOURCES),
     items: [],
     networkConfigured: false,
     oiConfigured: false,
+    autoscriptConfigured: false,
     holdSnapshot: false,
     lastError: ''
   };
@@ -658,6 +890,8 @@ function mountFooter(footer) {
   var panelMode = null;
   var listSource = null;
   var highlighted = Object.create(null);
+  var listExpanded = Object.create(null);
+  var textExpanded = Object.create(null);
 
   function displayConfigured() {
     return state.networkConfigured || state.holdSnapshot;
@@ -785,6 +1019,11 @@ function mountFooter(footer) {
       finishHydrate(gen, local);
       return;
     }
+    // A hung macOS keychain read otherwise never reaches finishHydrate, so the
+    // footer stays on 未配置 even when this origin already has a secret.
+    if (local.secret || local.baseUrl) {
+      finishHydrate(gen, local);
+    }
     pending.then(function (shared) {
       if (gen !== hydrateGen) return;
       var next = reconcilePriorityStore(shared, local);
@@ -826,6 +1065,30 @@ function mountFooter(footer) {
     } catch (e) {}
   }
 
+  function readRangeKey() {
+    try {
+      return parseRangeKey(localStorage.getItem(STORAGE_KEYS.range));
+    } catch (e) {
+      return DEFAULT_ITEM_RANGE;
+    }
+  }
+
+  function writeRangeKey(key) {
+    var next = parseRangeKey(key);
+    try {
+      localStorage.setItem(STORAGE_KEYS.range, next);
+    } catch (e) {}
+    return next;
+  }
+
+  function currentRange() {
+    return readRangeKey();
+  }
+
+  function visibleItems() {
+    return filterItemsByRange(state.items, currentRange(), new Date());
+  }
+
   function sourceName(id) {
     for (var i = 0; i < state.sources.length; i++) {
       if (state.sources[i].id === id) return state.sources[i].name || id;
@@ -838,13 +1101,32 @@ function mountFooter(footer) {
     for (var i = 0; i < state.sources.length; i++) {
       if (state.sources[i].id === id) return;
     }
-    state.sources.push({ id: id, name: id });
+    state.sources = arrangePrioritySources(state.sources.concat([{ id: id, name: id }]));
+  }
+
+  function writeDebugState() {
+    try {
+      localStorage.setItem(STORAGE_KEYS.debug, JSON.stringify({
+        t: Date.now(),
+        hasTauri: !!(window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke),
+        configured: !!state.networkConfigured,
+        lastError: String(state.lastError || '').slice(0, 160),
+        sourceCount: (state.sources || []).length,
+        itemCount: (state.items || []).length,
+        visibleCount: visibleItems().length,
+        oi: !!state.oiConfigured,
+        autoscript: !!state.autoscriptConfigured,
+        autoscriptBase: selectedAutoscriptBase || '',
+        oiBase: selectedOiBase || '',
+        range: currentRange()
+      }));
+    } catch (e) {}
   }
 
   function renderFooter() {
     var host = document.getElementById('priorityRows');
     if (!host) return;
-    var rows = footerRows(state.sources, state.items, loadSeen(), displayConfigured(), { oi_report: true });
+    var rows = footerRows(state.sources, visibleItems(), loadSeen(), displayConfigured(), localPriorityAlwaysOn());
     host.textContent = '';
     rows.forEach(function (row) {
       var el = document.createElement('div');
@@ -886,10 +1168,21 @@ function mountFooter(footer) {
     footer.title = state.lastError
       ? '优先队列暂时不可用，正在重试。双击仍可查看已收到的列表。'
       : '双击查看完整列表';
+    var errEl = document.getElementById('priorityFooterError');
+    if (errEl) {
+      if (state.lastError) {
+        errEl.hidden = false;
+        errEl.textContent = '连接中转失败，正在重试（切到「全部」仍可能为空直到连接成功）';
+      } else {
+        errEl.hidden = true;
+        errEl.textContent = '';
+      }
+    }
+    writeDebugState();
   }
 
   function itemsForList() {
-    return state.items.filter(function (item) {
+    return visibleItems().filter(function (item) {
       return item && (!listSource || item.source === listSource);
     }).slice().sort(function (a, b) {
       var ta = a.createdAt || '';
@@ -917,8 +1210,18 @@ function mountFooter(footer) {
     if (!items.length) {
       var empty = document.createElement('p');
       empty.className = 'priority-empty';
-      if (listSource === OI_REPORT_SOURCE_ID) {
+      var ranged = currentRange() !== 'all';
+      var hadOlder = ranged && state.items.some(function (item) {
+        return item && (!listSource || item.source === listSource);
+      });
+      if (hadOlder) {
+        empty.textContent = '该时段暂无消息（当前：' + rangeOptionLabel(currentRange()) + '）';
+      } else if (listSource === OI_REPORT_SOURCE_ID) {
         empty.textContent = state.oiConfigured ? '暂无 BTC/ETH 5m 放量影线' : '未连接到本机 /oi（127.0.0.1:8765）';
+      } else if (isAutoscriptFeedSourceId(listSource)) {
+        empty.textContent = state.autoscriptConfigured
+          ? '暂无记录'
+          : '未连接到本机 auto-script 实时源（127.0.0.1:3852）';
       } else {
         empty.textContent = displayConfigured()
           ? '暂无消息'
@@ -927,7 +1230,9 @@ function mountFooter(footer) {
       list.appendChild(empty);
       return;
     }
-    items.forEach(function (item) {
+    var foldKey = listSource || '*';
+    var folded = foldList(items, LIST_FOLD_LIMIT, !!listExpanded[foldKey]);
+    folded.items.forEach(function (item) {
       var view = describeItem(item, sourceName(item.source));
       var article = document.createElement('article');
       article.className = 'priority-item' + (highlighted[item.id] ? ' is-new' : '');
@@ -996,14 +1301,169 @@ function mountFooter(footer) {
         }
         article.appendChild(spec);
       }
+      if (view.status || view.exchange || view.platform || view.reason || view.entry || view.cardId) {
+        var trade = document.createElement('div');
+        trade.className = 'priority-item-main priority-item-trade';
+        if (view.exchange) {
+          var ex = document.createElement('span');
+          ex.textContent = view.exchange;
+          trade.appendChild(ex);
+        }
+        if (view.platform) {
+          var plat = document.createElement('span');
+          plat.textContent = view.platform;
+          trade.appendChild(plat);
+        }
+        if (view.status) {
+          var st = document.createElement('span');
+          st.className = 'priority-status is-' + String(view.status).toLowerCase();
+          st.textContent = view.status === 'waiting' ? '待触发区间市价'
+            : view.status === 'ok' || view.status === 'filled' ? '成功'
+            : view.status === 'failed' || view.status === 'fail' ? '失败'
+            : view.status;
+          trade.appendChild(st);
+        }
+        if (view.entry) {
+          var en = document.createElement('span');
+          en.textContent = '入场 ' + view.entry;
+          trade.appendChild(en);
+        }
+        if (view.cardId) {
+          var cid = document.createElement('span');
+          cid.textContent = '#' + view.cardId;
+          trade.appendChild(cid);
+        }
+        if (view.reason) {
+          var rs = document.createElement('span');
+          rs.className = 'priority-reason';
+          rs.textContent = view.reason;
+          trade.appendChild(rs);
+        }
+        article.appendChild(trade);
+      }
       if (view.text) {
         var text = document.createElement('p');
         text.className = 'priority-item-text';
         text.textContent = view.text;
+        if (item.id) text.setAttribute('data-fold-id', item.id);
         article.appendChild(text);
       }
       list.appendChild(article);
     });
+    if (folded.hidden > 0 || !!listExpanded[foldKey]) {
+      var more = document.createElement('button');
+      more.type = 'button';
+      more.className = 'priority-fold-btn';
+      more.textContent = listExpanded[foldKey]
+        ? '收起'
+        : ('展开其余 ' + folded.hidden + ' 条');
+      more.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        listExpanded[foldKey] = !listExpanded[foldKey];
+        renderList();
+      });
+      more.addEventListener('dblclick', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      list.appendChild(more);
+    }
+    prepareTextFolds(list);
+  }
+
+  function prepareTextFolds(list) {
+    if (!list || typeof requestAnimationFrame !== 'function') return;
+    requestAnimationFrame(function () {
+      var nodes = list.querySelectorAll('.priority-item-text[data-fold-id]');
+      for (var i = 0; i < nodes.length; i++) {
+        wireTextFold(nodes[i]);
+      }
+    });
+  }
+
+  function wireTextFold(textEl) {
+    if (!textEl || textEl.getAttribute('data-fold-ready') === '1') return;
+    var id = textEl.getAttribute('data-fold-id');
+    if (!id) return;
+    var expanded = !!textExpanded[id];
+    textEl.classList.toggle('is-folded', !expanded);
+    var overflows;
+    if (expanded) {
+      textEl.classList.add('is-folded');
+      overflows = textEl.scrollHeight > textEl.clientHeight + 1;
+      textEl.classList.remove('is-folded');
+    } else {
+      overflows = textEl.scrollHeight > textEl.clientHeight + 1;
+      if (!overflows) textEl.classList.remove('is-folded');
+    }
+    if (!overflows) return;
+    textEl.setAttribute('data-fold-ready', '1');
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'priority-more';
+    btn.textContent = expanded ? '收起' : '展开';
+    btn.addEventListener('click', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      textExpanded[id] = !textExpanded[id];
+      renderList();
+    });
+    btn.addEventListener('dblclick', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    });
+    if (textEl.parentNode) textEl.parentNode.insertBefore(btn, textEl.nextSibling);
+  }
+
+  function paintRangeButtons(host) {
+    if (!host) return;
+    host.textContent = '';
+    var current = currentRange();
+    ITEM_RANGE_OPTIONS.forEach(function (opt) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('data-range', opt.id);
+      btn.className = current === opt.id ? 'is-on' : '';
+      btn.textContent = opt.name;
+      btn.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        writeRangeKey(opt.id);
+        render();
+      });
+      btn.addEventListener('dblclick', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      host.appendChild(btn);
+    });
+  }
+
+  function renderRangeBars() {
+    var footerBar = document.getElementById('priorityFooterRange');
+    var listBar = document.getElementById('priorityRangeBar');
+    var hint = document.getElementById('priorityFilterHint');
+    if (footerBar) footerBar.hidden = false;
+    if (listBar) listBar.hidden = panelMode !== 'list';
+    paintRangeButtons(footerBar);
+    paintRangeButtons(listBar);
+    paintRangeButtons(document.getElementById('prioritySettingsRange'));
+    if (hint) {
+      var total = (state.items || []).length;
+      var visible = visibleItems().length;
+      var hiddenCount = total - visible;
+      if (currentRange() !== 'all' && hiddenCount > 0 && visible === 0) {
+        hint.hidden = false;
+        hint.textContent = '该时段暂无消息（当前：' + rangeOptionLabel(currentRange()) + '），已隐藏 ' + hiddenCount + ' 条，可切换范围';
+      } else if (currentRange() !== 'all' && hiddenCount > 0) {
+        hint.hidden = false;
+        hint.textContent = '已按「' + rangeOptionLabel(currentRange()) + '」筛选，另有 ' + hiddenCount + ' 条更早记录';
+      } else {
+        hint.hidden = true;
+        hint.textContent = '';
+      }
+    }
   }
 
   function renderSourceField() {
@@ -1019,6 +1479,7 @@ function mountFooter(footer) {
   function render() {
     renderFooter();
     renderSourceField();
+    renderRangeBars();
     if (panelMode) renderList();
   }
 
@@ -1231,11 +1692,15 @@ function mountFooter(footer) {
       var knownSources = Object.create(null);
       nextSources.forEach(function (source) { knownSources[source.id] = true; });
       knownSources[OI_REPORT_SOURCE_ID] = true;
-      state.sources = withOiReportSource(nextSources);
-      var oiNow = state.items.filter(function (item) {
-        return item && item.source === OI_REPORT_SOURCE_ID;
+      Object.keys(localPriorityAlwaysOn()).forEach(function (id) { knownSources[id] = true; });
+      state.sources = arrangePrioritySources(nextSources);
+      var localNow = state.items.filter(function (item) {
+        return item && isLocalPrioritySourceId(item.source);
       });
-      nextItems = replaceSourceItems(nextItems, OI_REPORT_SOURCE_ID, oiNow);
+      var relayOnly = nextItems.filter(function (item) {
+        return item && !isLocalPrioritySourceId(item.source);
+      });
+      nextItems = mergeItems(relayOnly, localNow);
       state.items = nextItems.filter(function (item) { return item && knownSources[item.source]; });
       var snapshotIds = itemIdSet(snapshotItems);
       // HTTP history is not a live arrival.
@@ -1353,21 +1818,43 @@ function mountFooter(footer) {
     });
   }
 
+  function oiBaseCandidates() {
+    var list = [];
+    if (selectedOiBase) list.push(selectedOiBase);
+    OI_WEB_BASE_CANDIDATES.forEach(function (base) {
+      if (list.indexOf(base) === -1) list.push(base);
+    });
+    return list;
+  }
+
   function syncOiReports() {
-    var url = oiReportQueueUrl(DEFAULT_OI_WEB_BASE_URL);
-    if (!url) {
-      state.oiConfigured = false;
-      state.sources = withOiReportSource(state.sources);
-      render();
-      return Promise.resolve();
+    var bases = oiBaseCandidates();
+    function tryAt(i) {
+      if (i >= bases.length) {
+        selectedOiBase = '';
+        state.oiConfigured = false;
+        state.sources = arrangePrioritySources(state.sources);
+        render();
+        return Promise.resolve();
+      }
+      var url = oiReportQueueUrl(bases[i]);
+      if (!url) return tryAt(i + 1);
+      return fetchOiReportQueue(url).then(function (body) {
+        selectedOiBase = bases[i];
+        return body;
+      }, function () {
+        if (selectedOiBase === bases[i]) selectedOiBase = '';
+        return tryAt(i + 1);
+      });
     }
-    return fetchOiReportQueue(url).then(function (body) {
+    return tryAt(0).then(function (body) {
+      if (!body) return;
       var items = parseOiReportQueue(body);
       var previous = itemIdSet(state.items.filter(function (item) {
         return item && item.source === OI_REPORT_SOURCE_ID;
       }));
       state.oiConfigured = true;
-      state.sources = withOiReportSource(state.sources);
+      state.sources = arrangePrioritySources(state.sources);
       state.items = replaceSourceItems(state.items, OI_REPORT_SOURCE_ID, items);
       if (oiReady) {
         publishNotices('live', items.filter(function (item) {
@@ -1381,7 +1868,7 @@ function mountFooter(footer) {
     }).catch(function (err) {
       state.oiConfigured = false;
       quietLog(err);
-      state.sources = withOiReportSource(state.sources);
+      state.sources = arrangePrioritySources(state.sources);
       render();
     });
   }
@@ -1390,6 +1877,176 @@ function mountFooter(footer) {
     if (oiTimer) clearInterval(oiTimer);
     syncOiReports();
     oiTimer = setInterval(syncOiReports, OI_REPORT_POLL_MS);
+  }
+
+  var feedTimer = null;
+  var feedSocket = null;
+  var feedSession = 0;
+  var selectedAutoscriptBase = '';
+  var selectedOiBase = '';
+  var feedReady = false;
+
+  function fetchAutoscriptFeed(url, secret) {
+    var tauri = window.__TAURI__;
+    if (tauri && tauri.core && tauri.core.invoke) {
+      return tauri.core.invoke('autoscript_live_feed_get', { url: url, secret: secret || '' }).then(function (res) {
+        var status = res && res.status;
+        if (!status || status < 200 || status >= 300) {
+          throw new Error('autoscript feed HTTP ' + (status || 0));
+        }
+        try {
+          return JSON.parse((res && res.body) || '{}');
+        } catch (e) {
+          throw new Error('autoscript feed invalid json');
+        }
+      }).catch(function (err) {
+        if (typeof fetch !== 'function') throw err;
+        var headers = { Accept: 'application/json' };
+        if (secret) {
+          headers.Authorization = 'Bearer ' + secret;
+          headers['X-Relay-Secret'] = secret;
+        }
+        return fetch(url, { headers: headers, cache: 'no-store', credentials: 'omit' }).then(function (res) {
+          if (!res.ok) throw new Error('autoscript feed HTTP ' + res.status);
+          return res.json();
+        });
+      });
+    }
+    if (typeof fetch !== 'function') {
+      return Promise.reject(new Error('autoscript feed fetch unavailable'));
+    }
+    var headers = { Accept: 'application/json' };
+    if (secret) {
+      headers.Authorization = 'Bearer ' + secret;
+      headers['X-Relay-Secret'] = secret;
+    }
+    return fetch(url, { headers: headers, cache: 'no-store', credentials: 'omit' }).then(function (res) {
+      if (!res.ok) throw new Error('autoscript feed HTTP ' + res.status);
+      return res.json();
+    });
+  }
+
+  function applyAutoscriptItems(nextItems, origin) {
+    var previous = itemIdSet(state.items.filter(function (item) {
+      return item && isAutoscriptFeedSourceId(item.source);
+    }));
+    var ids = [];
+    AUTOSCRIPT_FEED_SOURCES.forEach(function (src) { ids.push(src.id); });
+    KOLVIP_AUTOTRADE_SOURCES.forEach(function (src) { ids.push(src.id); });
+    var merged = state.items.filter(function (item) {
+      return item && !isAutoscriptFeedSourceId(item.source);
+    });
+    ids.forEach(function (sid) {
+      merged = replaceSourceItems(merged, sid, (nextItems || []).filter(function (item) {
+        return item && item.source === sid;
+      }));
+    });
+    state.autoscriptConfigured = true;
+    state.sources = arrangePrioritySources(state.sources);
+    state.items = merged;
+    var arrived = nextItems.filter(function (item) { return item && item.id && !previous[item.id]; });
+    if (feedReady) publishNotices(origin || 'live', arrived, previous);
+    else {
+      publishNotices('snapshot', nextItems, previous);
+      feedReady = true;
+    }
+    render();
+  }
+
+  function autoscriptBaseCandidates() {
+    var list = [];
+    if (selectedAutoscriptBase) list.push(selectedAutoscriptBase);
+    AUTOSCRIPT_FEED_BASE_CANDIDATES.forEach(function (base) {
+      if (list.indexOf(base) === -1) list.push(base);
+    });
+    return list;
+  }
+
+  function pullAutoscriptFeed(base, secret) {
+    var sourcesUrl = autoscriptFeedSourcesUrl(base);
+    if (!sourcesUrl) return Promise.reject(new Error('autoscript feed url empty'));
+    return fetchAutoscriptFeed(sourcesUrl, secret).then(function (body) {
+      var listed = parseSources(body);
+      if (!listed.length) listed = AUTOSCRIPT_FEED_SOURCES.concat(KOLVIP_AUTOTRADE_SOURCES);
+      return Promise.all(listed.map(function (source) {
+        return fetchAutoscriptFeed(autoscriptFeedQueueUrl(base, source.id, QUEUE_LIMIT), secret).then(function (payload) {
+          return parseQueueItems(payload).filter(function (item) { return item.source === source.id; });
+        }, function () { return []; });
+      })).then(function (groups) {
+        var next = [];
+        groups.forEach(function (g) { next = next.concat(g); });
+        selectedAutoscriptBase = base;
+        applyAutoscriptItems(next, 'snapshot');
+      });
+    });
+  }
+
+  function syncAutoscriptFeed() {
+    var cfg = readConfig();
+    var secret = cfg && cfg.secret ? cfg.secret : '';
+    var bases = autoscriptBaseCandidates();
+    function tryAt(i) {
+      if (i >= bases.length) {
+        selectedAutoscriptBase = '';
+        state.autoscriptConfigured = false;
+        state.sources = arrangePrioritySources(state.sources);
+        render();
+        return Promise.resolve();
+      }
+      return pullAutoscriptFeed(bases[i], secret).catch(function (err) {
+        quietLog(err);
+        if (selectedAutoscriptBase === bases[i]) selectedAutoscriptBase = '';
+        return tryAt(i + 1);
+      });
+    }
+    return tryAt(0);
+  }
+
+  function stopAutoscriptSocket() {
+    var ws = feedSocket;
+    feedSocket = null;
+    if (!ws) return;
+    try { ws.close(); } catch (e) {}
+  }
+
+  function openAutoscriptSocket(token) {
+    var cfg = readConfig();
+    var url = autoscriptFeedWebSocketUrl(selectedAutoscriptBase || DEFAULT_AUTOSCRIPT_FEED_BASE_URL, cfg && cfg.secret ? cfg.secret : '');
+    if (!url || typeof WebSocket === 'undefined') return;
+    var ws;
+    try { ws = new WebSocket(url); } catch (e) { return; }
+    feedSocket = ws;
+    ws.onmessage = function (ev) {
+      if (token !== feedSession) return;
+      var data;
+      try { data = JSON.parse(ev.data); } catch (e) { return; }
+      if (!data || data.type !== 'priority_card') return;
+      if (!isAutoscriptFeedSourceId(data.source)) return;
+      var known = itemIdSet(state.items);
+      var arrived = ingestPriorityFrame([], data);
+      state.items = ingestPriorityFrame(state.items, data);
+      if (data.source) ensureSource(data.source);
+      state.autoscriptConfigured = true;
+      publishNotices('live', arrived, known);
+      render();
+    };
+    ws.onclose = function () {
+      if (feedSocket === ws) feedSocket = null;
+    };
+  }
+
+  function startAutoscriptFeed() {
+    feedSession += 1;
+    var token = feedSession;
+    stopAutoscriptSocket();
+    if (feedTimer) clearInterval(feedTimer);
+    syncAutoscriptFeed().then(function () {
+      if (token !== feedSession) return;
+      openAutoscriptSocket(token);
+    });
+    feedTimer = setInterval(function () {
+      syncAutoscriptFeed();
+    }, AUTOSCRIPT_FEED_POLL_MS);
   }
 
   function restart() {
@@ -1407,10 +2064,10 @@ function mountFooter(footer) {
     var cfg = readConfig();
     state.networkConfigured = !!cfg.connect;
     state.lastError = '';
-    state.sources = withOiReportSource(state.networkConfigured ? state.sources : DEFAULT_SOURCES);
+    state.sources = arrangePrioritySources(state.networkConfigured ? state.sources : DEFAULT_SOURCES);
     if (!state.networkConfigured) {
       state.items = state.items.filter(function (item) {
-        return item && item.source === OI_REPORT_SOURCE_ID;
+        return item && isLocalPrioritySourceId(item.source);
       });
       render();
       return;
@@ -1423,9 +2080,11 @@ function mountFooter(footer) {
     state.lastError = '';
     var sources = parseSources({ sources: snap && snap.sources });
     var snapItems = parseQueueItems({ items: snap && snap.items });
-    var oiKeep = state.items.filter(function (item) { return item && item.source === OI_REPORT_SOURCE_ID; });
-    state.sources = withOiReportSource(sources.length ? sources : DEFAULT_SOURCES);
-    state.items = mergeItems(oiKeep, snapItems);
+    var localKeep = state.items.filter(function (item) { return item && isLocalPrioritySourceId(item.source); });
+    state.sources = arrangePrioritySources(sources.length ? sources : DEFAULT_SOURCES);
+    state.items = mergeItems(localKeep, snapItems.filter(function (item) {
+      return item && !isLocalPrioritySourceId(item.source);
+    }));
     render();
   }
 
@@ -1483,7 +2142,7 @@ function mountFooter(footer) {
   api.openList = openList;
   api.closePanel = closePanel;
   api.footerModel = function () {
-    return footerRows(state.sources, state.items, loadSeen(), displayConfigured(), { oi_report: true });
+    return footerRows(state.sources, visibleItems(), loadSeen(), displayConfigured(), localPriorityAlwaysOn());
   };
 
   var gear = document.getElementById('prioritySettingsBtn');
@@ -1542,12 +2201,13 @@ function mountFooter(footer) {
     if (!event.key) return;
     if (event.key === STORAGE_KEYS.baseUrl || event.key === STORAGE_KEYS.secret || event.key === STORAGE_KEYS.notify) {
       hydrateConfig();
-    } else if (event.key === STORAGE_KEYS.seen) render();
+    } else if (event.key === STORAGE_KEYS.seen || event.key === STORAGE_KEYS.range) render();
   });
 
   render();
   hydrateConfig();
   startOiPoll();
+  startAutoscriptFeed();
 }
 
 if (typeof document !== 'undefined') {

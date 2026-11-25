@@ -103,3 +103,15 @@ msg-relay 不返回 CORS 头，气泡页面直接 `fetch` 带密钥会被 WebVie
 ## 云 CI / 本机构建说明
 
 在缺少 WebView 系统库的环境（例如部分 Linux CI）上可能无法完成 `tauri build` 链接步骤；结构与本 README 仍可在本地 Windows / macOS / 完整 Linux 桌面环境按上文命令构建。
+
+
+## auto-script 实时源（气泡页脚）
+
+胖猫社区仍走 msg-relay：`GET /queue/priority`、`WS /ws/priority?token=`。  
+本机 auto-script 另启兼容协议服务，默认 `http://127.0.0.1:3852`：
+
+- `GET /queue/priority/sources`
+- `GET /queue/priority?source=&limit=`
+- `WS /ws/priority?token=`（若配置了 `TASKOS_LIVE_FEED_TOKEN` 或 `PRIORITY_QUEUE_SECRET`，非本机必须带 token）
+
+气泡行顺序：BTC/ETH 5m 放量影线 → 信号卡片 / 自动挂单或下单 / CDP 发布 → 胖猫社区 → kolvip 自动下单白名单频道（华尔街女王、零下二度VIP禁言群、kacang-团队、FX-黄金信号、币安杀手、熬鹰）。时间显示为 Asia/Hong_Kong。桌面壳用命令 `autoscript_live_feed_get` 代发本机 3852 的上述 GET。Mac 上启动：`cd auto-script/discord-collector && pnpm run taskos:live-feed`。
