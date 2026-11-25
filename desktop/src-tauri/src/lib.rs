@@ -54,7 +54,7 @@ fn switch_main_to_bundled_frontend(app: &tauri::AppHandle) -> Result<(), String>
 }
 
 /// Circle stays 132×168. Extra width/height is the priority footer under it.
-const BUBBLE_COMPACT_W: f64 = 248.0;
+const BUBBLE_COMPACT_W: f64 = 300.0;
 const BUBBLE_COMPACT_H: f64 = 236.0;
 const BUBBLE_LIST_W: f64 = 420.0;
 const BUBBLE_LIST_H: f64 = 600.0;

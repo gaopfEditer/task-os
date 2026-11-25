@@ -60,7 +60,14 @@ npm run tauri icon ../favicon.svg
 
 悬浮窗圆形行情核仍是 **132×168**。圆下方有一条优先消息页脚，是 [msg-relay-service](https://github.com/gaopfEditer/msg-relay-service) 优先队列的桌面端，不另起协议。当前来源只有 **胖猫社区**（`pangmao`）；`GET /queue/priority/sources` 以后如果返回更多来源，页脚会逐行显示。
 
-每一行依次是：**名称**、**消息数**（当前拉到的该来源消息）、**新交易卡片数**（带 `symbol` / `direction` / `yield`，或 `meta.via` 为 `ocr` / `text`，且还没在列表里打开过）。名称是来源显示标签，灰色、只读，不能在设置里改名。双击某一行或页脚，打开完整列表（时间、来源、币种、方向、收益、短文、`meta.via`）。打开后这些交易卡片不再算「新」，已读 id 记在本机。
+每一行依次是：**名称**、**消息数**（当前拉到的该来源消息）、**新交易卡片数**（带 `symbol` / `direction` / `yield`，或 `meta.via` 为 `ocr` / `text`，且还没在列表里打开过）、**特别提醒数**。名称是来源显示标签，灰色、只读，不能在设置里改名。双击某一行或页脚，打开完整列表（时间、来源、币种、方向、收益、短文、`meta.via`）。打开后这些交易卡片不再算「新」，已读 id 记在本机。「特别」是这些新卡里币种落在观察列表上的张数，不是另一套历史总数；已读后和新卡一起下降。新卡为 0 时仍显示「新卡 0」，特别同样始终显示（空列表时为「特别 0」）。
+
+观察列表默认空，不预置币种。两处配置，本机键优先：
+
+- 代码钩子：`board-extras/priority-footer.js` 的 `SPECIAL_SYMBOLS`（默认 `[]`）。改完后重新同步前端。
+- 本机覆盖：`localStorage` 键 `taskos.desktop.priority.specialSymbols`。键存在时替换代码列表（空字符串表示没有特别命中）；键不存在时用 `SPECIAL_SYMBOLS`。逗号、分号或空白分隔。`BTC`、`BTCUSDT`、`btc/usdt`、`BTC.P` 视为同一币种。
+
+临时确认：在气泡页执行 `localStorage.setItem('taskos.desktop.priority.specialSymbols', 'BTC')` 后重新加载。该频道里尚未打开过的 BTC 新交易卡会让「特别」加一，且不会大于「新卡」。`localStorage.removeItem('taskos.desktop.priority.specialSymbols')` 后回到代码列表。
 
 连接方式与中转站相同：
 
@@ -82,6 +89,7 @@ msg-relay 不返回 CORS 头，气泡页面直接 `fetch` 带密钥会被 WebVie
 | `taskos.desktop.priority.secret` | 中转密钥的缓存，仅本机，由用户自己填写 |
 | `taskos.desktop.priority.notify` | `0` 关闭新卡片系统通知；缺省或其它值表示开启 |
 | `taskos.desktop.priority.seen` | 已打开的交易卡片 id |
+| `taskos.desktop.priority.specialSymbols` | 特别提醒观察列表。键存在时替换代码里的 `SPECIAL_SYMBOLS`；不写这个键则用代码列表（默认空） |
 
 来源名称（默认 **胖猫社区**）在页脚和两处设置里都是灰色只读，服务器来源列表还没到时仍显示这个默认名。
 
