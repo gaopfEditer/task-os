@@ -1,8 +1,43 @@
 {
   "version": 1,
-  "updated_at": "2026-11-25T16:00:05+08:00",
-  "last_slot": "2026-11-25T16:00+08:00",
+  "updated_at": "2026-11-25T20:00:00+08:00",
+  "last_slot": "2026-11-25T20:00+08:00",
   "items": [
+    {
+      "id": "vpn:20:2026-11-25",
+      "category": "vpn",
+      "ts": "2026-11-25T20:00:00+08:00",
+      "title": "VPN Guard · OK · clash",
+      "body": "健康: 正常\n出口归属: clash",
+      "meta": {
+        "ok": true,
+        "owner": "clash"
+      }
+    },
+    {
+      "id": "meta:publish:gap:1795608000",
+      "category": "publish",
+      "ts": "2026-11-25T20:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-25.log",
+      "meta": {
+        "level": "info"
+      }
+    },
+    {
+      "id": "sig:list_realtime:2125557397322342551",
+      "category": "signal",
+      "ts": "2026-11-25T19:49:09+08:00",
+      "title": "list_realtime · mirro7777 · 0x83f0653b69069db15dff55cf2598b08021487777 long",
+      "body": "RT @BossyMarvin: It is deployed on @BNBCHAIN . Please check the CA:\n\n0x83f0653b69069db15dff55cf2598b08021487777\n\nThere i…\nRT @BossyMarvin: It is deployed on @BNBCHAIN . Please check the CA:  0x83f0653b69069db15dff55cf2598b08021487777  There is a very small Hava…\nhttps://x.com/Mirro7777/status/2125557397322342551",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "mirro7777",
+        "profile": "mirro7777",
+        "source_mode": "list_realtime"
+      }
+    },
     {
       "id": "meta:bitget:api:1795593600",
       "category": "bitget",
