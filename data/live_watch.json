@@ -1,8 +1,252 @@
 {
   "version": 1,
-  "updated_at": "2026-11-26T20:00:00+08:00",
-  "last_slot": "2026-11-26T20:00+08:00",
+  "updated_at": "2026-11-27T00:00:00+08:00",
+  "last_slot": "2026-11-27T00:00+08:00",
   "items": [
+    {
+      "id": "pub:hist:4a8e978a7cee",
+      "category": "publish",
+      "ts": "2026-11-26T21:57:31",
+      "title": "控制台发布 · draft (0/0)",
+      "body": "今晚晒单 · 只挑盈利了结\n\n平台: gate, okx, binance_square, bitget",
+      "meta": {
+        "source": "publish_history",
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pub:hist:750e1c4fcc83",
+      "category": "publish",
+      "ts": "2026-11-26T21:57:31",
+      "title": "控制台发布 · draft (0/0)",
+      "body": "【盘面跟读｜BTC】做多 · 精选\n\n平台: gate, okx, binance_square, bitget",
+      "meta": {
+        "source": "publish_history",
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pub:hist:42b237d80673",
+      "category": "publish",
+      "ts": "2026-11-26T21:57:31",
+      "title": "控制台发布 · draft (0/0)",
+      "body": "【跟单参考｜XAU】做空 · 开仓\n\n平台: gate, okx, binance_square, bitget",
+      "meta": {
+        "source": "publish_history",
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pub:hist:317ff7f738d0",
+      "category": "publish",
+      "ts": "2026-11-26T22:03:42",
+      "title": "控制台发布 · draft (0/0)",
+      "body": "平台: gate, okx, binance_square, bitget",
+      "meta": {
+        "source": "publish_history",
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pub:hist:7fa4897093c1",
+      "category": "publish",
+      "ts": "2026-11-26T22:03:42",
+      "title": "控制台发布 · draft (0/0)",
+      "body": "平台: gate, okx, binance_square, bitget",
+      "meta": {
+        "source": "publish_history",
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pub:hist:d84cb04c1036",
+      "category": "publish",
+      "ts": "2026-11-26T22:03:42",
+      "title": "控制台发布 · draft (0/0)",
+      "body": "平台: gate, okx, binance_square, bitget",
+      "meta": {
+        "source": "publish_history",
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pub:hist:8e3c6e3639e2",
+      "category": "publish",
+      "ts": "2026-11-26T22:03:42",
+      "title": "控制台发布 · draft (0/0)",
+      "body": "平台: gate, okx, binance_square, bitget",
+      "meta": {
+        "source": "publish_history",
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pub:hist:fc54ecf7ce52",
+      "category": "publish",
+      "ts": "2026-11-26T22:03:42",
+      "title": "控制台发布 · draft (0/0)",
+      "body": "平台: gate, okx, binance_square, bitget",
+      "meta": {
+        "source": "publish_history",
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:b6eb0a9434e2:2026-11-26T23:17:25+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T23:17:25+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 3, \"total\": 4, \"message\": \"发布结束 成功 3/4\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:bitget:body:b6eb0a9434e2:2026-11-26T23:17:25+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T23:17:25+08:00",
+      "title": "✗ bitget platform_fail",
+      "body": "已点击「发布」但帖子未发出：编辑区还在（49 字），点击没有发出去",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "bitget",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:binance_square:body:b6eb0a9434e2:2026-11-26T23:15:17+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T23:15:17+08:00",
+      "title": "✓ binance_square platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "binance_square",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:okx:body:b6eb0a9434e2:2026-11-26T23:14:45+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T23:14:45+08:00",
+      "title": "✓ okx platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "okx",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:gate:body:b6eb0a9434e2:2026-11-26T23:13:51+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T23:13:51+08:00",
+      "title": "✓ gate platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "gate",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:b6eb0a9434e2:2026-11-26T23:13:17+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T23:13:17+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"gate\", \"okx\", \"binance_square\", \"bitget\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 4 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:07a0c71f6514:2026-11-26T22:47:30+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T22:47:30+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 4, \"total\": 4, \"message\": \"发布结束 成功 4/4\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:bitget:body:07a0c71f6514:2026-11-26T22:47:30+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T22:47:30+08:00",
+      "title": "✓ bitget platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "bitget",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:binance_square:body:07a0c71f6514:2026-11-26T22:46:57+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T22:46:57+08:00",
+      "title": "✓ binance_square platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "binance_square",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:okx:body:07a0c71f6514:2026-11-26T22:46:18+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T22:46:18+08:00",
+      "title": "✓ okx platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "okx",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:gate:body:07a0c71f6514:2026-11-26T22:44:57+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T22:44:57+08:00",
+      "title": "✓ gate platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "gate",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:07a0c71f6514:2026-11-26T22:44:20+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T22:44:20+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"gate\", \"okx\", \"binance_square\", \"bitget\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 4 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
     {
       "id": "vpn:20:2026-11-26",
       "category": "vpn",
