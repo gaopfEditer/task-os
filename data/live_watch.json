@@ -1,8 +1,47 @@
 {
   "version": 1,
-  "updated_at": "2026-11-26T16:00:00+08:00",
-  "last_slot": "2026-11-26T16:00+08:00",
+  "updated_at": "2026-11-26T20:00:00+08:00",
+  "last_slot": "2026-11-26T20:00+08:00",
   "items": [
+    {
+      "id": "vpn:20:2026-11-26",
+      "category": "vpn",
+      "ts": "2026-11-26T20:00:00+08:00",
+      "title": "VPN Guard · OK · clash",
+      "body": "健康: 正常\n出口归属: clash",
+      "meta": {
+        "ok": true,
+        "owner": "clash"
+      }
+    },
+    {
+      "id": "sig:binance_square:392387751368860",
+      "category": "signal",
+      "ts": "2026-11-26T18:29:50+08:00",
+      "title": "币安广场 · yanchibit · BTC long",
+      "body": "11.26 #BTC  日内行情分析，二探结束？多单怒赚中… 继续向上测试？\nhttps://www.binance.com/zh-CN/square/post/392387751368860",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "yanchibit",
+        "profile": "yanchibit",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:list_realtime:2125900271884845552",
+      "category": "signal",
+      "ts": "2026-11-26T18:31:36+08:00",
+      "title": "list_realtime · btc563 · BTC long",
+      "body": "11.26 #BTC 日内行情分析\n\n二探结束？多单获利中，继续向上测试！ https://t.co/6FfOx8z3Lf\nhttps://x.com/BTC563/status/2125900271884845552",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "btc563",
+        "profile": "btc563",
+        "source_mode": "list_realtime"
+      }
+    },
     {
       "id": "pub:run_end:?:body:6ea7a61bf1b2:2026-11-26T12:55:37+08:00",
       "category": "publish",
