@@ -1,8 +1,222 @@
 {
   "version": 1,
-  "updated_at": "2026-11-26T00:00:00+08:00",
-  "last_slot": "2026-11-26T00:00+08:00",
+  "updated_at": "2026-11-26T08:00:03+08:00",
+  "last_slot": "2026-11-26T08:00+08:00",
   "items": [
+    {
+      "id": "meta:bitget:api:1795651200",
+      "category": "bitget",
+      "ts": "2026-11-26T08:00:00+08:00",
+      "title": "Collector API 不可用",
+      "body": "http://127.0.0.1:3851/api/discord/signal-cards?from=2026-11-26T00%3A00%3A00%2B08%3A00&to=2026-11-26T08%3A00%3A00%2B08%3A00&limit=200\nHTTP Error 502: Bad Gateway",
+      "meta": {
+        "level": "info"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:efe307985a01:2026-11-26T01:21:00+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T01:21:00+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 3, \"total\": 4, \"message\": \"发布结束 成功 3/4\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:bitget:body:efe307985a01:2026-11-26T01:21:00+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T01:21:00+08:00",
+      "title": "✓ bitget platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "bitget",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:binance_square:body:efe307985a01:2026-11-26T01:20:29+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T01:20:29+08:00",
+      "title": "✗ binance_square platform_fail",
+      "body": "币安广场没有打开，当前是 未知页面",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "binance_square",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:okx:body:efe307985a01:2026-11-26T01:20:10+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T01:20:10+08:00",
+      "title": "✓ okx platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "okx",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:gate:body:efe307985a01:2026-11-26T01:19:41+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T01:19:41+08:00",
+      "title": "✓ gate platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "gate",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:efe307985a01:2026-11-26T01:19:13+08:00",
+      "category": "publish",
+      "ts": "2026-11-26T01:19:13+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"gate\", \"okx\", \"binance_square\", \"bitget\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 4 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "sig:binance_square:391751801854230",
+      "category": "signal",
+      "ts": "2026-11-24T00:00:00+08:00",
+      "title": "币安广场 · btc7873 · BTC short",
+      "body": "Btc星辰 · 11月24日 只要会做空，你就能挣钱的行情。 哪个最弱空哪个，什么存储，比特币，统统都是空空空。 BTC +0.44% 108 122 1 108 118 82.9k 100.1k\nhttps://www.binance.com/zh-CN/square/post/391751801854230",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "btc7873",
+        "profile": "btc7873",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:390692878283046",
+      "category": "signal",
+      "ts": "2026-11-21T00:00:00+08:00",
+      "title": "币安广场 · sanmageshuai · BTC short",
+      "body": "三马哥 · 11月21日 三马哥做到了！昨天黑色星期五告诉你们我们周末也做单，三马哥为此戒酒戒色戒烟戒游戏。 不管是公开发帖+直播，还是币安vip策略告诉你们置顶空单吃肉，现在我做到了，利润超过120%+了，至少不能亏哦。#BTC BTC …\n三马哥 · 11月21日 三马哥做到了！昨天黑色星期五告诉你们我们周末也做单，三马哥为此戒酒戒色戒烟戒游戏。 不管是公开发帖+直播，还是币安vip策略告诉你们置顶空单吃肉，现在我做到了，利润超过120%+了，至少不能亏哦。#BTC BTC +0.45% 5 15 13.6k\nhttps://www.binance.com/zh-CN/square/post/390692878283046",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "sanmageshuai",
+        "profile": "sanmageshuai",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:391378486132378",
+      "category": "signal",
+      "ts": "2026-11-23T22:03:08+08:00",
+      "title": "币安广场 · sanmageshuai · BTC short",
+      "body": "三马哥 · 11月23日 黄仁勋回归 假新闻 准备在65000～66600之间短线做空BTC 带上止损 BTC +0.48% 20 25 22.5k\nhttps://www.binance.com/zh-CN/square/post/391378486132378",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "sanmageshuai",
+        "profile": "sanmageshuai",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:391386381666710",
+      "category": "signal",
+      "ts": "2026-11-26T04:15:47+08:00",
+      "title": "币安广场 · sanmageshuai · ETH,BTC short",
+      "body": "三马哥 · 11月23日 ETH空单在1780止盈一波或者BTC回调到62088止盈一波，先到先的对标，最高拉升到1845都说了误差5U都可以进包括第二个点位，因为挂单和要跑步进场的人太多了，会造成价格挤压 三马哥 · 11月23日 ETH…\n三马哥 · 11月23日 ETH空单在1780止盈一波或者BTC回调到62088止盈一波，先到先的对标，最高拉升到1845都说了误差5U都可以进包括第二个点位，因为挂单和要跑步进场的人太多了，会造成价格挤压 三马哥 · 11月23日 ETH 睡觉挂单空（11连胜） 仓位思路强平控制在2500U及以上 挂1850 100倍 2%保证金 再挂1938 100倍 3%保证金 第一止盈 （这两个点位吃上后短线会浮盈 你赚了不要亏不能做长线） 止盈70%移动保本 止损2000 BTC +0.48% ETH +0.52% 10 12.3k\nhttps://www.binance.com/zh-CN/square/post/391386381666710",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "sanmageshuai",
+        "profile": "sanmageshuai",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:391436023314044",
+      "category": "signal",
+      "ts": "2026-11-26T04:15:28+08:00",
+      "title": "币安广场 · sanmageshuai · BTC short",
+      "body": "明天他们睡醒仓位又又又没了，因为BTC跌到61388空单自动止盈了，再次恭喜跟上的朋友！#BTC 👉🏻[记录提前告诉你了61388](https://app.binance.com/uni-qr/cpos/391404645431006?r…\n明天他们睡醒仓位又又又没了，因为BTC跌到61388空单自动止盈了，再次恭喜跟上的朋友！#BTC 👉🏻[记录提前告诉你了61388](https://app.binance.com/uni-qr/cpos/391404645431006?r=SDR9QGU2&l=zh-CN&uco=YlhI6nVWAwXtxF1K2b4Utg&uc=app_square_share_link&us=copylink)\nhttps://www.binance.com/zh-CN/square/post/391436023314044",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "sanmageshuai",
+        "profile": "sanmageshuai",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:391678319256055",
+      "category": "signal",
+      "ts": "2026-11-24T18:23:09+08:00",
+      "title": "币安广场 · sanmageshuai · BTC,ETH short",
+      "body": "三马哥 · 11月24日 比特币高位做空后如何操作？ BTC +0.48% ETH +0.52% 5 12 8.6k\nhttps://www.binance.com/zh-CN/square/post/391678319256055",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "sanmageshuai",
+        "profile": "sanmageshuai",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:391715694357011",
+      "category": "signal",
+      "ts": "2026-11-24T20:55:14+08:00",
+      "title": "币安广场 · sanmageshuai · BTC short",
+      "body": "三马哥 · 11月24日 行情震荡继续，老手死于震荡，你看看那些人没事高位开多、低位做空亏损麻了，因为到现在还没清醒是什么行情。 单边行情追突破可以赚钱，但震荡行情占所有交易时间的比重非常大，基本每年有11个月都是震荡行情，所以左侧交易+严…\n三马哥 · 11月24日 行情震荡继续，老手死于震荡，你看看那些人没事高位开多、低位做空亏损麻了，因为到现在还没清醒是什么行情。 单边行情追突破可以赚钱，但震荡行情占所有交易时间的比重非常大，基本每年有11个月都是震荡行情，所以左侧交易+严格的止盈止损才能在市场上活下来。马丁格尔战法怕的是单边行情，因为他不止损。 说实话这一波BTC会让那些不可一世的装B的大仓位高杆杆受到清算，实际他们都开始慢慢的投降了，有的投降了，但我认为还不够，全部投降换一批KOL基本行情就见底了，很残酷但这也是事实。 BTC周二第一赌狗支撑位60000、比较牛B而且我们两次加…\nhttps://www.binance.com/zh-CN/square/post/391715694357011",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "sanmageshuai",
+        "profile": "sanmageshuai",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:392108856528219",
+      "category": "signal",
+      "ts": "2026-11-25T23:35:01+08:00",
+      "title": "币安广场 · sanmageshuai · BTC long",
+      "body": "三马哥 · 4小时 箱体震荡而已，BTC越接近55000比如今天57000那个位置做多就很舒服，越接近高点65000做空就会很舒服。 上涨短线小压力59188、60388。 #BTC BTC +0.50% 1 13 11.3k\nhttps://www.binance.com/zh-CN/square/post/392108856528219",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "sanmageshuai",
+        "profile": "sanmageshuai",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:392145224525168",
+      "category": "signal",
+      "ts": "2026-11-26T02:03:00+08:00",
+      "title": "币安广场 · square-creator-446e63a9fd9ef · SOXLB long",
+      "body": "$SOXLB 兄弟们都吃上了跑步进场已得吃\nhttps://www.binance.com/zh-CN/square/post/392145224525168",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "square-creator-446e63a9fd9ef",
+        "profile": "square-creator-446e63a9fd9ef",
+        "source_mode": "binance_square"
+      }
+    },
     {
       "id": "meta:publish:gap:1795622400",
       "category": "publish",
