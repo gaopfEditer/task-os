@@ -75,6 +75,9 @@ var DIRECTION_KEYS = ['direction', 'side', 'dir', '方向'];
 var YIELD_KEYS = ['yield', 'yield_pct', 'pnl', 'profit', '收益', '收益率'];
 var TEXT_BODY_KEYS = ['text', 'body', 'content', 'summary', 'message', '内容', '备注'];
 var TEXT_TITLE_KEYS = ['title', '摘要'];
+var CHANNEL_KEYS = ['channel', 'channelName', 'channel_name', '频道名称', '频道'];
+var PRICE_KEYS = ['price', 'currentPrice', 'current_price', 'lastPrice', 'markPrice', '当前价格', '现价'];
+var ENTRY_KEYS = ['entry', '入场'];
 
 export function normalizeBaseUrl(raw) {
   var s = String(raw || '').trim();
@@ -548,8 +551,10 @@ export function describeItem(item, sourceName) {
     id: item && typeof item.id === 'string' ? item.id : '',
     time: item && typeof item.createdAt === 'string' ? item.createdAt : '',
     sourceName: sourceName || (item && item.source) || '',
+    channel: stringFrom(firstEntry(card, CHANNEL_KEYS)),
     symbol: stringFrom(firstEntry(card, SYMBOL_KEYS)),
     direction: stringFrom(firstEntry(card, DIRECTION_KEYS)),
+    price: stringFrom(firstEntry(card, PRICE_KEYS)),
     yieldValue: yieldText(card, meta),
     text: shortText(card),
     via: meta.via === 'ocr' || meta.via === 'text' ? meta.via : '',
@@ -561,7 +566,7 @@ export function describeItem(item, sourceName) {
     exchange: stringFrom(firstEntry(card, ['exchange', '交易所'])) || String(meta.exchange || '').trim(),
     platform: stringFrom(firstEntry(card, ['platform', '平台'])) || String(meta.platform || '').trim(),
     reason: stringFrom(firstEntry(card, ['reason', '原因'])) || String(meta.reason || '').trim(),
-    entry: stringFrom(firstEntry(card, ['entry', '入场'])) || String(meta.entry || '').trim(),
+    entry: stringFrom(firstEntry(card, ENTRY_KEYS)) || String(meta.entry || '').trim(),
     cardId: stringFrom(firstEntry(card, ['cardId', '卡片'])) || String(meta.cardId || '').trim()
   };
 }
@@ -638,6 +643,106 @@ export function itemTimestampMs(item) {
   return NaN;
 }
 
+export function isSignalCard(item) {
+  if (!item || typeof item !== 'object') return false;
+  if (item.source === AUTOSCRIPT_CARD_SOURCE.id) return true;
+  var meta = metaOf(item);
+  var kind = String(meta.kind || '').trim();
+  var via = String(meta.via || '').trim();
+  return kind === 'card' || via === 'card';
+}
+
+export function latestSignalCard(items) {
+  var list = Array.isArray(items) ? items : [];
+  var best = null;
+  var bestTs = -Infinity;
+  for (var i = 0; i < list.length; i++) {
+    var item = list[i];
+    if (!isSignalCard(item)) continue;
+    var ts = itemTimestampMs(item);
+    if (!isFinite(ts)) ts = -1;
+    var preferSource = best && ts === bestTs
+      && item.source === AUTOSCRIPT_CARD_SOURCE.id
+      && best.source !== AUTOSCRIPT_CARD_SOURCE.id;
+    if (!best || ts > bestTs || preferSource) {
+      best = item;
+      bestTs = ts;
+    }
+  }
+  return best;
+}
+
+/** Compact footer hint for the newest 信号卡片. Missing fields are omitted; entry is used when no current price exists. */
+/** First 5 Unicode code points; longer names get a trailing '...'. Blank names stay blank. */
+export function truncateChannelName(name) {
+  var raw = String(name == null ? '' : name).trim();
+  if (!raw) return '';
+  var chars = [...raw];
+  if (chars.length <= 5) return chars.join('');
+  return chars.slice(0, 5).join('') + '...';
+}
+
+/** Compact ticker only (BTC, ETHUSDT, XAU/USD). Paragraphs are rejected. */
+export function compactHintSymbol(raw) {
+  var s = String(raw == null ? '' : raw).trim();
+  if (!s) return '';
+  if (/^[A-Za-z0-9.$/_-]{1,16}$/.test(s)) return s;
+  return '';
+}
+
+/** Compact 多/空/做多/LONG etc. Extracts a leading token; rejects a raw paragraph. */
+export function compactHintDirection(raw) {
+  var s = String(raw == null ? '' : raw).trim();
+  if (!s) return '';
+  var longTok = s.match(/^(做多|做空|多单|空单|long|short|buy|sell)/i);
+  if (longTok) {
+    var rest = s.slice(longTok[0].length);
+    if (!rest || /^[\s，,。；;：:、]/.test(rest)) return longTok[0];
+    return '';
+  }
+  var shortTok = s.match(/^(多|空)(?=$|[\s，,。；;：:、])/);
+  if (shortTok) return shortTok[1];
+  return '';
+}
+
+/**
+ * Short numeric price or range only. If entry is a long brief, take a range
+ * clearly at the start (e.g. 当前5.84-5.89附近…). Never keep 止盈/止损/理由/仓位.
+ */
+export function compactHintPrice(raw) {
+  var s = String(raw == null ? '' : raw).trim();
+  if (!s) return '';
+  if (/止盈|止损|理由|仓位|信心度|倍数|点位/.test(s) || [...s].length > 24) {
+    var start = s.replace(/^当前/, '');
+    var m = start.match(/^(\d+(?:\.\d+)?)(\s*[-–~至到]\s*)(\d+(?:\.\d+)?)/);
+    if (m) return m[1] + '-' + m[3];
+    var one = start.match(/^(\d+(?:\.\d+)?)/);
+    if (one && [...one[1]].length <= 12) return one[1];
+    return '';
+  }
+  if (/^\d+(?:\.\d+)?(?:\s*[-–~至到]\s*\d+(?:\.\d+)?)?$/.test(s)) return s;
+  return '';
+}
+
+export function formatLatestCardHint(item) {
+  if (!item) return '';
+  var view = describeItem(item, '');
+  var symbol = compactHintSymbol(view.symbol);
+  var direction = compactHintDirection(view.direction);
+  if (!symbol || !direction) return '';
+  var parts = [];
+  var channel = truncateChannelName(view.channel);
+  if (channel) parts.push(channel);
+  parts.push(symbol);
+  var price = compactHintPrice(view.price || view.entry);
+  if (price) parts.push(price);
+  parts.push(direction);
+  var ts = itemTimestampMs(item);
+  var time = isFinite(ts) ? formatTime(new Date(ts).toISOString()) : (view.time ? formatTime(view.time) : '');
+  if (time) parts.push(time);
+  return parts.join(' · ');
+}
+
 export function itemInRange(item, rangeKey, now) {
   var key = parseRangeKey(rangeKey);
   if (key === 'all') return true;
@@ -703,13 +808,39 @@ export function markSeen(map, sourceId, ids, cap) {
   return next;
 }
 
+export function autoscriptOrderIdentityId(item) {
+  if (!item || item.source !== AUTOSCRIPT_ORDER_SOURCE.id) {
+    return item && typeof item.id === 'string' ? item.id : '';
+  }
+  var card = item.card && typeof item.card === 'object' && !Array.isArray(item.card) ? item.card : {};
+  var meta = item.meta && typeof item.meta === 'object' && !Array.isArray(item.meta) ? item.meta : {};
+  var exchange = String(card.exchange || meta.exchange || '').trim().toLowerCase() || 'x';
+  var key = String(card.cardId != null && card.cardId !== '' ? card.cardId : (meta.cardId || '')).trim();
+  if (key) return 'order:' + exchange + ':' + key;
+  if (typeof item.id === 'string' && item.id.indexOf('order:') === 0) return item.id;
+  return typeof item.id === 'string' ? item.id : '';
+}
+
 export function mergeItems(existing, incoming) {
   var map = Object.create(null);
   var order = [];
   function upsert(item) {
     if (!item || typeof item.id !== 'string' || !item.id) return;
-    if (!Object.prototype.hasOwnProperty.call(map, item.id)) order.push(item.id);
-    map[item.id] = item;
+    if (!Object.prototype.hasOwnProperty.call(map, item.id)) {
+      order.push(item.id);
+      map[item.id] = item;
+      return;
+    }
+    var prev = map[item.id];
+    if (item.source === AUTOSCRIPT_ORDER_SOURCE.id && prev && prev.source === AUTOSCRIPT_ORDER_SOURCE.id) {
+      var ta = itemTimestampMs(item);
+      var tb = itemTimestampMs(prev);
+      if (!isFinite(ta)) ta = 0;
+      if (!isFinite(tb)) tb = 0;
+      map[item.id] = ta >= tb ? item : prev;
+    } else {
+      map[item.id] = item;
+    }
   }
   (existing || []).forEach(upsert);
   (incoming || []).forEach(upsert);
@@ -737,7 +868,7 @@ export function ingestPriorityFrame(items, frame) {
   if (typeof frame.source !== 'string' || !frame.source) return items || [];
   var card = frame.card && typeof frame.card === 'object' && !Array.isArray(frame.card) ? clonePlain(frame.card, {}) : {};
   var meta = frame.meta && typeof frame.meta === 'object' && !Array.isArray(frame.meta) ? clonePlain(frame.meta, {}) : {};
-  return mergeItems(items, [{
+  var row = {
     id: frame.id,
     source: frame.source,
     card: card,
@@ -745,14 +876,17 @@ export function ingestPriorityFrame(items, frame) {
     createdAt: typeof frame.createdAt === 'string' && frame.createdAt
       ? frame.createdAt
       : (isoFromMillis(frame && frame.createdAt) || isoFromMillis(frame && frame.created_at) || '')
-  }]);
+  };
+  var stableId = autoscriptOrderIdentityId(row);
+  if (stableId) row.id = stableId;
+  return mergeItems(items, [row]);
 }
 
 export function parseQueueItems(body) {
   var raw = body && Array.isArray(body.items) ? body.items : [];
   var out = [];
   raw.forEach(function (frame) {
-    var next = ingestPriorityFrame([], {
+    out = ingestPriorityFrame(out, {
       type: 'priority_card',
       id: frame && frame.id,
       source: frame && frame.source,
@@ -760,7 +894,6 @@ export function parseQueueItems(body) {
       meta: frame && frame.meta,
       createdAt: frame && frame.createdAt
     });
-    if (next.length) out.push(next[0]);
   });
   return out;
 }
@@ -847,6 +980,14 @@ var api = {
   queueUrl: queueUrl,
   toWebSocketUrl: toWebSocketUrl,
   isTradeCard: isTradeCard,
+  isSignalCard: isSignalCard,
+  latestSignalCard: latestSignalCard,
+  truncateChannelName: truncateChannelName,
+  compactHintSymbol: compactHintSymbol,
+  compactHintDirection: compactHintDirection,
+  compactHintPrice: compactHintPrice,
+  formatLatestCardHint: formatLatestCardHint,
+  autoscriptOrderIdentityId: autoscriptOrderIdentityId,
   describeItem: describeItem,
   formatTime: formatTime,
   sourceCounts: sourceCounts,
@@ -1450,18 +1591,28 @@ function mountFooter(footer) {
     paintRangeButtons(listBar);
     paintRangeButtons(document.getElementById('prioritySettingsRange'));
     if (hint) {
-      var total = (state.items || []).length;
-      var visible = visibleItems().length;
-      var hiddenCount = total - visible;
-      if (currentRange() !== 'all' && hiddenCount > 0 && visible === 0) {
+      var latestHint = formatLatestCardHint(latestSignalCard(state.items || []));
+      if (latestHint) {
         hint.hidden = false;
-        hint.textContent = '该时段暂无消息（当前：' + rangeOptionLabel(currentRange()) + '），已隐藏 ' + hiddenCount + ' 条，可切换范围';
-      } else if (currentRange() !== 'all' && hiddenCount > 0) {
-        hint.hidden = false;
-        hint.textContent = '已按「' + rangeOptionLabel(currentRange()) + '」筛选，另有 ' + hiddenCount + ' 条更早记录';
+        hint.textContent = latestHint;
+        hint.title = latestHint;
+        hint.classList.add('is-latest');
       } else {
-        hint.hidden = true;
-        hint.textContent = '';
+        hint.classList.remove('is-latest');
+        hint.removeAttribute('title');
+        var total = (state.items || []).length;
+        var visible = visibleItems().length;
+        var hiddenCount = total - visible;
+        if (currentRange() !== 'all' && hiddenCount > 0 && visible === 0) {
+          hint.hidden = false;
+          hint.textContent = '该时段暂无消息（当前：' + rangeOptionLabel(currentRange()) + '），已隐藏 ' + hiddenCount + ' 条，可切换范围';
+        } else if (currentRange() !== 'all' && hiddenCount > 0) {
+          hint.hidden = false;
+          hint.textContent = '已按「' + rangeOptionLabel(currentRange()) + '」筛选，另有 ' + hiddenCount + ' 条更早记录';
+        } else {
+          hint.hidden = true;
+          hint.textContent = '';
+        }
       }
     }
   }

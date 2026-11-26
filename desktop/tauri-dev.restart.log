@@ -1,0 +1,39 @@
+
+> task-os-desktop@0.1.0 tauri:dev
+> npm run build:frontend && tauri dev
+
+
+> task-os-desktop@0.1.0 build:frontend
+> node scripts/sync-board.mjs
+
+Built static frontend at /Users/maotouying/frontend/code/1.operations/task-os/desktop/dist
+     Running BeforeDevCommand (`npm run build:frontend && npm run serve:dist`)
+
+> task-os-desktop@0.1.0 build:frontend
+> node scripts/sync-board.mjs
+
+Built static frontend at /Users/maotouying/frontend/code/1.operations/task-os/desktop/dist
+
+> task-os-desktop@0.1.0 serve:dist
+> serve dist -l 1420 --no-clipboard
+
+ UPDATE  The latest version of `serve` is 14.2.8
+ INFO  Accepting connections at http://localhost:1420
+     Running DevCommand (`cargo  run --no-default-features --color always --`)
+        Info Watching /Users/maotouying/frontend/code/1.operations/task-os/desktop/src-tauri for changes...
+[1m[92m   Compiling[0m task-os-desktop v0.1.0 (/Users/maotouying/frontend/code/1.operations/task-os/desktop/src-tauri)
+[1m[96m    Building[0m [=======================> ] 426/428: task-os-desktop             [1m[96m    Building[0m [=======================> ] 427/428: task-os-desktop(bin)        [K[1m[92m    Finished[0m `dev` profile [unoptimized + debuginfo] target(s) in 4.94s
+[1m[92m     Running[0m `target/debug/task-os-desktop`
+ HTTP  11/19/2026 11:45:18 PM 127.0.0.1 GET /price-bubble.html
+ HTTP  11/19/2026 11:45:18 PM 127.0.0.1 Returned 301 in 9 ms
+ HTTP  11/19/2026 11:45:18 PM 127.0.0.1 GET /price-bubble
+ HTTP  11/19/2026 11:45:18 PM 127.0.0.1 Returned 304 in 4 ms
+ HTTP  11/19/2026 11:45:18 PM 127.0.0.1 GET /price-bubble.css
+ HTTP  11/19/2026 11:45:18 PM 127.0.0.1 Returned 304 in 1 ms
+ HTTP  11/19/2026 11:45:18 PM 127.0.0.1 GET /market-symbols.js
+ HTTP  11/19/2026 11:45:18 PM 127.0.0.1 GET /price-bubble.js
+ HTTP  11/19/2026 11:45:18 PM 127.0.0.1 GET /priority-footer.js
+ HTTP  11/19/2026 11:45:18 PM 127.0.0.1 Returned 304 in 1 ms
+ HTTP  11/19/2026 11:45:18 PM 127.0.0.1 Returned 304 in 0 ms
+ HTTP  11/19/2026 11:45:18 PM 127.0.0.1 Returned 304 in 1 ms
+sh: line 1: 28510 Killed: 9               npm run serve:dist

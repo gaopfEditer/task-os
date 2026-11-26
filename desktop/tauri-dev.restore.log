@@ -1,0 +1,55 @@
+
+> task-os-desktop@0.1.0 tauri:dev
+> npm run build:frontend && tauri dev
+
+
+> task-os-desktop@0.1.0 build:frontend
+> node scripts/sync-board.mjs
+
+Built static frontend at /Users/maotouying/frontend/code/1.operations/task-os/desktop/dist
+     Running BeforeDevCommand (`npm run build:frontend && npm run serve:dist`)
+
+> task-os-desktop@0.1.0 build:frontend
+> node scripts/sync-board.mjs
+
+Built static frontend at /Users/maotouying/frontend/code/1.operations/task-os/desktop/dist
+
+> task-os-desktop@0.1.0 serve:dist
+> serve dist -l 1420 --no-clipboard
+
+        Warn Waiting for your frontend dev server to start on http://127.0.0.1:1420/...
+ UPDATE  The latest version of `serve` is 14.2.8
+ INFO  Accepting connections at http://localhost:1420
+     Running DevCommand (`cargo  run --no-default-features --color always --`)
+        Info Watching /Users/maotouying/frontend/code/1.operations/task-os/desktop/src-tauri for changes...
+[1m[92m   Compiling[0m task-os-desktop v0.1.0 (/Users/maotouying/frontend/code/1.operations/task-os/desktop/src-tauri)
+[1m[96m    Building[0m [=======================> ] 426/428: task-os-desktop             [1m[96m    Building[0m [=======================> ] 427/428: task-os-desktop(bin)        [K[1m[92m    Finished[0m `dev` profile [unoptimized + debuginfo] target(s) in 4.99s
+[1m[92m     Running[0m `target/debug/task-os-desktop`
+ HTTP  11/19/2026 11:57:55 PM 127.0.0.1 GET /price-bubble.html
+ HTTP  11/19/2026 11:57:55 PM 127.0.0.1 Returned 301 in 49 ms
+ HTTP  11/19/2026 11:57:55 PM 127.0.0.1 GET /price-bubble
+ HTTP  11/19/2026 11:57:55 PM 127.0.0.1 Returned 304 in 33 ms
+ HTTP  11/19/2026 11:57:55 PM 127.0.0.1 GET /price-bubble.css
+ HTTP  11/19/2026 11:57:55 PM 127.0.0.1 GET /price-bubble.js
+ HTTP  11/19/2026 11:57:55 PM 127.0.0.1 GET /priority-footer.js
+ HTTP  11/19/2026 11:57:55 PM 127.0.0.1 GET /market-symbols.js
+ HTTP  11/19/2026 11:57:55 PM 127.0.0.1 Returned 304 in 48 ms
+ HTTP  11/19/2026 11:57:55 PM 127.0.0.1 Returned 304 in 42 ms
+ HTTP  11/19/2026 11:57:55 PM 127.0.0.1 Returned 200 in 46 ms
+ HTTP  11/19/2026 11:57:55 PM 127.0.0.1 Returned 304 in 46 ms
+2026-11-19 23:58:04.245 task-os-desktop[44038:34950718] error messaging the mach port for IMKCFRunLoopWakeUpReliable
+2026-11-19 23:58:26.342 task-os-desktop[44038:34950718] CoreText note: Client requested name ".SFNS-Regular_wdth_opsz110000_GRAD_wght2580000", it will get TimesNewRomanPSMT rather than the intended font. All system UI font access should be through proper APIs such as CTFontCreateUIFontForLanguage() or +[NSFont systemFontOfSize:].
+2026-11-19 23:58:26.342 task-os-desktop[44038:34950718] CoreText note: Set a breakpoint on CTFontLogSystemFontNameRequest to debug.
+ HTTP  11/20/2026 12:07:43 AM 127.0.0.1 GET /data/command-center.json
+ HTTP  11/20/2026 12:07:43 AM 127.0.0.1 Returned 404 in 1 ms
+ HTTP  11/20/2026 12:07:43 AM 127.0.0.1 GET /index.md
+ HTTP  11/20/2026 12:07:43 AM 127.0.0.1 Returned 404 in 1 ms
+ HTTP  11/20/2026 12:07:43 AM 127.0.0.1 GET /log.csv
+ HTTP  11/20/2026 12:07:43 AM 127.0.0.1 Returned 404 in 1 ms
+ HTTP  11/20/2026 12:10:12 AM 127.0.0.1 GET /data/command-center.json
+ HTTP  11/20/2026 12:10:12 AM 127.0.0.1 Returned 200 in 2 ms
+ HTTP  11/20/2026 12:10:12 AM 127.0.0.1 GET /index.md
+ HTTP  11/20/2026 12:10:12 AM 127.0.0.1 Returned 200 in 0 ms
+ HTTP  11/20/2026 12:10:12 AM 127.0.0.1 GET /log.csv
+ HTTP  11/20/2026 12:10:12 AM 127.0.0.1 Returned 200 in 0 ms
+sh: line 1: 43933 Killed: 9               npm run serve:dist

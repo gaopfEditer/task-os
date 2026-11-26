@@ -175,6 +175,10 @@ html, body {
   line-height: 1.35;
 }
 .priority-filter-hint[hidden] { display: none !important; }
+.priority-filter-hint.is-latest {
+  color: #c9d1d9;
+  word-break: break-word;
+}
 .priority-rows { flex: 1 1 auto; min-width: 0; }
 .priority-row {
   display: grid;

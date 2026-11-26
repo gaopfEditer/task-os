@@ -1,0 +1,5 @@
+
+> task-os-desktop@0.1.0 serve:dist
+> node scripts/serve-with-market-proxy.mjs
+
+Market-aware static server at http://127.0.0.1:1420

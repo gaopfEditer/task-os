@@ -13,6 +13,14 @@ import {
   formatTime,
   ingestPriorityFrame,
   isTradeCard,
+  isSignalCard,
+  latestSignalCard,
+  truncateChannelName,
+  compactHintSymbol,
+  compactHintDirection,
+  compactHintPrice,
+  formatLatestCardHint,
+  autoscriptOrderIdentityId,
   markSeen,
   mergeItems,
   normalizeBaseUrl,
@@ -661,4 +669,223 @@ test('expanded list panel is not crushed by the compact bubble and uses a thin s
   assert.match(css, /body\.priority-expanded \.priority-footer\s*\{[^}]*max-height:\s*132px/s);
   assert.match(css, /\.priority-footer::-webkit-scrollbar\s*,\s*\.priority-panel-list::-webkit-scrollbar\s*\{[^}]*width:\s*6px/s);
   assert.match(css, /scrollbar-width:\s*thin/);
+});
+
+test('latest signal-card hint summarizes channel, symbol, price, direction and Hong Kong time', () => {
+  const card = {
+    id: 'card:3148',
+    source: AUTOSCRIPT_CARD_SOURCE.id,
+    createdAt: '2026-11-24T19:46:26.622Z',
+    card: {
+      channel: '币安杀手',
+      symbol: 'NEAR',
+      entry: '2.780 - 2.800',
+      direction: '做多',
+      title: 'NEAR · 做多',
+      text: 'ENTRY: 2.780 - 2.800',
+    },
+    meta: { kind: 'card', via: 'card' },
+  };
+  const laterMessage = {
+    id: 'msg:1',
+    source: 'kolvip_huajie',
+    createdAt: '2026-11-25T02:00:00.000Z',
+    card: { title: '消息', text: 'hello', channel: '华尔街女王' },
+    meta: { kind: 'message', via: 'message' },
+  };
+  const olderCard = {
+    id: 'card:3143',
+    source: AUTOSCRIPT_CARD_SOURCE.id,
+    createdAt: '2026-11-24T19:13:20.428Z',
+    card: { channel: 'FX-黄金信号', symbol: 'XAU', entry: '3568', direction: '做空' },
+    meta: { kind: 'card', via: 'card' },
+  };
+  const order = {
+    id: 'tlog:1',
+    source: AUTOSCRIPT_ORDER_SOURCE.id,
+    createdAt: '2026-11-25T03:00:00.000Z',
+    card: { symbol: 'XAUUSDT', direction: 'SHORT', entry: '3568' },
+    meta: { kind: 'order', via: 'order' },
+  };
+
+  assert.equal(isSignalCard(card), true);
+  assert.equal(isSignalCard({ ...card, source: 'kolvip_binance_killer' }), true);
+  assert.equal(isSignalCard(laterMessage), false);
+  assert.equal(isSignalCard(order), false);
+  assert.equal(isSignalCard(plain), false);
+  assert.equal(isTradeCard(trade), true);
+  assert.equal(isSignalCard(trade), false);
+
+  const view = describeItem(card);
+  assert.equal(view.channel, '币安杀手');
+  assert.equal(view.symbol, 'NEAR');
+  assert.equal(view.entry, '2.780 - 2.800');
+  assert.equal(view.price, '');
+  assert.equal(view.direction, '做多');
+
+  assert.equal(truncateChannelName('币安杀手'), '币安杀手');
+  assert.equal(truncateChannelName('华尔街女王'), '华尔街女王');
+  assert.equal(truncateChannelName('零下二度VIP禁言群'), '零下二度V...');
+  assert.equal(truncateChannelName(''), '');
+  assert.equal(truncateChannelName(null), '');
+
+  assert.equal(
+    formatLatestCardHint(card),
+    '币安杀手 · NEAR · 2.780 - 2.800 · 做多 · 11-25 03:46'
+  );
+  assert.equal(
+    formatLatestCardHint({
+      ...card,
+      card: { ...card.card, channel: '华尔街女王' },
+    }),
+    '华尔街女王 · NEAR · 2.780 - 2.800 · 做多 · 11-25 03:46'
+  );
+  assert.equal(
+    formatLatestCardHint({
+      ...card,
+      card: { ...card.card, channel: '零下二度VIP禁言群' },
+    }),
+    '零下二度V... · NEAR · 2.780 - 2.800 · 做多 · 11-25 03:46'
+  );
+
+  const priced = {
+    ...card,
+    card: { ...card.card, price: '2.791', entry: '2.780 - 2.800' },
+  };
+  assert.equal(
+    formatLatestCardHint(priced),
+    '币安杀手 · NEAR · 2.791 · 做多 · 11-25 03:46'
+  );
+
+  const sparse = {
+    id: 'card:3135',
+    source: AUTOSCRIPT_CARD_SOURCE.id,
+    createdAt: '2026-11-25T01:15:12.222Z',
+    card: { symbol: 'BTCUSDT', direction: '做多', title: '卡片 #3135' },
+    meta: { kind: 'card', via: 'card' },
+  };
+  assert.equal(formatLatestCardHint(sparse), 'BTCUSDT · 做多 · 11-25 09:15');
+  assert.equal(formatLatestCardHint(null), '');
+
+  const latest = latestSignalCard([laterMessage, olderCard, order, sparse, card]);
+  assert.equal(latest.id, 'card:3135');
+  assert.equal(formatLatestCardHint(latest), 'BTCUSDT · 做多 · 11-25 09:15');
+  assert.doesNotMatch(formatLatestCardHint(card), /最近卡片/);
+  const footerSrc = readFileSync(new URL('./priority-footer.js', import.meta.url), 'utf8');
+  const hintFn = footerSrc.slice(
+    footerSrc.indexOf('export function formatLatestCardHint'),
+    footerSrc.indexOf('export function itemInRange')
+  );
+  assert.doesNotMatch(hintFn, /最近卡片/);
+
+  const tiedKolvip = {
+    ...sparse,
+    id: 'chcard:kolvip:3135',
+    source: 'kolvip_huajie',
+  };
+  assert.equal(latestSignalCard([tiedKolvip, sparse]).source, AUTOSCRIPT_CARD_SOURCE.id);
+
+  const footer = readFileSync(new URL('./priority-footer.js', import.meta.url), 'utf8');
+  const renderFn = footer.slice(
+    footer.indexOf('function renderRangeBars'),
+    footer.indexOf('function renderSourceField')
+  );
+  assert.match(renderFn, /formatLatestCardHint\(latestSignalCard\(state\.items/);
+  assert.match(renderFn, /classList\.add\('is-latest'\)/);
+  assert.match(renderFn, /该时段暂无消息/);
+  const css = readFileSync(new URL('./price-bubble.css', import.meta.url), 'utf8');
+  assert.match(css, /\.priority-filter-hint\.is-latest\s*\{[^}]*color:\s*#c9d1d9/s);
+  assert.match(footer, /该时段暂无消息[\s\S]{0,80}已隐藏/);
+});
+
+test('latest-card hint stays a short summary and hides unparsed symbol/direction', () => {
+  assert.equal(compactHintSymbol('BTC'), 'BTC');
+  assert.equal(compactHintSymbol('ETHUSDT'), 'ETHUSDT');
+  assert.equal(compactHintSymbol('比特币 方向：做多 入场：当前5.84-5.89附近'), '');
+  assert.equal(compactHintDirection('做多'), '做多');
+  assert.equal(compactHintDirection('SHORT'), 'SHORT');
+  assert.equal(compactHintDirection('做多 入场：当前5.84-5.89附近 信心度：中 倍数：5倍 仓位：10% 止盈：点位1：6.05万附近（求稳） 点位2：6.22万附近 点位3：6.4万 止损：小幅跌破5.78万一点。 理由：'), '做多');
+  assert.equal(compactHintDirection('当前5.84-5.89附近 信心度：中 倍数：5倍'), '');
+  assert.equal(compactHintPrice('2.780 - 2.800'), '2.780 - 2.800');
+  assert.equal(compactHintPrice('3568'), '3568');
+  assert.equal(
+    compactHintPrice('当前5.84-5.89附近 信心度：中 倍数：5倍 仓位：10% 止盈：点位1：6.05万附近（求稳） 点位2：6.22万附近 点位3：6.4万 止损：小幅跌破5.78万一点。 理由：'),
+    '5.84-5.89'
+  );
+  assert.doesNotMatch(compactHintPrice('当前5.84-5.89附近 信心度：中 仓位：10% 止盈：6.05万 止损：5.78万 理由：支撑'), /止盈|止损|理由|仓位|信心度/);
+
+  const shuqin = {
+    id: 'card:3155',
+    source: AUTOSCRIPT_CARD_SOURCE.id,
+    createdAt: '2026-11-25T02:47:28.912Z',
+    card: {
+      channel: '淑琴',
+      symbol: 'BTC',
+      direction: '做多 入场：当前5.84-5.89附近 信心度：中 倍数：5倍 仓位：10% 止盈：点位1：6.05万附近（求稳） 点位2：6.22万附近 点位3：6.4万 止损：小幅跌破5.78万一点。 理由：',
+      entry: '当前5.84-5.89附近 信心度：中 倍数：5倍 仓位：10% 止盈：点位1：6.05万附近（求稳） 点位2：6.22万附近 点位3：6.4万 止损：小幅跌破5.78万一点。 理由：',
+      title: '比特币信号',
+      text: '比特币 方向：做多 入场：当前5.84-5.89附近 信心度：中 倍数：5倍 仓位：10%',
+    },
+    meta: { kind: 'card', via: 'card' },
+  };
+  assert.equal(formatLatestCardHint(shuqin), '淑琴 · BTC · 5.84-5.89 · 做多 · 11-25 10:47');
+  assert.doesNotMatch(formatLatestCardHint(shuqin), /止盈|止损|理由|仓位|信心度|倍数|点位|入场/);
+
+  const noDirection = {
+    ...shuqin,
+    card: { ...shuqin.card, direction: '当前5.84-5.89附近 信心度：中 仓位：10%' },
+  };
+  assert.equal(formatLatestCardHint(noDirection), '');
+
+  const noSymbol = {
+    ...shuqin,
+    card: { ...shuqin.card, symbol: '比特币可以在前低附近挂一单，还是老样子' },
+  };
+  assert.equal(formatLatestCardHint(noSymbol), '');
+});
+
+test('autoscript order snapshots and live frames upsert the same venue+card instead of appending', () => {
+  const first = {
+    id: 'tlog:bitget:3141:2026-11-25T05:12:34.899Z',
+    source: AUTOSCRIPT_ORDER_SOURCE.id,
+    createdAt: '2026-11-25T05:12:34.899Z',
+    card: { symbol: 'MMT', direction: 'long', status: 'tpsl_set', exchange: 'bitget', cardId: '3141' },
+    meta: { kind: 'order', via: 'order', event: 'order_persist' },
+  };
+  const later = {
+    id: 'tlog:bitget:3141:2026-11-25T10:44:53.536Z',
+    source: AUTOSCRIPT_ORDER_SOURCE.id,
+    createdAt: '2026-11-25T10:44:53.536Z',
+    card: { symbol: 'MMT', direction: 'long', status: 'tpsl_set', exchange: 'bitget', cardId: '3141' },
+    meta: { kind: 'order', via: 'order', event: 'order_persist' },
+  };
+  const filled = {
+    id: 'tlog:bitget:3141:2026-11-25T10:45:00.000Z',
+    source: AUTOSCRIPT_ORDER_SOURCE.id,
+    createdAt: '2026-11-25T10:45:00.000Z',
+    card: { symbol: 'MMT', direction: 'long', status: 'filled', exchange: 'bitget', cardId: '3141' },
+    meta: { kind: 'order', via: 'order', event: 'order_persist' },
+  };
+  assert.equal(autoscriptOrderIdentityId(first), 'order:bitget:3141');
+  const parsed = parseQueueItems({ items: [first, later, filled] });
+  assert.equal(parsed.length, 1);
+  assert.equal(parsed[0].id, 'order:bitget:3141');
+  assert.equal(parsed[0].card.status, 'filled');
+
+  let items = ingestPriorityFrame([], { type: 'priority_card', ...first });
+  items = ingestPriorityFrame(items, { type: 'priority_card', ...later });
+  items = ingestPriorityFrame(items, { type: 'priority_card', ...filled });
+  assert.equal(items.length, 1);
+  assert.equal(items[0].id, 'order:bitget:3141');
+  assert.equal(items[0].card.status, 'filled');
+
+  const weex = {
+    id: 'tlog:weex:3141:2026-11-25T05:12:34.899Z',
+    source: AUTOSCRIPT_ORDER_SOURCE.id,
+    createdAt: '2026-11-25T05:12:34.899Z',
+    card: { symbol: 'MMT', direction: 'long', status: 'failed', exchange: 'weex', cardId: '3141' },
+    meta: { kind: 'order', via: 'order' },
+  };
+  const both = parseQueueItems({ items: [first, weex] });
+  assert.deepEqual(both.map((row) => row.id).sort(), ['order:bitget:3141', 'order:weex:3141']);
 });

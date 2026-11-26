@@ -364,9 +364,15 @@
   .lw-filters .res-tags { margin-bottom: 0; }
   .lw-range { flex-wrap: nowrap; }
   .lw-range .rtag-f { white-space: nowrap; }
-  .lw-list { list-style: none; margin: 0; padding: 0; }
-  .lw-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
-  .lw-item.lw-summary { border-color: #b6e3ff; }
+  .lw-list {
+    list-style: none; margin: 0; padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 8px;
+    align-items: stretch;
+  }
+  .lw-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 0; height: 100%; box-sizing: border-box; }
+  .lw-item.lw-summary { border-color: #b6e3ff; grid-column: 1 / -1; }
   .lw-item .lw-top { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; margin-bottom: 4px; }
   .lw-item .lw-ts { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; margin-left: auto; }
   .lw-item .lw-cat { font-size: 11px; font-weight: 600; padding: 0 6px; border-radius: 10px; background: #eef1f4; color: #57606a; }
@@ -393,6 +399,7 @@
   .lw-more { margin-top: 4px; }
   .lw-more > summary { cursor: pointer; color: var(--accent); font-size: 12px; }
   .lw-sigs { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .lw-sigs.lw-at-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 6px; }
   .lw-sig { background: #f6f8fa; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
   .lw-sig-top { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; font-size: 12px; }
   .lw-src { font-weight: 700; color: #0550ae; }
@@ -743,7 +750,7 @@
 
   <section class="tab" id="tab-livewatch">
     <h2 class="pagetitle">实时关注</h2>
-    <p class="hint" style="margin:0 0 8px">由本机 <code>python-ai-operate</code> 在每天 0 / 8 / 12 / 16 / 20 点增量写入 <code>data/live_watch.json</code>（VPN 仅在 12 / 20 点）。可按类型（信号、发布、Bitget 自动下单、VPN）与时间（今天 / 最近 24h / 最近一周，上海时间）叠加筛选。</p>
+    <p class="hint" style="margin:0 0 8px">由本机 <code>python-ai-operate</code> 在每天 0 / 8 / 12 / 16 / 20 点增量写入 <code>data/live_watch.json</code>（VPN 仅在 12 / 20 点）。可按类型（信号、发布、自动下单、VPN）与时间（今天 / 最近 24h / 最近一周，上海时间）叠加筛选；列表为 3–5 列网格，汇总条占满行宽。</p>
     <div class="lw-bar"><input id="lwq" type="search" placeholder="搜索标题 / 正文 / 账号…" autocomplete="off" aria-label="搜索实时关注"><span id="lwInfo" class="res-info"></span><a href="https://github.com/gaopfEditer/task-os/blob/main/data/live_watch.json" target="_blank" rel="noopener" style="font-size:12px">GitHub 上的 live_watch.json</a></div>
     <div class="lw-filters">
       <div id="lwRange" class="res-tags lw-range" role="group" aria-label="时间范围"></div>
@@ -5034,7 +5041,7 @@
 
   // ---------- 实时关注 data/live_watch.json ----------
   var LIVE_WATCH_PATH = 'data/live_watch.json';
-  var LIVE_CATS = [['signal', '信号'], ['publish', '发布'], ['bitget', 'Bitget'], ['vpn', 'VPN']];
+  var LIVE_CATS = [['signal', '信号'], ['publish', '发布'], ['bitget', '自动下单'], ['vpn', 'VPN']];
   var LIVE_RANGES = [['24h', '最近 24h'], ['today', '今天'], ['week', '最近一周']];
   var LW_TZ = 'Asia/Shanghai';
   function liveRangeKey() {
@@ -5239,7 +5246,9 @@
   function liveIsSignalSummary(it) {
     if (!it || typeof it !== 'object') return false;
     if (String(it.id || '').indexOf('sig:summary:') === 0) return true;
+  if (String(it.id || '').indexOf('bitget:daily:') === 0) return true;
     var meta = it.meta;
+    if (meta && typeof meta === 'object' && meta.kind === 'autotrade_daily') return true;
     return it.category === 'signal' && !!(meta && typeof meta === 'object' && !Array.isArray(meta) && Array.isArray(meta.items));
   }
   function liveWindowLabel(meta) {
@@ -5277,6 +5286,15 @@
     var showSum = summary && (!dir || String(summary).trim() !== dir.text);
     return '<li class="lw-sig">' + top + (showSum ? '<div class="lw-sum">' + linkifyEsc(summary) + '</div>' : '') + '</li>';
   }
+  function liveAutotradeStatHtml(row) {
+    if (!row || typeof row !== 'object') return '';
+    var ch = esc(row.channel || row.name || '—');
+    var n = Number(row.orders) || 0;
+    var ok = Number(row.ok) || 0;
+    var fail = Number(row.fail) || 0;
+    var m = row.margin_u != null && row.margin_u !== '' ? (' · ' + esc(row.margin_u) + 'U') : '';
+    return '<li class="lw-sig"><div class="lw-sig-top"><span class="lw-src">' + ch + '</span></div><div class="lw-sum">' + esc(n + ' 笔 · 成' + ok + ' / 败' + fail + m) + '</div></li>';
+  }
   function liveSummaryHtml(it) {
     var meta = it.meta && typeof it.meta === 'object' && !Array.isArray(it.meta) ? it.meta : {};
     var rows = Array.isArray(meta.items) ? meta.items : [];
@@ -5285,14 +5303,16 @@
     var win = liveWindowLabel(meta);
     var h = '<div class="lw-stats"><span class="lw-stat"><b>条数</b>' + esc(count) + '</span>';
     if (win) h += '<span class="lw-stat"><b>时段</b>' + esc(win) + '</span>';
+    if (meta.kind === 'autotrade_daily' && meta.total_orders != null) h += '<span class="lw-stat"><b>下单</b>' + esc(meta.total_orders) + '</span>';
     h += '</div>';
     if (!rows.length) {
       h += '<div class="lw-empty-sig">本时段没有信号明细。</div>';
       if (it.body) h += liveRichBodyHtml(it.body);
       return h;
     }
-    h += '<ul class="lw-sigs">';
-    rows.forEach(function (row) { h += liveSigItemHtml(row); });
+    var atDaily = meta.kind === 'autotrade_daily';
+    h += '<ul class="lw-sigs' + (atDaily ? ' lw-at-grid' : '') + '">';
+    rows.forEach(function (row) { h += atDaily ? liveAutotradeStatHtml(row) : liveSigItemHtml(row); });
     h += '</ul>';
     if (it.body && String(it.body).trim()) {
       var raw = String(it.body), nLines = raw.split(/\n/).filter(function (l) { return l.trim(); }).length;
