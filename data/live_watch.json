@@ -1,8 +1,19 @@
 {
   "version": 1,
-  "updated_at": "2026-11-26T08:00:03+08:00",
-  "last_slot": "2026-11-26T08:00+08:00",
+  "updated_at": "2026-11-26T12:00:00+08:00",
+  "last_slot": "2026-11-26T12:00+08:00",
   "items": [
+    {
+      "id": "vpn:12:2026-11-26",
+      "category": "vpn",
+      "ts": "2026-11-26T12:00:00+08:00",
+      "title": "VPN Guard · OK · clash",
+      "body": "健康: 正常\n出口归属: clash",
+      "meta": {
+        "ok": true,
+        "owner": "clash"
+      }
+    },
     {
       "id": "meta:bitget:api:1795651200",
       "category": "bitget",
