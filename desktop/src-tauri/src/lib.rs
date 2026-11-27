@@ -533,7 +533,7 @@ fn validate_oi_report_queue_url(raw: &str) -> Result<reqwest::Url, String> {
     let port = url.port();
     let allowed_host = matches!(
         (host, port),
-        ("127.0.0.1" | "localhost", Some(8765)) | ("149.88.80.60", Some(39134))
+        ("127.0.0.1" | "localhost", Some(8765)) | ("45.207.196.71", Some(39134))
     );
     if !allowed_host {
         return Err("invalid oi report-queue url".into());
@@ -584,7 +584,7 @@ fn validate_autoscript_live_feed_url(raw: &str) -> Result<reqwest::Url, String> 
     let port = url.port();
     let allowed_host = matches!(
         (host, port),
-        ("127.0.0.1" | "localhost", Some(3852)) | ("149.88.80.60", Some(39137))
+        ("127.0.0.1" | "localhost", Some(3852)) | ("45.207.196.71", Some(39137))
     );
     if !allowed_host {
         return Err("invalid autoscript feed url".into());
@@ -851,10 +851,10 @@ mod tests {
         assert!(super::validate_oi_report_queue_url("http://127.0.0.1/api/report-queue").is_err());
         assert!(super::validate_oi_report_queue_url("https://example.com/api/report-queue").is_err());
         assert!(super::validate_oi_report_queue_url(
-            "http://149.88.80.60:39134/api/report-queue?kind=st_vol_wick&symbols=BTCUSDT,ETHUSDT"
+            "http://45.207.196.71:39134/api/report-queue?kind=st_vol_wick&symbols=BTCUSDT,ETHUSDT"
         )
         .is_ok());
-        assert!(super::validate_oi_report_queue_url("http://149.88.80.60:39137/api/report-queue").is_err());
+        assert!(super::validate_oi_report_queue_url("http://45.207.196.71:39137/api/report-queue").is_err());
     }
 
     #[test]
@@ -871,14 +871,14 @@ mod tests {
         assert!(super::validate_autoscript_live_feed_url("http://127.0.0.1:8765/queue/priority").is_err());
         assert!(super::validate_autoscript_live_feed_url("https://example.com/queue/priority").is_err());
         assert!(super::validate_autoscript_live_feed_url(
-            "http://149.88.80.60:39137/queue/priority/sources"
+            "http://45.207.196.71:39137/queue/priority/sources"
         )
         .is_ok());
         assert!(super::validate_autoscript_live_feed_url(
-            "http://149.88.80.60:39137/queue/priority?source=autoscript_cards&limit=200"
+            "http://45.207.196.71:39137/queue/priority?source=autoscript_cards&limit=200"
         )
         .is_ok());
-        assert!(super::validate_autoscript_live_feed_url("http://149.88.80.60:39134/queue/priority").is_err());
+        assert!(super::validate_autoscript_live_feed_url("http://45.207.196.71:39134/queue/priority").is_err());
     }
 
     #[test]
