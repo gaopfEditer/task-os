@@ -1,8 +1,203 @@
 {
   "version": 1,
-  "updated_at": "2026-11-27T16:00:00+08:00",
-  "last_slot": "2026-11-27T16:00+08:00",
+  "updated_at": "2026-11-27T20:00:00+08:00",
+  "last_slot": "2026-11-27T20:00+08:00",
   "items": [
+    {
+      "id": "vpn:20:2026-11-27",
+      "category": "vpn",
+      "ts": "2026-11-27T20:00:00+08:00",
+      "title": "VPN Guard · OK · clash",
+      "body": "健康: 正常\n出口归属: clash",
+      "meta": {
+        "ok": true,
+        "owner": "clash"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:7b2ebe776949:2026-11-27T18:39:35+08:00",
+      "category": "publish",
+      "ts": "2026-11-27T18:39:35+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 2, \"total\": 4, \"message\": \"发布结束 成功 2/4\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:bitget:body:7b2ebe776949:2026-11-27T18:39:35+08:00",
+      "category": "publish",
+      "ts": "2026-11-27T18:39:35+08:00",
+      "title": "✗ bitget platform_fail",
+      "body": "Bitget没有打开，当前是 未知页面",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "bitget",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:binance_square:body:7b2ebe776949:2026-11-27T18:39:16+08:00",
+      "category": "publish",
+      "ts": "2026-11-27T18:39:16+08:00",
+      "title": "✗ binance_square platform_fail",
+      "body": "币安广场没有打开，当前是 未知页面",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "binance_square",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:okx:body:7b2ebe776949:2026-11-27T18:38:57+08:00",
+      "category": "publish",
+      "ts": "2026-11-27T18:38:57+08:00",
+      "title": "✓ okx platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "okx",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:gate:body:7b2ebe776949:2026-11-27T18:38:32+08:00",
+      "category": "publish",
+      "ts": "2026-11-27T18:38:32+08:00",
+      "title": "✓ gate platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "gate",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:7b2ebe776949:2026-11-27T18:38:04+08:00",
+      "category": "publish",
+      "ts": "2026-11-27T18:38:04+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"gate\", \"okx\", \"binance_square\", \"bitget\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 4 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:522a9ef0097b:2026-11-27T16:36:40+08:00",
+      "category": "publish",
+      "ts": "2026-11-27T16:36:40+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 2, \"total\": 4, \"message\": \"发布结束 成功 2/4\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:bitget:body:522a9ef0097b:2026-11-27T16:36:40+08:00",
+      "category": "publish",
+      "ts": "2026-11-27T16:36:40+08:00",
+      "title": "✗ bitget platform_fail",
+      "body": "Bitget没有打开，当前是 未知页面",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "bitget",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:binance_square:body:522a9ef0097b:2026-11-27T16:36:22+08:00",
+      "category": "publish",
+      "ts": "2026-11-27T16:36:22+08:00",
+      "title": "✗ binance_square platform_fail",
+      "body": "币安广场没有打开，当前是 未知页面",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "binance_square",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:okx:body:522a9ef0097b:2026-11-27T16:36:03+08:00",
+      "category": "publish",
+      "ts": "2026-11-27T16:36:03+08:00",
+      "title": "✓ okx platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "okx",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:gate:body:522a9ef0097b:2026-11-27T16:35:44+08:00",
+      "category": "publish",
+      "ts": "2026-11-27T16:35:44+08:00",
+      "title": "✓ gate platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "gate",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:522a9ef0097b:2026-11-27T16:35:30+08:00",
+      "category": "publish",
+      "ts": "2026-11-27T16:35:30+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"gate\", \"okx\", \"binance_square\", \"bitget\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 4 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "sig:list_realtime:2126256207786807637",
+      "category": "signal",
+      "ts": "2026-11-27T18:05:58+08:00",
+      "title": "list_realtime · btc563 · BTC long",
+      "body": "11.27 #BTC 日内行情分析\n\n符合预期，多单获利中…💢 https://t.co/f81jlpp8v8\nhttps://x.com/BTC563/status/2126256207786807637",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "btc563",
+        "profile": "btc563",
+        "source_mode": "list_realtime"
+      }
+    },
+    {
+      "id": "sig:binance_square:392735332144818",
+      "category": "signal",
+      "ts": "2026-11-27T18:04:09+08:00",
+      "title": "币安广场 · yanchibit · BTC long",
+      "body": "11.27 #BTC  日内行情分析，符合预期，多单利润5000点拿下，其余山寨不同程度获利中…，后市会三探？？？\nhttps://www.binance.com/zh-CN/square/post/392735332144818",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "yanchibit",
+        "profile": "yanchibit",
+        "source_mode": "binance_square"
+      }
+    },
     {
       "id": "pub:run_end:?:body:4c3b82b86e11:2026-11-27T12:46:41+08:00",
       "category": "publish",
