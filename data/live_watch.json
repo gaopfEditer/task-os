@@ -1,8 +1,60 @@
 {
   "version": 1,
-  "updated_at": "2026-11-27T00:00:00+08:00",
-  "last_slot": "2026-11-27T00:00+08:00",
+  "updated_at": "2026-11-27T08:00:00+08:00",
+  "last_slot": "2026-11-27T08:00+08:00",
   "items": [
+    {
+      "id": "meta:publish:gap:1795737600",
+      "category": "publish",
+      "ts": "2026-11-27T08:00:00+08:00",
+      "title": "发布日志提示",
+      "body": "当日发布日志不存在: /Users/maotouying/frontend/code/1.operations/python-ai-operate/output/publish_logs/publish_2026-11-27.log",
+      "meta": {
+        "level": "info"
+      }
+    },
+    {
+      "id": "sig:binance_square:392197620520343",
+      "category": "signal",
+      "ts": "2026-11-26T06:16:31+08:00",
+      "title": "币安广场 · sanmageshuai · BTC long",
+      "body": "BTC暴涨到60388了，昨天提前布局让你们58388加仓做多，而且还直播给你们充值信仰。 如果你无脑执行都不用你盯盘，睡醒自动利润就落袋了，再次恭喜严格执行的朋友！#BTC 👉[记录](https://app.binance.com/un…\nBTC暴涨到60388了，昨天提前布局让你们58388加仓做多，而且还直播给你们充值信仰。 如果你无脑执行都不用你盯盘，睡醒自动利润就落袋了，再次恭喜严格执行的朋友！#BTC 👉[记录](https://app.binance.com/uni-qr/cpos/392108856528219?r=SDR9QGU2&l=zh-CN&uco=YlhI6nVWAwXtxF1K2b4Utg&uc=app_square_share_link&us=copylink)\nhttps://www.binance.com/zh-CN/square/post/392197620520343",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "sanmageshuai",
+        "profile": "sanmageshuai",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:392234793123254",
+      "category": "signal",
+      "ts": "2026-11-26T08:16:07+08:00",
+      "title": "币安广场 · sanmageshuai · BTC,ETH long",
+      "body": "三马哥 · 17小时 日内震荡继续回调做多也没有问题（更偏向于日内看涨哦），接近箱体高点做空也能赚钱，震荡行情多空双吃快速积累本金才是王道！ BTC周四日内第一赌狗支撑是59188、比较牛B的支撑是57388，我认为今天不会跌破55000.…\n三马哥 · 17小时 日内震荡继续回调做多也没有问题（更偏向于日内看涨哦），接近箱体高点做空也能赚钱，震荡行情多空双吃快速积累本金才是王道！ BTC周四日内第一赌狗支撑是59188、比较牛B的支撑是57388，我认为今天不会跌破55000.#BTC BTC周四上涨压力是61000、行情好的压力时62888，箱体顶部65000美元。 ETH就是垃圾，周一我们在1845范围出策略坚定做空就暴跌了，到位置后继续干就行了带上止损。#ETH 查看更多 BTC +2.16% ETH +1.87% 2 7 11.1k\nhttps://www.binance.com/zh-CN/square/post/392234793123254",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "sanmageshuai",
+        "profile": "sanmageshuai",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:392241704924135",
+      "category": "signal",
+      "ts": "2026-11-26T09:15:43+08:00",
+      "title": "币安广场 · sanmageshuai · BTC short",
+      "body": "三马哥 · 16小时 真的太舒服了我们BTC在震荡行情中获得了14连胜，这还不算当时1845公开马前炮做空ETH的单子。 就在刚才BTC还是60300左右的时候发布日内偏向看涨分析，结果BTC8分钟之后瞬间上涨到61588，涨幅1200美元…\n三马哥 · 16小时 真的太舒服了我们BTC在震荡行情中获得了14连胜，这还不算当时1845公开马前炮做空ETH的单子。 就在刚才BTC还是60300左右的时候发布日内偏向看涨分析，结果BTC8分钟之后瞬间上涨到61588，涨幅1200美元+。 我看看今天白天能不能稍微回落一些在考虑上车，震荡行情耐心也很重要。#BTC 查看更多 BTCUSDT 永续 已平多 盈亏 +935.58USDT BTC +2.16% 2.1k 5 119 11.8k\nhttps://www.binance.com/zh-CN/square/post/392241704924135",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "sanmageshuai",
+        "profile": "sanmageshuai",
+        "source_mode": "binance_square"
+      }
+    },
     {
       "id": "pub:hist:4a8e978a7cee",
       "category": "publish",
