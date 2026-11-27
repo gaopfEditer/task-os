@@ -377,6 +377,25 @@ html, body {
 }
 
 .priority-item-trade { margin-top: 4px; flex-wrap: wrap; gap: 6px 8px; }
+
+.priority-item-cdp-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.priority-cdp-miss {
+  font-size: 11px;
+  font-weight: 400;
+  color: #f0883e;
+}
+.priority-item-cdp-summary {
+  margin-top: 6px;
+  color: #aeb7c2;
+  font-size: 11px;
+  line-height: 1.5;
+}
 .priority-status { font-weight: 700; }
 .priority-status.is-ok,
 .priority-status.is-filled,

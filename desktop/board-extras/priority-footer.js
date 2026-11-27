@@ -178,8 +178,16 @@ export function priorityNotice(item, sourceName) {
   var name = view.sourceName || '优先队列';
   var title = 'Task OS · ' + name;
   var parts = [];
-  if (view.symbol) parts.push(view.symbol);
-  if (view.direction) parts.push(view.direction);
+  if (isCdpRunSummary(item)) {
+    var sig = enrichCdpSignalFields(item, []);
+    var main = formatCdpRunMainLine(sig);
+    if (main) parts.push(main);
+    var summary = buildCdpPlatformSummary(item, [item]);
+    if (summary) parts.push(summary.split('\n')[0]);
+  } else {
+    if (view.symbol) parts.push(view.symbol);
+    if (view.direction) parts.push(view.direction);
+  }
   var body = parts.join(' ');
   if (!body) body = view.text || '新优先卡片';
   if (body.length > 180) body = body.slice(0, 180) + '…';
@@ -191,6 +199,7 @@ export function noticeForPriorityArrival(origin, item, options) {
   if (origin !== 'live') return null;
   var opts = options || {};
   if (opts.notify === false) return null;
+  if (isCdpFeedFragment(item)) return null;
   if (!item || typeof item.id !== 'string' || !item.id) return null;
   if (opts.knownIds && opts.knownIds[item.id]) return null;
   if (opts.seenIds && opts.seenIds[item.id]) return null;
@@ -544,6 +553,276 @@ function yieldText(card, meta) {
   return '';
 }
 
+var CDP_PLATFORM_LABELS = {
+  gate: 'Gate',
+  okx: 'OKX',
+  binance_square: '币安广场',
+  bitget: 'Bitget',
+  x: 'X / Twitter',
+  twitter: 'X / Twitter'
+};
+
+export function parseCdpItemId(id, item) {
+  var raw = typeof id === 'string' ? id : (item && typeof item.id === 'string' ? item.id : '');
+  if (typeof raw !== 'string' || raw.indexOf('cdp:') !== 0) return null;
+  var parts = raw.split(':');
+  var event = parts[1] || '';
+  var tail = parts.length >= 4 ? parts[parts.length - 1] : '';
+  var jobId = parts.length >= 4 ? parts.slice(2, parts.length - 1).join(':') : (parts[2] || '');
+  if (item) {
+    var metaJob = String((metaOf(item).jobId || metaOf(item).job_id || '')).trim();
+    if (metaJob) jobId = metaJob;
+  }
+  return { event: event, jobId: jobId, tail: tail };
+}
+
+function cdpNormalizeJobId(jobId) {
+  return String(jobId || '').replace(/:/g, '-');
+}
+
+export function isCdpSourceItem(item) {
+  return !!(item && item.source === AUTOSCRIPT_CDP_SOURCE.id);
+}
+
+export function cdpEventName(item) {
+  var meta = metaOf(item);
+  if (meta.event) return String(meta.event).trim();
+  var parsed = parseCdpItemId(item && item.id, item);
+  return parsed ? parsed.event : '';
+}
+
+/** 列表里只展示整次发布的 run_end；platform_ok/fail 等碎片仅用于汇总。 */
+export function isCdpRunSummary(item) {
+  return isCdpSourceItem(item) && cdpEventName(item) === 'run_end';
+}
+
+export function isCdpFeedFragment(item) {
+  return isCdpSourceItem(item) && !isCdpRunSummary(item);
+}
+
+function cdpLabelPlatform(code) {
+  var key = String(code == null ? '' : code).trim().toLowerCase();
+  if (!key || key === '?' || key === 'all') return '';
+  return CDP_PLATFORM_LABELS[key] || String(code).trim();
+}
+
+function cdpPickFields(obj, keys) {
+  if (!obj || typeof obj !== 'object') return '';
+  return stringFrom(firstEntry(obj, keys));
+}
+
+function cdpMergeSiblingSignal(target, donor) {
+  if (!donor || typeof donor !== 'object') return;
+  var card = cardOf(donor);
+  var meta = metaOf(donor);
+  var nested = meta.signal && typeof meta.signal === 'object' && !Array.isArray(meta.signal) ? meta.signal : null;
+  var snap = meta.card && typeof meta.card === 'object' && !Array.isArray(meta.card) ? meta.card : null;
+  if (!target.channel) {
+    target.channel = cdpPickFields(card, CHANNEL_KEYS)
+      || cdpPickFields(nested, CHANNEL_KEYS)
+      || cdpPickFields(snap, CHANNEL_KEYS)
+      || String(meta.channel || meta.channelName || '').trim();
+  }
+  if (!target.symbol) {
+    target.symbol = compactHintSymbol(
+      cdpPickFields(card, SYMBOL_KEYS)
+        || cdpPickFields(nested, SYMBOL_KEYS)
+        || cdpPickFields(snap, SYMBOL_KEYS)
+        || String(meta.symbol || '').trim()
+    ) || cdpPickFields(card, SYMBOL_KEYS);
+  }
+  if (!target.direction) {
+    target.direction = compactHintDirection(
+      cdpPickFields(card, DIRECTION_KEYS)
+        || cdpPickFields(nested, DIRECTION_KEYS)
+        || cdpPickFields(snap, DIRECTION_KEYS)
+        || String(meta.direction || '').trim()
+    ) || cdpPickFields(card, DIRECTION_KEYS);
+  }
+  if (!target.openedRaw) {
+    target.openedRaw = meta.cardOpenedAt || meta.openedAt || meta.signalAt || meta.orderTime
+      || cdpPickFields(card, ['openedAt', 'cardOpenedAt', '开单时间', 'signalTime'])
+      || cdpPickFields(nested, ['openedAt', 'cardOpenedAt', '开单时间', 'signalTime']);
+  }
+  if (!target.cardId) {
+    target.cardId = cdpPickFields(card, ['cardId', '卡片']) || String(meta.cardId || '').trim();
+  }
+}
+
+function cdpPlatformDetail(it, ev) {
+  if (ev === 'platform_ok') return 'done';
+  var view = describeItem(it, '');
+  var st = String(view.status || metaOf(it).status || '').toLowerCase();
+  if (st === 'ok' || st === 'success' || st === 'filled') return 'done';
+  var reason = String(view.reason || '').trim();
+  if (!reason || /^error$/i.test(reason) || st === 'fail' || st === 'failed' || st === 'error') {
+    return 'error';
+  }
+  if (/发布成功|done/i.test(reason)) return 'done';
+  return 'error';
+}
+
+function cdpReadPublishCounts(item) {
+  var card = cardOf(item);
+  var meta = metaOf(item);
+  var sc = meta.successCount != null ? meta.successCount : meta.success_count;
+  var tot = meta.total != null ? meta.total : meta.totalCount;
+  if (sc != null && tot != null && isFinite(Number(sc)) && isFinite(Number(tot))) {
+    return { success: Number(sc), total: Number(tot) };
+  }
+  var raw = cdpPickFields(card, ['text', 'body', 'message'])
+    || cdpPickFields(card, TEXT_TITLE_KEYS)
+    || shortText(card);
+  var m = String(raw).match(/成功\s*(\d+)\s*\/\s*(\d+)/);
+  if (m) return { success: Number(m[1]), total: Number(m[2]) };
+  return null;
+}
+
+export function enrichCdpSignalFields(item, allItems) {
+  var card = cardOf(item);
+  var meta = metaOf(item);
+  var nested = meta.signal && typeof meta.signal === 'object' && !Array.isArray(meta.signal) ? meta.signal : null;
+  var snap = meta.card && typeof meta.card === 'object' && !Array.isArray(meta.card) ? meta.card : null;
+  var parsed = parseCdpItemId(item && item.id, item);
+  var jobId = parsed && parsed.jobId ? parsed.jobId : '';
+
+  var channel = cdpPickFields(card, CHANNEL_KEYS)
+    || cdpPickFields(nested, CHANNEL_KEYS)
+    || cdpPickFields(snap, CHANNEL_KEYS)
+    || String(meta.channel || meta.channelName || '').trim();
+  var symbol = cdpPickFields(card, SYMBOL_KEYS)
+    || cdpPickFields(nested, SYMBOL_KEYS)
+    || cdpPickFields(snap, SYMBOL_KEYS)
+    || String(meta.symbol || '').trim();
+  var direction = cdpPickFields(card, DIRECTION_KEYS)
+    || cdpPickFields(nested, DIRECTION_KEYS)
+    || cdpPickFields(snap, DIRECTION_KEYS)
+    || String(meta.direction || '').trim();
+  symbol = compactHintSymbol(symbol) || symbol;
+  direction = compactHintDirection(direction) || direction;
+
+  var openedRaw = meta.cardOpenedAt || meta.openedAt || meta.signalAt || meta.orderTime
+    || cdpPickFields(card, ['openedAt', 'cardOpenedAt', '开单时间', 'signalTime'])
+    || cdpPickFields(nested, ['openedAt', 'cardOpenedAt', '开单时间', 'signalTime']);
+  var cardId = cdpPickFields(card, ['cardId', '卡片'])
+    || String(meta.cardId || '').trim();
+
+  if (allItems && jobId) {
+    var bucket = { channel: channel, symbol: symbol, direction: direction, openedRaw: openedRaw, cardId: cardId };
+    for (var s = 0; s < allItems.length; s++) {
+      var sib = allItems[s];
+      if (!sib || sib === item) continue;
+      var pj = parseCdpItemId(sib.id, sib);
+      if (!pj || cdpNormalizeJobId(pj.jobId) !== cdpNormalizeJobId(jobId)) continue;
+      cdpMergeSiblingSignal(bucket, sib);
+    }
+    channel = bucket.channel;
+    symbol = bucket.symbol;
+    direction = bucket.direction;
+    openedRaw = bucket.openedRaw;
+    cardId = bucket.cardId;
+  }
+
+  if (allItems && (!channel || !symbol || !direction || !openedRaw) && cardId) {
+    for (var i = 0; i < allItems.length; i++) {
+      var it = allItems[i];
+      if (!it || it.source !== AUTOSCRIPT_CARD_SOURCE.id) continue;
+      var cid = cdpPickFields(cardOf(it), ['cardId', '卡片']) || String(metaOf(it).cardId || '').trim();
+      if (cid !== cardId && String(it.id) !== 'card:' + cardId && !String(it.id).endsWith(':' + cardId)) continue;
+      var linked = describeItem(it, '');
+      if (!channel) channel = linked.channel;
+      if (!symbol) symbol = compactHintSymbol(linked.symbol) || linked.symbol;
+      if (!direction) direction = compactHintDirection(linked.direction) || linked.direction;
+      if (!openedRaw && linked.time) openedRaw = linked.time;
+      break;
+    }
+  }
+
+  var openedAt = '';
+  if (openedRaw) {
+    var ts = itemTimestampMs({ createdAt: openedRaw });
+    openedAt = isFinite(ts) ? formatTime(new Date(ts).toISOString()) : String(openedRaw);
+  }
+  return {
+    channel: channel,
+    symbol: symbol,
+    direction: direction,
+    openedAt: openedAt,
+    cardId: cardId,
+    jobId: jobId
+  };
+}
+
+export function cdpSignalMissingHint(signal) {
+  if (!signal) return '';
+  var miss = [];
+  if (!signal.channel) miss.push('频道');
+  if (!signal.symbol) miss.push('币种');
+  if (!signal.direction) miss.push('方向');
+  if (!signal.openedAt) miss.push('开单时间');
+  if (!miss.length) return '';
+  return '待补：' + miss.join('、') + '（3852 run_end 需带 signal/card 或 cardId）';
+}
+
+export function formatCdpRunMainLine(signal) {
+  if (!signal) signal = {};
+  var channel = signal.channel ? truncateChannelName(signal.channel) : '—';
+  var symbol = signal.symbol || '—';
+  var direction = signal.direction || '—';
+  var opened = signal.openedAt ? signal.openedAt : '—';
+  return channel + ' · ' + symbol + ' · ' + direction + ' · 开单 ' + opened;
+}
+
+export function buildCdpPlatformSummary(item, allItems) {
+  var parsed = parseCdpItemId(item && item.id, item);
+  var jobId = parsed && parsed.jobId ? parsed.jobId : '';
+  var meta = metaOf(item);
+  var lines = [];
+  var byCode = Object.create(null);
+
+  (allItems || []).forEach(function (it) {
+    if (!isCdpSourceItem(it)) return;
+    var pi = parseCdpItemId(it.id, it);
+    if (!pi || !pi.jobId) return;
+    if (jobId && cdpNormalizeJobId(pi.jobId) !== cdpNormalizeJobId(jobId)) return;
+    var ev = cdpEventName(it);
+    if (ev !== 'platform_ok' && ev !== 'platform_fail' && ev !== 'platform_skip') return;
+    var code = (pi.tail || describeItem(it, '').platform || '').trim();
+    var label = cdpLabelPlatform(code) || code;
+    var mark = ev === 'platform_ok' ? '✓' : (ev === 'platform_fail' ? '✗' : '–');
+    var detail = cdpPlatformDetail(it, ev);
+    byCode[code || label] = mark + ' ' + label + '：' + detail;
+  });
+
+  ['gate', 'okx', 'binance_square', 'bitget', 'x', 'twitter'].forEach(function (code) {
+    if (byCode[code]) {
+      lines.push(byCode[code]);
+      delete byCode[code];
+    }
+  });
+  Object.keys(byCode).sort().forEach(function (code) { lines.push(byCode[code]); });
+
+  var counts = cdpReadPublishCounts(item);
+  if (counts) {
+    lines.unshift('发布汇总 · 成功 ' + counts.success + '/' + counts.total);
+  }
+
+  if (!lines.length && Array.isArray(meta.platforms)) {
+    meta.platforms.forEach(function (row) {
+      if (!row || typeof row !== 'object') return;
+      var name = cdpLabelPlatform(row.platform || row.name) || String(row.platform || row.name || '');
+      var ok = row.ok === true || row.status === 'ok' || row.status === 'success';
+      lines.push((ok ? '✓ ' : '✗ ') + name);
+    });
+  }
+
+  if (!lines.length) {
+    var fallback = shortText(cardOf(item)).replace(/发布结束\s*/g, '').trim();
+    if (fallback) lines.push(fallback);
+  }
+  return lines.join('\n');
+}
+
 export function describeItem(item, sourceName) {
   var card = cardOf(item);
   var meta = metaOf(item);
@@ -773,6 +1052,7 @@ export function sourceCounts(items, sourceId, seenIds) {
   var fresh = 0;
   (items || []).forEach(function (item) {
     if (!item || item.source !== sourceId) return;
+    if (isCdpFeedFragment(item)) return;
     messages += 1;
     if (isTradeCard(item) && item.id && !(seenIds && seenIds[item.id])) fresh += 1;
   });
@@ -987,6 +1267,14 @@ var api = {
   compactHintDirection: compactHintDirection,
   compactHintPrice: compactHintPrice,
   formatLatestCardHint: formatLatestCardHint,
+  parseCdpItemId: parseCdpItemId,
+  isCdpSourceItem: isCdpSourceItem,
+  isCdpRunSummary: isCdpRunSummary,
+  isCdpFeedFragment: isCdpFeedFragment,
+  cdpSignalMissingHint: cdpSignalMissingHint,
+  enrichCdpSignalFields: enrichCdpSignalFields,
+  formatCdpRunMainLine: formatCdpRunMainLine,
+  buildCdpPlatformSummary: buildCdpPlatformSummary,
   autoscriptOrderIdentityId: autoscriptOrderIdentityId,
   describeItem: describeItem,
   formatTime: formatTime,
@@ -1324,7 +1612,9 @@ function mountFooter(footer) {
 
   function itemsForList() {
     return visibleItems().filter(function (item) {
-      return item && (!listSource || item.source === listSource);
+      if (!item) return false;
+      if (isCdpFeedFragment(item)) return false;
+      return !listSource || item.source === listSource;
     }).slice().sort(function (a, b) {
       var ta = a.createdAt || '';
       var tb = b.createdAt || '';
@@ -1402,7 +1692,30 @@ function mountFooter(footer) {
       }
       article.appendChild(meta);
 
-      if (view.symbol || view.direction || view.yieldValue) {
+      if (isCdpRunSummary(item)) {
+        var cdpSignal = enrichCdpSignalFields(item, state.items);
+        var cdpMain = document.createElement('div');
+        cdpMain.className = 'priority-item-main priority-item-cdp-card';
+        var cdpHead = document.createElement('b');
+        cdpHead.textContent = formatCdpRunMainLine(cdpSignal);
+        cdpMain.appendChild(cdpHead);
+        var missHint = cdpSignalMissingHint(cdpSignal);
+        if (missHint) {
+          var cdpMiss = document.createElement('span');
+          cdpMiss.className = 'priority-cdp-miss';
+          cdpMiss.textContent = missHint;
+          cdpMain.appendChild(cdpMiss);
+        }
+        article.appendChild(cdpMain);
+        var cdpSummary = buildCdpPlatformSummary(item, state.items);
+        if (cdpSummary) {
+          var cdpText = document.createElement('p');
+          cdpText.className = 'priority-item-text priority-item-cdp-summary';
+          cdpText.textContent = cdpSummary;
+          if (item.id) cdpText.setAttribute('data-fold-id', item.id);
+          article.appendChild(cdpText);
+        }
+      } else if (view.symbol || view.direction || view.yieldValue) {
         var main = document.createElement('div');
         main.className = 'priority-item-main';
         if (view.symbol) {
@@ -1442,7 +1755,7 @@ function mountFooter(footer) {
         }
         article.appendChild(spec);
       }
-      if (view.status || view.exchange || view.platform || view.reason || view.entry || view.cardId) {
+      if (!isCdpRunSummary(item) && (view.status || view.exchange || view.platform || view.reason || view.entry || view.cardId)) {
         var trade = document.createElement('div');
         trade.className = 'priority-item-main priority-item-trade';
         if (view.exchange) {
@@ -1482,7 +1795,7 @@ function mountFooter(footer) {
         }
         article.appendChild(trade);
       }
-      if (view.text) {
+      if (!isCdpRunSummary(item) && view.text) {
         var text = document.createElement('p');
         text.className = 'priority-item-text';
         text.textContent = view.text;
@@ -1804,8 +2117,10 @@ function mountFooter(footer) {
     if (frame.source) ensureSource(frame.source);
     publishNotices('live', arrived, known);
     if (panelMode === 'list' && (!listSource || frame.source === listSource) && isTradeCard(frame) && frame.id) {
-      if (!seenSet(loadSeen(), frame.source)[frame.id]) highlighted[frame.id] = true;
-      saveSeen(markSeen(loadSeen(), frame.source, [frame.id]));
+      if (!isCdpFeedFragment(frame)) {
+        if (!seenSet(loadSeen(), frame.source)[frame.id]) highlighted[frame.id] = true;
+        saveSeen(markSeen(loadSeen(), frame.source, [frame.id]));
+      }
     }
     render();
   }

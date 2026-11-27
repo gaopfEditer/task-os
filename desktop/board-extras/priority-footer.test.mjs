@@ -8,6 +8,13 @@ import {
   QUEUE_LIMIT,
   STORAGE_KEYS,
   describeItem,
+  isCdpRunSummary,
+  isCdpFeedFragment,
+  parseCdpItemId,
+  enrichCdpSignalFields,
+  formatCdpRunMainLine,
+  buildCdpPlatformSummary,
+  cdpSignalMissingHint,
   displayBaseUrl,
   footerRows,
   formatTime,
@@ -527,6 +534,122 @@ test('autoscript and kolvip rows sit around 胖猫社区', () => {
   assert.equal(autoscriptFeedWebSocketUrl('http://127.0.0.1:3852', ''), 'ws://127.0.0.1:3852/ws/priority');
   const again = arrangePrioritySources(sources);
   assert.deepEqual(again.map((row) => row.id), ids);
+});
+
+test('parseCdpItemId keeps colonful content_ref job ids and prefers meta.jobId', () => {
+  const fromBody = parseCdpItemId('cdp:run_end:body:3913295ed88c:all');
+  assert.equal(fromBody.event, 'run_end');
+  assert.equal(fromBody.jobId, 'body:3913295ed88c');
+  assert.equal(fromBody.tail, 'all');
+  const plat = parseCdpItemId('cdp:platform_ok:body:3913295ed88c:gate');
+  assert.equal(plat.event, 'platform_ok');
+  assert.equal(plat.jobId, 'body:3913295ed88c');
+  assert.equal(plat.tail, 'gate');
+  const hex = parseCdpItemId('cdp:run_end:791282228fe147959a99977a4d0f65bc:all');
+  assert.equal(hex.jobId, '791282228fe147959a99977a4d0f65bc');
+  assert.equal(hex.tail, 'all');
+  const preferred = parseCdpItemId('cdp:run_end:body-3913295ed88c:all', {
+    id: 'cdp:run_end:body-3913295ed88c:all',
+    meta: { jobId: 'body:3913295ed88c' }
+  });
+  assert.equal(preferred.jobId, 'body:3913295ed88c');
+});
+
+test('cdp run_end shows signal line and per-platform publish summary', () => {
+  const job = '791282228fe147959a99977a4d0f65bc';
+  const runEnd = {
+    id: 'cdp:run_end:' + job + ':all',
+    source: AUTOSCRIPT_CDP_SOURCE.id,
+    createdAt: '2026-11-27T02:57:19.000Z',
+    card: { title: '发布结束', text: '发布结束 成功 2/4', status: 'ok' },
+    meta: {
+      kind: 'cdp',
+      via: 'cdp',
+      event: 'run_end',
+      channel: 'FX-黄金信号',
+      symbol: 'XAU',
+      direction: '做空',
+      cardOpenedAt: '2026-11-27T02:50:00.000Z',
+      successCount: 2,
+      total: 4,
+    },
+  };
+  const siblings = [
+    runEnd,
+    {
+      id: 'cdp:platform_ok:' + job + ':gate',
+      source: AUTOSCRIPT_CDP_SOURCE.id,
+      createdAt: '2026-11-27T02:55:00.000Z',
+      card: { platform: 'gate', text: '发布成功' },
+      meta: { kind: 'cdp', event: 'platform_ok' },
+    },
+    {
+      id: 'cdp:platform_fail:' + job + ':bitget',
+      source: AUTOSCRIPT_CDP_SOURCE.id,
+      createdAt: '2026-11-27T02:56:00.000Z',
+      card: { platform: 'bitget', text: '未发出', reason: '编辑区仍在' },
+      meta: { kind: 'cdp', event: 'platform_fail' },
+    },
+  ];
+  assert.equal(isCdpRunSummary(runEnd), true);
+  const sig = enrichCdpSignalFields(runEnd, siblings);
+  assert.equal(sig.channel, 'FX-黄金信号');
+  assert.equal(sig.symbol, 'XAU');
+  assert.equal(sig.direction, '做空');
+  assert.match(formatCdpRunMainLine(sig), /FX-黄金/);
+  assert.match(formatCdpRunMainLine(sig), /XAU/);
+  assert.match(formatCdpRunMainLine(sig), /做空/);
+  assert.match(formatCdpRunMainLine(sig), /开单/);
+  const summary = buildCdpPlatformSummary(runEnd, siblings);
+  assert.match(summary, /发布汇总 · 成功 2\/4/);
+  assert.match(summary, /✓ Gate：done/);
+  assert.match(summary, /✗ Bitget：error/);
+  assert.doesNotMatch(summary, /发布结束 发布结束/);
+  assert.equal(isCdpFeedFragment(siblings[1]), true);
+  assert.equal(isCdpFeedFragment(siblings[2]), true);
+  assert.equal(isCdpFeedFragment(runEnd), false);
+  assert.match(cdpSignalMissingHint({}), /待补：/);
+  assert.match(formatCdpRunMainLine({}), /— · — · — · 开单 —/);
+});
+
+test('cdp body content_ref ids still group platform rows onto the same run_end', () => {
+  const job = 'body:3913295ed88c';
+  const runEnd = {
+    id: 'cdp:run_end:' + job + ':all',
+    source: 'autoscript_cdp',
+    createdAt: '2026-11-27T03:50:52.000Z',
+    card: { title: '发布结束', text: '发布结束 成功 2/4', status: 'ok' },
+    meta: { kind: 'cdp', event: 'run_end', successCount: 2, total: 4, jobId: job }
+  };
+  const siblings = [
+    runEnd,
+    {
+      id: 'cdp:platform_ok:' + job + ':gate',
+      source: 'autoscript_cdp',
+      createdAt: '2026-11-27T03:49:55.000Z',
+      card: { platform: 'gate', text: '发布成功' },
+      meta: { kind: 'cdp', event: 'platform_ok', jobId: job }
+    },
+    {
+      id: 'cdp:platform_fail:' + job + ':bitget',
+      source: 'autoscript_cdp',
+      createdAt: '2026-11-27T03:50:52.000Z',
+      card: { platform: 'bitget', text: '未发出', reason: 'error' },
+      meta: { kind: 'cdp', event: 'platform_fail', jobId: job }
+    },
+    {
+      id: 'cdp:platform_ok:body:aaaa1111bbbb:okx',
+      source: 'autoscript_cdp',
+      createdAt: '2026-11-27T02:29:00.000Z',
+      card: { platform: 'okx', text: '发布成功' },
+      meta: { kind: 'cdp', event: 'platform_ok', jobId: 'body:aaaa1111bbbb' }
+    }
+  ];
+  const summary = buildCdpPlatformSummary(runEnd, siblings);
+  assert.match(summary, /发布汇总 · 成功 2\/4/);
+  assert.match(summary, /✓ Gate：done/);
+  assert.match(summary, /✗ Bitget：error/);
+  assert.doesNotMatch(summary, /OKX/);
 });
 
 test('order and cdp items describe status and count as new cards', () => {
