@@ -37,3 +37,15 @@ Built static frontend at /Users/maotouying/frontend/code/1.operations/task-os/de
  HTTP  11/19/2026 11:45:18 PM 127.0.0.1 Returned 304 in 0 ms
  HTTP  11/19/2026 11:45:18 PM 127.0.0.1 Returned 304 in 1 ms
 sh: line 1: 28510 Killed: 9               npm run serve:dist
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> task-os-desktop@0.1.0 serve:dist
+> node scripts/serve-with-market-proxy.mjs
+
+Market-aware static server at http://127.0.0.1:1420
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> task-os-desktop@0.1.0 serve:dist
+> node scripts/serve-with-market-proxy.mjs
+
+Market-aware static server at http://127.0.0.1:1420
