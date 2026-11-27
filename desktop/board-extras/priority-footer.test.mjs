@@ -314,7 +314,7 @@ test('unset base URL defaults to the public relay and auto-connects when a secre
   assert.match(footer, /state\.networkConfigured = !!cfg\.connect/);
   assert.match(desktop, /RELAY_DEFAULT_BASE = 'https:\/\/op\.g\.ezcoin\.ink'/);
   assert.match(desktop, /if \(!raw\) return RELAY_DEFAULT_BASE/);
-  // 149.88.80.60 is the existing Mac FRP path for auto-script /oi, not the msg-relay default.
+  // 45.207.196.71 is the existing Mac FRP path for auto-script /oi, not the msg-relay default.
   assert.doesNotMatch(DEFAULT_BASE_URL, /149\.88\.80\.60/);
   assert.doesNotMatch(desktop, /149\.88\.80\.60/);
   assert.doesNotMatch(footer, /localStorage\.setItem\(STORAGE_KEYS\.baseUrl,\s*DEFAULT_BASE_URL\)/);

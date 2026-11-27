@@ -28,7 +28,7 @@ export var DEFAULT_OI_WEB_BASE_URL = 'http://127.0.0.1:8765';
 /** Local first; the existing Mac FRP path is used when this machine has no :8765. */
 export var OI_WEB_BASE_CANDIDATES = Object.freeze([
   DEFAULT_OI_WEB_BASE_URL,
-  'http://149.88.80.60:39134'
+  'http://45.207.196.71:39134'
 ]);
 export var OI_REPORT_POLL_MS = 15000;
 
@@ -37,7 +37,7 @@ export var DEFAULT_AUTOSCRIPT_FEED_BASE_URL = 'http://127.0.0.1:3852';
 /** Local first; the existing Mac FRP path is used when this machine has no :3852. */
 export var AUTOSCRIPT_FEED_BASE_CANDIDATES = Object.freeze([
   DEFAULT_AUTOSCRIPT_FEED_BASE_URL,
-  'http://149.88.80.60:39137'
+  'http://45.207.196.71:39137'
 ]);
 export var AUTOSCRIPT_FEED_POLL_MS = 10000;
 
