@@ -1,8 +1,136 @@
 {
   "version": 1,
-  "updated_at": "2026-11-28T08:00:00+08:00",
-  "last_slot": "2026-11-28T08:00+08:00",
+  "updated_at": "2026-11-28T12:00:00+08:00",
+  "last_slot": "2026-11-28T12:00+08:00",
   "items": [
+    {
+      "id": "vpn:12:2026-11-28",
+      "category": "vpn",
+      "ts": "2026-11-28T12:00:00+08:00",
+      "title": "VPN Guard · OK · clash",
+      "body": "健康: 正常\n出口归属: clash",
+      "meta": {
+        "ok": true,
+        "owner": "clash"
+      }
+    },
+    {
+      "id": "bitget:card:3233:skipped",
+      "category": "bitget",
+      "ts": "2026-11-28T03:38:32+00:00",
+      "title": "自动下单 · INJ · skipped",
+      "body": "{\"holdSide\": null, \"orderType\": null, \"size\": null, \"stopLossPrice\": null, \"error\": null, \"reason\": \"price_crossed_above_range\"}",
+      "meta": {
+        "card_id": 3233,
+        "source": "collector_api"
+      }
+    },
+    {
+      "id": "pub:run_end:?:body:c6ba671d9a1b:2026-11-28T11:13:14+08:00",
+      "category": "publish",
+      "ts": "2026-11-28T11:13:14+08:00",
+      "title": "CDP run_end",
+      "body": "{\"platforms\": null, \"success_count\": 3, \"total\": 4, \"message\": \"发布结束 成功 3/4\"}",
+      "meta": {
+        "event": "run_end",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_fail:bitget:body:c6ba671d9a1b:2026-11-28T11:13:14+08:00",
+      "category": "publish",
+      "ts": "2026-11-28T11:13:14+08:00",
+      "title": "✗ bitget platform_fail",
+      "body": "已点击「发布」但帖子未发出：编辑区还在（63 字），点击没有发出去",
+      "meta": {
+        "event": "platform_fail",
+        "platform": "bitget",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:binance_square:body:c6ba671d9a1b:2026-11-28T11:12:46+08:00",
+      "category": "publish",
+      "ts": "2026-11-28T11:12:46+08:00",
+      "title": "✓ binance_square platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "binance_square",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:okx:body:c6ba671d9a1b:2026-11-28T11:12:23+08:00",
+      "category": "publish",
+      "ts": "2026-11-28T11:12:23+08:00",
+      "title": "✓ okx platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "okx",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:platform_ok:gate:body:c6ba671d9a1b:2026-11-28T11:12:03+08:00",
+      "category": "publish",
+      "ts": "2026-11-28T11:12:03+08:00",
+      "title": "✓ gate platform_ok",
+      "body": "发布成功",
+      "meta": {
+        "event": "platform_ok",
+        "platform": "gate",
+        "ok": true,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "pub:run_start:?:body:c6ba671d9a1b:2026-11-28T11:11:48+08:00",
+      "category": "publish",
+      "ts": "2026-11-28T11:11:48+08:00",
+      "title": "CDP run_start",
+      "body": "{\"platforms\": [\"gate\", \"okx\", \"binance_square\", \"bitget\"], \"success_count\": null, \"total\": null, \"message\": \"开始发布 4 个平台\"}",
+      "meta": {
+        "event": "run_start",
+        "platform": "?",
+        "ok": false,
+        "source": "publish_log"
+      }
+    },
+    {
+      "id": "sig:binance_copy_trading:2d67e5d01803acd3297f",
+      "category": "signal",
+      "ts": "2026-11-28T04:11:39+08:00",
+      "title": "binance_copy_trading · copy-5230099962881911809 · NIGHT short",
+      "body": "开空 以均价为0.05056USDT 卖出开空NIGHTUSDT永续合约 ，成交数量为 25,712NIGHT，总价值为 1,299.99872USDT 。\nhttps://www.binance.com/zh-CN/copy-trading/lead-details/5230099962881911809",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "copy-5230099962881911809",
+        "profile": "copy-5230099962881911809",
+        "source_mode": "binance_copy_trading"
+      }
+    },
+    {
+      "id": "sig:binance_copy_trading:d864e9f6ac69aa54ea30",
+      "category": "signal",
+      "ts": "2026-11-28T07:56:49+08:00",
+      "title": "binance_copy_trading · copy-5230099962881911809 · VELVET short",
+      "body": "开空 以均价为0.11303USDT 卖出开空VELVETUSDT永续合约 ，成交数量为 2,432VELVET，总价值为 274.88896USDT 。\nhttps://www.binance.com/zh-CN/copy-trading/lead-details/5230099962881911809",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "copy-5230099962881911809",
+        "profile": "copy-5230099962881911809",
+        "source_mode": "binance_copy_trading"
+      }
+    },
     {
       "id": "bitget:card:3229:tpsl_set",
       "category": "bitget",
