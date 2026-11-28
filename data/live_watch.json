@@ -1,8 +1,36 @@
 {
   "version": 1,
-  "updated_at": "2026-11-28T20:00:00+08:00",
-  "last_slot": "2026-11-28T20:00+08:00",
+  "updated_at": "2026-11-29T00:00:00+08:00",
+  "last_slot": "2026-11-29T00:00+08:00",
   "items": [
+    {
+      "id": "sig:binance_square:990002",
+      "category": "signal",
+      "ts": "2026-11-28T12:01:00+08:00",
+      "title": "币安广场 · yanchibit · ETH short",
+      "body": "other kol\nhttps://x.com/yanchibit/status/990002",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "yanchibit",
+        "profile": "yanchibit",
+        "source_mode": "binance_square"
+      }
+    },
+    {
+      "id": "sig:binance_square:990001",
+      "category": "signal",
+      "ts": "2026-11-28T12:00:00+08:00",
+      "title": "币安广场 · square-creator-filtertest99 · BTC long",
+      "body": "filter probe\nhttps://x.com/square-creator-filtertest99/status/990001",
+      "meta": {
+        "important": false,
+        "trade": true,
+        "handle": "square-creator-filtertest99",
+        "profile": "square-creator-filtertest99",
+        "source_mode": "binance_square"
+      }
+    },
     {
       "id": "vpn:20:2026-11-28",
       "category": "vpn",
